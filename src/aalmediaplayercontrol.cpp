@@ -30,11 +30,6 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_service(service),
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia)
-#if 0
-    m_state(QCamera::UnloadedState),
-    m_status(QCamera::UnloadedStatus),
-    m_captureMode(QCamera::CaptureStillImage)
-#endif
 {
     bool ok = m_service->newMediaPlayer();
     if (!ok)
@@ -42,66 +37,16 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
         qDebug() << "Failed to create a new hybris media player." << endl;
         return;
     }
+
+    m_cachedVolume = volume();
 }
 
 AalMediaPlayerControl::~AalMediaPlayerControl()
 {
+    stop();
+    m_state = QMediaPlayer::StoppedState;
+    m_status = QMediaPlayer::NoMedia;
 }
-
-#if 0
-QCamera::State AalMediaPlayerControl::state() const
-{
-    return m_state;
-}
-
-void AalMediaPlayerControl::setState(QCamera::State state)
-{
-    if (m_state == state)
-        return;
-
-    if (m_state == QCamera::UnloadedState) {
-        bool ok = m_service->connectCamera();
-        if (!ok)
-            return;
-    }
-
-    qDebug() << m_state << "->" << state;
-    m_state = state;
-    Q_EMIT stateChanged(m_state);
-}
-
-QCamera::Status AalMediaPlayerControl::status() const
-{
-    return m_status;
-}
-
-QCamera::CaptureModes AalMediaPlayerControl::captureMode() const
-{
-    return m_captureMode;
-}
-
-void AalMediaPlayerControl::setCaptureMode(QCamera::CaptureModes mode)
-{
-    if (m_captureMode == mode)
-        return;
-
-    m_captureMode = mode;
-    Q_EMIT captureModeChanged(mode);
-}
-
-bool AalMediaPlayerControl::isCaptureModeSupported(QCamera::CaptureModes mode) const
-{
-    return (QCamera::CaptureStillImage==mode) | (QCamera::CaptureVideo==mode);
-}
-
-bool AalMediaPlayerControl::canChangeProperty(QCameraControl::PropertyChangeType changeType, QCamera::Status status) const
-{
-    Q_UNUSED(changeType);
-    Q_UNUSED(status);
-
-    return true;
-}
-#endif
 
 QMediaPlayer::State AalMediaPlayerControl::state() const
 {
@@ -133,57 +78,88 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
 int AalMediaPlayerControl::volume() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    return m_service->getVolume();
 }
 
-void AalMediaPlayerControl::setVolume(int)
+void AalMediaPlayerControl::setVolume(int volume)
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    m_cachedVolume = volume;
+    m_service->setVolume(volume);
 }
 
 bool AalMediaPlayerControl::isMuted() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
-    return false;
+    return (volume() == 0);
 }
 
-void AalMediaPlayerControl::setMuted(bool)
+void AalMediaPlayerControl::setMuted(bool muted)
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+    if (muted)
+    {
+        m_cachedVolume = volume();
+        setVolume(0);
+    }
+    else
+    {
+        setVolume(m_cachedVolume);
+    }
+
+    Q_EMIT mutedChanged(muted);
 }
 
 int AalMediaPlayerControl::bufferStatus() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    // Until we are playing network streams, there is no buffering necessary
+    return 100;
 }
 
 bool AalMediaPlayerControl::isAudioAvailable() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    return true;
 }
 
 bool AalMediaPlayerControl::isVideoAvailable() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    return true;
 }
 
 bool AalMediaPlayerControl::isSeekable() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    return true;
 }
 
 QMediaTimeRange AalMediaPlayerControl::availablePlaybackRanges() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    // TODO: this will need to change once we can play networked sources
+    return QMediaTimeRange(0, duration());
 }
 
 qreal AalMediaPlayerControl::playbackRate() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    return 1.0;
 }
 
-void AalMediaPlayerControl::setPlaybackRate(qreal)
+void AalMediaPlayerControl::setPlaybackRate(qreal rate)
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+    Q_UNUSED(rate);
 }
 
 QMediaContent AalMediaPlayerControl::media() const
@@ -194,6 +170,9 @@ QMediaContent AalMediaPlayerControl::media() const
 const QIODevice* AalMediaPlayerControl::mediaStream() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
+    // This is only valid if a stream was passed into setMedia()
+    return NULL;
 }
 
 void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stream)

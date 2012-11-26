@@ -29,7 +29,6 @@ class QMediaPlayerControl;
 class AalVideoRendererControl;
 
 struct MediaPlayerWrapper;
-//struct CameraControlListener;
 
 class AalMediaPlayerService : public QMediaService
 {
@@ -43,27 +42,21 @@ public:
 
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
-#if 0
-    AalCameraFlashControl *flashControl() const { return m_flashControl; }
-    AalCameraFocusControl *focusControl() const { return m_focusControl; }
-    AalCameraZoomControl *zoomControl() const { return m_zoomControl; }
-    AalImageCaptureControl *imageCaptureControl() const { return m_imageCaptureControl; }
-#endif
 
     MediaPlayerWrapper *androidControl();
 
-    //CameraControlListener *listener() {return m_cameraListener; }
-
-    // Was connectCamera:
     bool newMediaPlayer();
 
     void setMedia(const QUrl &url);
     void play();
     void pause();
     void stop();
-    int position();
+    int position() const;
     void setPosition(int msec);
-    int duration();
+    int duration() const;
+
+    int getVolume() const;
+    void setVolume(int volume);
 
     void setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context);
     void setVideoSizeCb(on_msg_set_video_size cb, void *context);
@@ -75,16 +68,8 @@ private:
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
-#if 0
-    AalCameraFlashControl *m_flashControl;
-    AalCameraFocusControl *m_focusControl;
-    AalCameraZoomControl *m_zoomControl;
-    AalImageCaptureControl *m_imageCaptureControl;
-#endif
 
     MediaPlayerWrapper *m_androidMediaPlayer;
-    //CameraControlListener *m_cameraListener;
-
 };
 
 #endif

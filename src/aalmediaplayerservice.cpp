@@ -20,13 +20,6 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 #include "aalvideorenderercontrol.h"
-#if 0
-#include "aalcameraflashcontrol.h"
-#include "aalcamerafocuscontrol.h"
-#include "aalcameraservice.h"
-#include "aalcamerazoomcontrol.h"
-#include "aalimagecapturecontrol.h"
-#endif
 
 #include <cassert>
 #include <errno.h>
@@ -39,7 +32,7 @@ enum {
     BAD_VALUE   = -EINVAL,
 };
 
-void error_msg_cb(void* context)
+static void error_msg_cb(void *context)
 {
     printf("%s \n", __PRETTY_FUNCTION__);
 }
@@ -48,38 +41,18 @@ AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
 
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
-    m_androidMediaPlayer(0)
+    m_androidMediaPlayer(NULL)
 {
     m_service = this;
 
-    //m_cameraListener = new CameraControlListener;
-    //memset(m_cameraListener, 0, sizeof(*m_cameraListener));
-
     m_videoOutput = new AalVideoRendererControl(this);
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
-
-#if 0
-    m_flashControl = new AalCameraFlashControl(this);
-    m_focusControl = new AalCameraFocusControl(this);
-    m_zoomControl = new AalCameraZoomControl(this);
-    m_imageCaptureControl = new AalImageCaptureControl(this);
-
-    m_cameraListener->on_msg_error_cb = error_msg_cb;
-#endif
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
-    m_mediaPlayerControl->stop();
     delete m_mediaPlayerControl;
-
     delete m_videoOutput;
-#if 0
-    delete m_flashControl;
-    delete m_focusControl;
-    delete m_zoomControl;
-    delete m_imageCaptureControl;
-#endif
     delete m_androidMediaPlayer;
 }
 
@@ -90,21 +63,6 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)
         return m_videoOutput;
-
-#if 0
-    if (qstrcmp(name, QCameraFlashControl_iid) == 0)
-        return m_flashControl;
-
-    if (qstrcmp(name, QCameraFocusControl_iid) == 0)
-        return m_focusControl;
-
-    if (qstrcmp(name, QCameraImageCaptureControl_iid) == 0)
-        return m_imageCaptureControl;
-
-    if (qstrcmp(name, QCameraZoomControl_iid) == 0)
-        return m_zoomControl;
-
-#endif
 
     return 0;
 }
@@ -131,14 +89,8 @@ bool AalMediaPlayerService::newMediaPlayer()
     }
 
     m_videoOutput->setupSurface();
-
-#if 0
-    m_cameraListener->context = m_androidMediaPlayer;
-    m_imageCaptureControl->init(m_androidMediaPlayer);
-    m_flashControl->init(m_androidMediaPlayer);
-    m_focusControl->init(m_androidMediaPlayer, m_cameraListener);
-    m_zoomControl->init(m_androidMediaPlayer, m_cameraListener);
-#endif
+    // Gets called when there is any type of media playback issue
+    android_media_set_error_cb(m_androidMediaPlayer, error_msg_cb, static_cast<void *>(this));
 
     return true;
 }
@@ -195,7 +147,7 @@ void AalMediaPlayerService::stop()
     }
 }
 
-int AalMediaPlayerService::position()
+int AalMediaPlayerService::position() const
 {
     assert(m_androidMediaPlayer != NULL);
 
@@ -224,7 +176,7 @@ void AalMediaPlayerService::setPosition(int msec)
     }
 }
 
-int AalMediaPlayerService::duration()
+int AalMediaPlayerService::duration() const
 {
     assert(m_androidMediaPlayer != NULL);
 
@@ -238,6 +190,31 @@ int AalMediaPlayerService::duration()
     qDebug() << "duration_msec: " << duration_msec << endl;
 
     return duration_msec;
+}
+
+int AalMediaPlayerService::getVolume() const
+{
+    assert(m_androidMediaPlayer != NULL);
+
+    int vol = 0;
+    int ret = android_media_get_volume(m_androidMediaPlayer, &vol);
+    if (ret != OK)
+    {
+        qWarning() << "Failed to get the volume." << endl;
+    }
+
+    return vol;
+}
+
+void AalMediaPlayerService::setVolume(int volume)
+{
+    assert(m_androidMediaPlayer != NULL);
+
+    int ret = android_media_set_volume(m_androidMediaPlayer, volume);
+    if (ret != OK)
+    {
+        qWarning() << "Failed to set the volume." << endl;
+    }
 }
 
 void AalMediaPlayerService::setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context)

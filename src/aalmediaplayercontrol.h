@@ -71,6 +71,7 @@ private:
     AalMediaPlayerService *m_service;
     QMediaPlayer::State m_state;
     QMediaPlayer::MediaStatus m_status;
+    int m_cachedVolume;
 };
 
 #endif

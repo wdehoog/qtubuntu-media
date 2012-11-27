@@ -31,19 +31,6 @@ public:
     AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalMediaPlayerControl();
 
-#if 0
-    QCamera::State state() const;
-    void setState(QCamera::State state);
-
-    QCamera::Status status() const;
-
-    QCamera::CaptureModes captureMode() const;
-    void setCaptureMode(QCamera::CaptureModes);
-    bool isCaptureModeSupported(QCamera::CaptureModes mode) const;
-
-    bool canChangeProperty(PropertyChangeType changeType, QCamera::Status status) const;
-#endif
-
     virtual QMediaPlayer::State state() const;
     virtual QMediaPlayer::MediaStatus mediaStatus() const;
     virtual qint64 duration() const;

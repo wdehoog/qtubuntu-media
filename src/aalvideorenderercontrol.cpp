@@ -20,10 +20,8 @@
 #include "aalvideorenderercontrol.h"
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
-// #include "snapshotgenerator.h"
 
 #include "media_compatibility_layer.h"
-//#include "camera_compatibility_layer_capabilities.h"
 
 #include <qgl.h>
 
@@ -76,16 +74,13 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_service(service),
      m_textureBuffer(0),
      m_height(720),
-     m_width(1280),
-     m_viewFinderRunning(false)
+     m_width(1280)
 {
     QTimer::singleShot(1, this, SLOT(getTextureId())); // delay until mainloop is running (GL context exists)
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
 {
-    //delete m_snapshotGenerator;
-
     if (m_textureBuffer) {
         GLuint textureId = m_textureBuffer->handle().toUInt();
         glDeleteTextures(1, &textureId);
@@ -123,8 +118,6 @@ void AalVideoRendererControl::setVideoSizeCb(int height, int width, void *data)
 
 void AalVideoRendererControl::setupSurface()
 {
-    //m_viewFinderRunning = true;
-
     if (!m_textureBuffer)
         return;
 
@@ -132,15 +125,6 @@ void AalVideoRendererControl::setupSurface()
     m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
     m_service->setVideoTextureNeedsUpdateCb(AalVideoRendererControl::updateVideoTextureCb, static_cast<void *>(this));
     android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
-
-#if 0
-    m_snapshotGenerator->setSize(m_viewFinderWidth, m_viewFinderHeight);
-    android_camera_set_preview_size(mp, m_viewFinderWidth, m_viewFinderHeight);
-    android_camera_set_preview_fps(mp, 30);
-
-    android_camera_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
-    android_camera_start_preview(mp);
-#endif
 }
 
 void AalVideoRendererControl::getTextureId()
@@ -156,24 +140,6 @@ void AalVideoRendererControl::getTextureId()
     setupSurface();
 }
 
-const QImage &AalVideoRendererControl::preview() const
-{
-    return m_preview;
-}
-
-#if 0
-void AalVideoRendererControl::createPreview()
-{
-    if (!m_textureBuffer)
-        return;
-
-    GLuint texId = m_textureBuffer->textureId();
-    GLfloat textureMatrix[16];
-    android_camera_get_preview_texture_transformation(m_service->androidControl(), textureMatrix);
-    m_preview = m_snapshotGenerator->snapshot(texId, textureMatrix);
-}
-#endif
-
 void AalVideoRendererControl::setVideoSize(int height, int width)
 {
     // FIXME: Figure out why I have to swap height/width to get it to appear on the screen properly.
@@ -185,17 +151,17 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 
 void AalVideoRendererControl::updateVideoTexture()
 {
-    // qDebug() << __PRETTY_FUNCTION__ << endl;
-
     if (!m_surface || !m_textureBuffer)
+    {
+        qWarning() << "m_surface or m_textureBuffer is NULL, can't update video texture" << endl;
         return;
+    }
 
     static QVideoFrame frame(m_textureBuffer, QSize(m_width, m_height), QVideoFrame::Format_RGB32);
 
     if (!frame.isValid())
         return;
 
-    // qDebug() << "Setting frame metadata tag to be MediaPlayerControl" << endl;
     MediaPlayerWrapper *mp = m_service->androidControl();
     frame.setMetaData("MediaPlayerControl", (int)mp);
 

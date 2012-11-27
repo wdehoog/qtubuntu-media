@@ -25,7 +25,6 @@
 
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
-//class SnapshotGenerator;
 
 class AalVideoRendererControl : public QVideoRendererControl
 {
@@ -38,12 +37,8 @@ public:
     void setSurface(QAbstractVideoSurface *surface);
 
     // Callbacks
-    //static void updateViewfinderFrameCB(void *context);
     static void updateVideoTextureCb(void *context);
     static void setVideoSizeCb(int height, int width, void *data);
-
-    const QImage &preview() const;
-    //void createPreview();
 
 public Q_SLOTS:
     void setupSurface();
@@ -52,7 +47,6 @@ Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);
 
 private Q_SLOTS:
-    //void updateViewfinderFrame();
     void getTextureId();
     void setVideoSize(int height, int width);
     void updateVideoTexture();
@@ -64,10 +58,6 @@ private:
 
     int m_height;
     int m_width;
-
-    bool m_viewFinderRunning;
-    QImage m_preview;
-    //SnapshotGenerator *m_snapshotGenerator;
 };
 
 #endif

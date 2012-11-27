@@ -34,7 +34,8 @@ enum {
 
 static void error_msg_cb(void *context)
 {
-    printf("%s \n", __PRETTY_FUNCTION__);
+    Q_UNUSED(context);
+    qDebug() << __PRETTY_FUNCTION__ << endl;
 }
 
 AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
@@ -51,9 +52,12 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
-    delete m_mediaPlayerControl;
-    delete m_videoOutput;
-    delete m_androidMediaPlayer;
+    if (m_mediaPlayerControl != NULL)
+        delete m_mediaPlayerControl;
+    if (m_videoOutput != NULL)
+        delete m_videoOutput;
+    if (m_androidMediaPlayer != NULL)
+        delete m_androidMediaPlayer;
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -158,8 +162,6 @@ int AalMediaPlayerService::position() const
         qWarning() << "Failed to get the current playback position." << endl;
     }
 
-    // qDebug() << "pos_msec: " << pos_msec << endl;
-
     return pos_msec;
 }
 
@@ -167,7 +169,6 @@ void AalMediaPlayerService::setPosition(int msec)
 {
     assert(m_androidMediaPlayer != NULL);
 
-    qDebug() << "Seeking to position (msec): " << msec << endl;
     int ret = android_media_seek_to(m_androidMediaPlayer, msec);
     if (ret != OK)
     {
@@ -186,8 +187,6 @@ int AalMediaPlayerService::duration() const
     {
         qWarning() << "Failed to get the media duration." << endl;
     }
-
-    qDebug() << "duration_msec: " << duration_msec << endl;
 
     return duration_msec;
 }

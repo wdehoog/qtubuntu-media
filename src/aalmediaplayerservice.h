@@ -68,7 +68,6 @@ private:
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
-
     MediaPlayerWrapper *m_androidMediaPlayer;
 };
 

@@ -22,7 +22,7 @@
 #include "aalmediaplayerservice.h"
 // #include "snapshotgenerator.h"
 
-#include "media_compatibility_layer.h"
+#include <media/media_compatibility_layer.h>
 //#include "camera_compatibility_layer_capabilities.h"
 
 #include <qgl.h>

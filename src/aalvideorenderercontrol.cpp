@@ -21,7 +21,7 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 
-#include "media_compatibility_layer.h"
+#include <media/media_compatibility_layer.h>
 
 #include <qgl.h>
 

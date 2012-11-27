@@ -20,7 +20,7 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
-#include "media_compatibility_layer.h"
+#include <media/media_compatibility_layer.h>
 
 #include <QMediaService>
 

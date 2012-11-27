@@ -1,0 +1,18 @@
+Source: mediaplayerplugin-aal
+Section: libs
+Priority: extra
+Maintainer: Ricardo Mendoza <ricardo.mendoza@canonical.com>
+Build-Depends:  debhelper (>= 9),
+                qtmultimedia,
+                libhybris-dev,
+Standards-Version: 3.9.3
+
+Package: mediaplayerplugin-aal
+Section: libs
+Architecture: armhf
+Depends:    ${shlibs:Depends},
+            ${misc:Depends},
+            qtmultimedia,
+            qtvideonode-plugin,
+Description: Multimedia plugin for AAL+
+ Video and audio playback plugin for the hybris backend

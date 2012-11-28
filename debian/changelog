@@ -1,5 +1,5 @@
-mediaplayerplugin-aal (0.1) UNRELEASED; urgency=low
+mediaplayerplugin-aal (0.1) quantal; urgency=low
 
   * Initial release
 
- -- Ricardo Mendoza <ricardo.mendoza@canonical.com>  Tue, 27 Nov 2012 00:06:06 -0430
+ -- Ricardo Mendoza <ricardo.mendoza@canonical.com>  Wed, 28 Nov 2012 09:15:40 -0430

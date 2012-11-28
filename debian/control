@@ -3,10 +3,12 @@ Section: libs
 Priority: extra
 Maintainer: Ricardo Mendoza <ricardo.mendoza@canonical.com>
 Build-Depends:  debhelper (>= 9),
-                qtmultimedia,
-                libhybris-dev,
+                libgl-dev,
                 libgles2-mesa-dev,
-                libegl1-mesa-dev,
+                libhybris-dev,
+                libpulse-dev,
+                qtmultimedia,
+                pkg-config
 Standards-Version: 3.9.3
 
 Package: mediaplayerplugin-aal

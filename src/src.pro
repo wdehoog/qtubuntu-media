@@ -1,7 +1,7 @@
 include(../coverage.pri)
 TARGET = aalmediaplayer
-#QT += multimedia-private opengl
-QT += multimedia opengl
+QT += multimedia-private opengl
+#QT += multimedia opengl
 
 PLUGIN_TYPE = mediaservice
 

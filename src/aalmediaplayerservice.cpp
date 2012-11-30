@@ -229,3 +229,10 @@ void AalMediaPlayerService::setVideoSizeCb(on_msg_set_video_size cb, void *conte
 
     android_media_set_video_size_cb(m_androidMediaPlayer, cb, context);
 }
+
+void AalMediaPlayerService::setPlaybackCompleteCb(on_playback_complete cb, void *context)
+{
+    assert(m_androidMediaPlayer != NULL);
+
+    android_media_set_playback_complete_cb(m_androidMediaPlayer, cb, context);
+}

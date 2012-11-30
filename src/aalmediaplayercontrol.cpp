@@ -38,6 +38,8 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
         return;
     }
 
+    m_service->setPlaybackCompleteCb(AalMediaPlayerControl::playbackCompleteCb, static_cast<void *>(this));
+
     m_cachedVolume = volume();
 }
 
@@ -202,4 +204,19 @@ void AalMediaPlayerControl::stop()
 
     m_state = QMediaPlayer::StoppedState;
     Q_EMIT stateChanged(m_state);
+}
+
+void AalMediaPlayerControl::playbackCompleteCb(void *context)
+{
+    if (context != NULL)
+        static_cast<AalMediaPlayerControl *>(context)->playbackComplete();
+    else
+        qWarning() << "Failed to call playbackComplete() since context is NULL." << endl;
+}
+
+void AalMediaPlayerControl::playbackComplete()
+{
+    qDebug() << "Status: EndOfMedia (emitting)" << endl;
+    m_status = QMediaPlayer::EndOfMedia;
+    Q_EMIT mediaStatusChanged(m_status);
 }

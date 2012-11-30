@@ -60,6 +60,7 @@ public:
 
     void setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context);
     void setVideoSizeCb(on_msg_set_video_size cb, void *context);
+    void setPlaybackCompleteCb(on_playback_complete cb, void *context);
 
     static AalMediaPlayerService *instance() { return m_service; }
 

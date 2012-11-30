@@ -17,6 +17,7 @@
 export DH_OPTIONS
 
 PATH := /opt/qt5/bin:$(PATH)
+export QT_QPA_PLATFORM = minimal
 
 %:
-	dh $@ --buildsystem=qmake
+	dh $@ --parallel --buildsystem=qmake

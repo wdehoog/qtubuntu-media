@@ -23,6 +23,8 @@
 #include <QImage>
 #include <QVideoRendererControl>
 
+#include <qgl.h>
+
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
 
@@ -55,6 +57,7 @@ private:
     QAbstractVideoSurface *m_surface;
     AalMediaPlayerService *m_service;
     AalGLTextureBuffer *m_textureBuffer;
+    GLuint m_textureId;
 
     int m_height;
     int m_width;

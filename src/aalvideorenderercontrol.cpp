@@ -23,6 +23,8 @@
 
 #include <media/media_compatibility_layer.h>
 
+#include <qgl.h>
+
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QDebug>

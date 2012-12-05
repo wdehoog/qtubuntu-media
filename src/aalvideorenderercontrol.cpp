@@ -23,8 +23,6 @@
 
 #include <media/media_compatibility_layer.h>
 
-#include <qgl.h>
-
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QDebug>
@@ -163,9 +161,6 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     QVideoFrame frame(new AalGLTextureBuffer(m_textureId), QSize(m_width, m_height), QVideoFrame::Format_RGB32);
-    //static QVideoFrame frame(m_textureBuffer, QSize(m_width, m_height), QVideoFrame::Format_RGB32);
-    //if (m_frame == NULL)
-    //    m_frame = new QVideoFrame(m_textureBuffer, QSize(m_width, m_height), QVideoFrame::Format_RGB32);
 
     if (!frame.isValid())
         return;

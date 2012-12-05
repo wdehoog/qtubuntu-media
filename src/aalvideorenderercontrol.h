@@ -23,6 +23,8 @@
 #include <QImage>
 #include <QVideoRendererControl>
 
+#include <qgl.h>
+
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
 

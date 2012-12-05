@@ -1,3 +1,21 @@
+mediaplayerplugin-aal (0.3) quantal; urgency=low
+
+  * Fix the landscape/portrait orientation issue to align with the AAL+
+    layer.
+  * Add signals to change the player control status when the end of media
+    is reached.
+  * Bumped package version.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Wed, 05 Dec 2012 10:54:53 -0500
+
+mediaplayerplugin-aal (0.2) quantal; urgency=low
+
+  * Fix the landscape/portrait orientation issue to align with the AAL+ layer.
+  * Add signals to change the player control status when the end of media is
+    reached.
+
+ -- Jim Hodapp <jhodapp@trinity>  Fri, 30 Nov 2012 13:57:06 -0500
+
 mediaplayerplugin-aal (0.1) quantal; urgency=low
 
   * Initial release

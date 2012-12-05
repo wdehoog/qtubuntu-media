@@ -23,8 +23,6 @@
 
 #include <media/media_compatibility_layer.h>
 
-#include <qgl.h>
-
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QDebug>
@@ -73,6 +71,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
    , m_surface(0),
      m_service(service),
      m_textureBuffer(0),
+     m_textureId(0),
      m_height(720),
      m_width(1280)
 {
@@ -129,22 +128,20 @@ void AalVideoRendererControl::setupSurface()
 
 void AalVideoRendererControl::getTextureId()
 {
-    GLuint textureId = 0;
-    glGenTextures(1, &textureId);
-    if (textureId == 0) {
+    glGenTextures(1, &m_textureId);
+    if (m_textureId == 0) {
         qWarning() << "unanble to get texture ID";
         return;
     }
 
-    m_textureBuffer = new AalGLTextureBuffer(textureId);
+    m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
 }
 
 void AalVideoRendererControl::setVideoSize(int height, int width)
 {
-    // FIXME: Figure out why I have to swap height/width to get it to appear on the screen properly.
-    m_height = width;
-    m_width = height;
+    m_height = height;
+    m_width = width;
 
     qDebug() << "Height: " << height << " Width: " << width << endl;
 }
@@ -157,7 +154,13 @@ void AalVideoRendererControl::updateVideoTexture()
         return;
     }
 
-    static QVideoFrame frame(m_textureBuffer, QSize(m_width, m_height), QVideoFrame::Format_RGB32);
+    if (m_textureId == 0)
+    {
+        qWarning() << "m_textureId == 0, can't update video texture" << endl;
+        return;
+    }
+
+    QVideoFrame frame(new AalGLTextureBuffer(m_textureId), QSize(m_width, m_height), QVideoFrame::Format_RGB32);
 
     if (!frame.isValid())
         return;

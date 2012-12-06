@@ -9,7 +9,6 @@ QT += multimedia-private opengl
 INCLUDEPATH += ../src \
     /opt/qt5/include/QtMultimedia \
     /usr/include/hybris
-LIBS += -lhybris_ics -lubuntu_application_api -lmediaplayer
 
 HEADERS += \
     ../src/aalmediaplayercontrol.h \
@@ -19,6 +18,7 @@ HEADERS += \
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \
+    player.cpp \
     ../src/aalmediaplayercontrol.cpp \
     ../src/aalmediaplayerservice.cpp \
     ../src/aalmediaplayerserviceplugin.cpp \

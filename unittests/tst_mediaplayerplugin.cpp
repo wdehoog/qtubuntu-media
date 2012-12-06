@@ -18,6 +18,7 @@
  */
 
 #include "aalmediaplayerservice.h"
+#include "media_compatibility_layer.h"
 
 #include <QMediaPlayerControl>
 #include <QVideoRendererControl>
@@ -40,6 +41,7 @@ private slots:
     void cleanupTestCase();
 
     void tst_requestRelease();
+    void tst_newMediaPlayer();
     void tst_androidControl();
 };
 
@@ -75,6 +77,12 @@ void tst_MediaPlayerPlugin::tst_requestRelease()
     QVERIFY(mpControl == m_playerControl);
     m_service.releaseControl(rendererControl);
     QVERIFY(rendererControl == m_rendererControl);
+}
+
+void tst_MediaPlayerPlugin::tst_newMediaPlayer()
+{
+    bool ret = m_service.newMediaPlayer();
+    QVERIFY(ret == true);
 }
 
 void tst_MediaPlayerPlugin::tst_androidControl()

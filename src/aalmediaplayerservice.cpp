@@ -42,7 +42,9 @@ AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
 
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
-    m_androidMediaPlayer(NULL)
+    m_androidMediaPlayer(NULL),
+    m_mediaPlayerControlRef(0),
+    m_videoOutputRef(0)
 {
     m_service = this;
 
@@ -63,17 +65,58 @@ AalMediaPlayerService::~AalMediaPlayerService()
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
+    {
+        if (m_mediaPlayerControlRef == 0 && m_mediaPlayerControl == NULL)
+            m_mediaPlayerControl = new AalMediaPlayerControl(this);
+
+        ++m_mediaPlayerControlRef;
         return m_mediaPlayerControl;
+    }
 
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)
-        return m_videoOutput;
+    {
+        if (m_videoOutputRef == 0 && m_videoOutput == NULL)
+            m_videoOutput = new AalVideoRendererControl(this);
 
-    return 0;
+        ++m_videoOutputRef;
+        return m_videoOutput;
+    }
+
+    return NULL;
 }
 
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
-    Q_UNUSED(control);
+    if (control == m_mediaPlayerControl)
+    {
+        if (m_mediaPlayerControlRef > 0)
+            --m_mediaPlayerControlRef;
+
+        if (m_mediaPlayerControlRef == 0)
+        {
+            if (m_mediaPlayerControl != NULL)
+            {
+                delete m_mediaPlayerControl;
+                m_mediaPlayerControl = NULL;
+                control = NULL;
+            }
+        }
+    }
+    else if (control == m_videoOutput)
+    {
+        if (m_videoOutputRef > 0)
+            --m_videoOutputRef;
+
+        if (m_videoOutputRef == 0)
+        {
+            if (m_videoOutput != NULL)
+            {
+                delete m_videoOutput;
+                m_videoOutput = NULL;
+                control = NULL;
+            }
+        }
+    }
 }
 
 MediaPlayerWrapper *AalMediaPlayerService::androidControl()
@@ -83,6 +126,8 @@ MediaPlayerWrapper *AalMediaPlayerService::androidControl()
 
 bool AalMediaPlayerService::newMediaPlayer()
 {
+    assert(m_videoOutput != NULL);
+
     if (m_androidMediaPlayer)
         return true;
 

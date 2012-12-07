@@ -5,13 +5,6 @@ src/Makefile
 debian/mediaplayerplugin-aal
 debian/mediaplayerplugin-aal.debhelper.log
 debian/mediaplayerplugin-aal.substvars
-src/moc_aalmediaplayercontrol.cpp
-src/moc_aalmediaplayerservice.cpp
-src/moc_aalmediaplayerserviceplugin.cpp
-src/moc_aalvideorenderercontrol.cpp
-unittests/moc_aalmediaplayercontrol.cpp
-unittests/moc_aalmediaplayerservice.cpp
-unittests/moc_aalmediaplayerserviceplugin.cpp
-unittests/moc_aalvideorenderercontrol.cpp
+**/moc_*.cpp
+**/*.moc
 unittests/tst_mediaplayerplugin
-unittests/tst_mediaplayerplugin.moc

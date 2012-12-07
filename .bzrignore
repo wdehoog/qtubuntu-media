@@ -1,0 +1,10 @@
+Makefile
+debian/files
+debian/mediaplayerplug-aal
+src/Makefile
+debian/mediaplayerplugin-aal
+debian/mediaplayerplugin-aal.debhelper.log
+debian/mediaplayerplugin-aal.substvars
+**/moc_*.cpp
+**/*.moc
+unittests/tst_mediaplayerplugin

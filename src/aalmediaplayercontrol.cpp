@@ -177,6 +177,8 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
     m_status = QMediaPlayer::LoadingMedia;
     m_service->setMedia(media.canonicalUrl());
     m_status = QMediaPlayer::LoadedMedia;
+    Q_EMIT mediaStatusChanged(m_status);
+    Q_EMIT durationChanged(duration());
 }
 
 void AalMediaPlayerControl::play()

@@ -44,7 +44,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_androidMediaPlayer(NULL),
     m_mediaPlayerControlRef(0),
-    m_videoOutputRef(0)
+    m_videoOutputRef(0),
+    m_setVideoSizeCb(0),
+    m_setVideoSizeContext(0)
 {
     m_service = this;
 
@@ -136,6 +138,9 @@ bool AalMediaPlayerService::newMediaPlayer()
         qWarning() << "Unable to create a new media player instance.";
         return false;
     }
+
+    assert(m_setVideoSizeCb != NULL);
+    android_media_set_video_size_cb(m_androidMediaPlayer, m_setVideoSizeCb, m_setVideoSizeContext);
 
     m_videoOutput->setupSurface();
     // Gets called when there is any type of media playback issue
@@ -270,9 +275,8 @@ void AalMediaPlayerService::setVideoTextureNeedsUpdateCb(on_video_texture_needs_
 
 void AalMediaPlayerService::setVideoSizeCb(on_msg_set_video_size cb, void *context)
 {
-    assert(m_androidMediaPlayer != NULL);
-
-    android_media_set_video_size_cb(m_androidMediaPlayer, cb, context);
+    m_setVideoSizeCb = cb;
+    m_setVideoSizeContext = context;
 }
 
 void AalMediaPlayerService::setPlaybackCompleteCb(on_playback_complete cb, void *context)

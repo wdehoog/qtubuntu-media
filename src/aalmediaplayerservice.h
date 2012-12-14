@@ -73,6 +73,9 @@ private:
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;
+
+    on_msg_set_video_size m_setVideoSizeCb;
+    void *m_setVideoSizeContext;
 };
 
 #endif

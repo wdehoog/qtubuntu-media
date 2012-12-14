@@ -75,6 +75,9 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_height(720),
      m_width(1280)
 {
+    MediaPlayerWrapper *mp = m_service->androidControl();
+    m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
+
     QTimer::singleShot(1, this, SLOT(getTextureId())); // delay until mainloop is running (GL context exists)
 }
 
@@ -121,7 +124,6 @@ void AalVideoRendererControl::setupSurface()
         return;
 
     MediaPlayerWrapper *mp = m_service->androidControl();
-    m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
     m_service->setVideoTextureNeedsUpdateCb(AalVideoRendererControl::updateVideoTextureCb, static_cast<void *>(this));
     android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
 }

@@ -1,3 +1,11 @@
+mediaplayerplugin-aal (0.4) quantal; urgency=low
+
+  * Set the videoSizeCb as early as possible to make sure that it is always
+    set in all circumstances.
+  * Emit the durationChanged signal so that the scene flow bubbles display.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Fri, 14 Dec 2012 15:53:48 -0500
+
 mediaplayerplugin-aal (0.3) quantal; urgency=low
 
   * Fix the landscape/portrait orientation issue to align with the AAL+

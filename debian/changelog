@@ -1,3 +1,9 @@
+mediaplayerplugin-aal (0.5.3) quantal; urgency=low
+
+  * Qt5 final release.
+
+ -- Renato Araujo Oliveira Filho <renato@canonical.com>  Wed, 23 Jan 2013 19:43:58 -0300
+
 mediaplayerplugin-aal (0.4) quantal; urgency=low
 
   * Set the videoSizeCb as early as possible to make sure that it is always

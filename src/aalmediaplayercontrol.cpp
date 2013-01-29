@@ -39,6 +39,7 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     }
 
     m_service->setPlaybackCompleteCb(AalMediaPlayerControl::playbackCompleteCb, static_cast<void *>(this));
+    m_service->setMediaPreparedCb(AalMediaPlayerControl::mediaPreparedCb, static_cast<void *>(this));
 
     m_cachedVolume = volume();
 }
@@ -178,7 +179,6 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
     m_service->setMedia(media.canonicalUrl());
     m_status = QMediaPlayer::LoadedMedia;
     Q_EMIT mediaStatusChanged(m_status);
-    Q_EMIT durationChanged(duration());
 }
 
 void AalMediaPlayerControl::play()
@@ -218,7 +218,19 @@ void AalMediaPlayerControl::playbackCompleteCb(void *context)
 
 void AalMediaPlayerControl::playbackComplete()
 {
-    qDebug() << "Status: EndOfMedia (emitting)" << endl;
     m_status = QMediaPlayer::EndOfMedia;
     Q_EMIT mediaStatusChanged(m_status);
+}
+
+void AalMediaPlayerControl::mediaPreparedCb(void *context)
+{
+    if (context != NULL)
+        static_cast<AalMediaPlayerControl *>(context)->mediaPrepared();
+    else
+        qWarning() << "Failed to call mediaPrepared() since context is NULL." << endl;
+}
+
+void AalMediaPlayerControl::mediaPrepared()
+{
+    Q_EMIT durationChanged(duration());
 }

@@ -1,3 +1,10 @@
+mediaplayerplugin-aal (0.5.6) quantal; urgency=low
+
+  * Add a callback to be called by the AAL+ layer when the media is actually
+  ready (prepared) to be played. At that time, emit the durationChanged Qt signal.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Tue, 29 Jan 2013 15:37:44 -0500
+
 mediaplayerplugin-aal (0.5.5) quantal; urgency=low
 
   * Qt5 final release.

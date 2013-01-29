@@ -1,3 +1,9 @@
+mediaplayerplugin-aal (0.5.8) quantal; urgency=low
+
+  * Add missing mock function to unit test media_compatbility_layer.h.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Tue, 29 Jan 2013 18:08:48 -0500
+
 mediaplayerplugin-aal (0.5.7) quantal; urgency=low
 
   * Temporary fix to get video to play back on Qt5 proper.

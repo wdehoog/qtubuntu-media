@@ -55,6 +55,13 @@ void android_media_set_playback_complete_cb(MediaPlayerWrapper *mp, on_playback_
     Q_UNUSED(context);
 }
 
+void android_media_set_media_prepared_cb(MediaPlayerWrapper *mp, on_media_prepared cb, void *context)
+{
+    Q_UNUSED(mp);
+    Q_UNUSED(cb);
+    Q_UNUSED(context);
+}
+
 MediaPlayerWrapper *android_media_new_player()
 {
     return new MediaPlayerWrapper();

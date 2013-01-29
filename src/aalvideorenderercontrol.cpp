@@ -77,7 +77,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
 {
     m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
 
-    QTimer::singleShot(1, this, SLOT(getTextureId())); // delay until mainloop is running (GL context exists)
+    QTimer::singleShot(1000, this, SLOT(getTextureId())); // delay until mainloop is running (GL context exists)
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()

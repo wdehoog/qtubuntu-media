@@ -20,8 +20,6 @@ Section: libs
 Architecture: armhf
 Depends:    ${shlibs:Depends},
             ${misc:Depends},
-            qtmultimedia5-private-dev,
-            qtmultimedia5-dev,
             qtvideonode-plugin,
 Description: Multimedia plugin for AAL+
  Video and audio playback plugin for the hybris backend

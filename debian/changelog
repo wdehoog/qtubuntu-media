@@ -1,3 +1,9 @@
+mediaplayerplugin-aal (0.6.0) quantal; urgency=low
+
+  * Bump the version number for the package."
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Wed, 30 Jan 2013 10:23:49 -0500
+
 mediaplayerplugin-aal (0.5.9) quantal; urgency=low
 
   * Improve the positionChanged signal emission.

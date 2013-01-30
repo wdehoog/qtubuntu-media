@@ -161,6 +161,7 @@ void AalMediaPlayerControl::setPlaybackRate(qreal rate)
 QMediaContent AalMediaPlayerControl::media() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+    return m_mediaContent;
 }
 
 const QIODevice* AalMediaPlayerControl::mediaStream() const
@@ -177,6 +178,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 
     m_status = QMediaPlayer::LoadingMedia;
     m_service->setMedia(media.canonicalUrl());
+    m_mediaContent = media;
     m_status = QMediaPlayer::LoadedMedia;
     Q_EMIT mediaStatusChanged(m_status);
 }
@@ -233,4 +235,5 @@ void AalMediaPlayerControl::mediaPreparedCb(void *context)
 void AalMediaPlayerControl::mediaPrepared()
 {
     Q_EMIT durationChanged(duration());
+    Q_EMIT positionChanged(position());
 }

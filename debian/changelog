@@ -1,3 +1,9 @@
+mediaplayerplugin-aal (0.5.9) quantal; urgency=low
+
+  * Improve the positionChanged signal emission.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Wed, 30 Jan 2013 10:03:22 -0500
+
 mediaplayerplugin-aal (0.5.8) quantal; urgency=low
 
   * Add missing mock function to unit test media_compatbility_layer.h.

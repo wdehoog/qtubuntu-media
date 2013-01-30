@@ -61,6 +61,7 @@ private:
     AalMediaPlayerService *m_service;
     QMediaPlayer::State m_state;
     QMediaPlayer::MediaStatus m_status;
+    QMediaContent m_mediaContent;
     int m_cachedVolume;
 
     void playbackComplete();

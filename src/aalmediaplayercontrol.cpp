@@ -77,6 +77,7 @@ qint64 AalMediaPlayerControl::position() const
 void AalMediaPlayerControl::setPosition(qint64 msec)
 {
     m_service->setPosition(static_cast<int>(msec));
+    Q_EMIT positionChanged(msec);
 }
 
 int AalMediaPlayerControl::volume() const
@@ -90,6 +91,7 @@ void AalMediaPlayerControl::setVolume(int volume)
     qDebug() << __PRETTY_FUNCTION__ << endl;
     m_cachedVolume = volume;
     m_service->setVolume(volume);
+    Q_EMIT volumeChanged(m_cachedVolume);
 }
 
 bool AalMediaPlayerControl::isMuted() const
@@ -176,38 +178,39 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
     Q_UNUSED(stream);
     qDebug() << __PRETTY_FUNCTION__ << endl;
 
-    m_status = QMediaPlayer::LoadingMedia;
-    m_service->setMedia(media.canonicalUrl());
+    stop();
+
     m_mediaContent = media;
-    m_status = QMediaPlayer::LoadedMedia;
-    Q_EMIT mediaStatusChanged(m_status);
+    Q_EMIT mediaChanged(m_mediaContent);
+
+    // Make sure we can actually load something valid
+    if (!media.isNull())
+    {
+        setMediaStatus(QMediaPlayer::LoadingMedia);
+
+        m_service->setMedia(media.canonicalUrl());
+    }
 }
 
 void AalMediaPlayerControl::play()
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->play();
 
-    m_state = QMediaPlayer::PlayingState;
-    Q_EMIT stateChanged(m_state);
+    setState(QMediaPlayer::PlayingState);
 }
 
 void AalMediaPlayerControl::pause()
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->pause();
 
-    m_state = QMediaPlayer::PausedState;
-    Q_EMIT stateChanged(m_state);
+    setState(QMediaPlayer::PausedState);
 }
 
 void AalMediaPlayerControl::stop()
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->stop();
 
-    m_state = QMediaPlayer::StoppedState;
-    Q_EMIT stateChanged(m_state);
+    setState(QMediaPlayer::StoppedState);
 }
 
 void AalMediaPlayerControl::playbackCompleteCb(void *context)
@@ -220,8 +223,8 @@ void AalMediaPlayerControl::playbackCompleteCb(void *context)
 
 void AalMediaPlayerControl::playbackComplete()
 {
-    m_status = QMediaPlayer::EndOfMedia;
-    Q_EMIT mediaStatusChanged(m_status);
+    setMediaStatus(QMediaPlayer::EndOfMedia);
+    setState(QMediaPlayer::StoppedState);
 }
 
 void AalMediaPlayerControl::mediaPreparedCb(void *context)
@@ -234,6 +237,25 @@ void AalMediaPlayerControl::mediaPreparedCb(void *context)
 
 void AalMediaPlayerControl::mediaPrepared()
 {
+    setMediaStatus(QMediaPlayer::LoadedMedia);
     Q_EMIT durationChanged(duration());
     Q_EMIT positionChanged(position());
+}
+
+void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)
+{
+    if (status != m_status)
+    {
+        m_status = status;
+        Q_EMIT mediaStatusChanged(m_status);
+    }
+}
+
+void AalMediaPlayerControl::setState(QMediaPlayer::State state)
+{
+    if (state != m_state)
+    {
+        m_state = state;
+        Q_EMIT stateChanged(m_state);
+    }
 }

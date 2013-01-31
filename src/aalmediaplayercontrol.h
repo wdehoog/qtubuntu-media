@@ -66,6 +66,9 @@ private:
 
     void playbackComplete();
     void mediaPrepared();
+
+    void setMediaStatus(QMediaPlayer::MediaStatus status);
+    void setState(QMediaPlayer::State state);
 };
 
 #endif

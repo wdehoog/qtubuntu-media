@@ -1,3 +1,34 @@
+mediaplayerplugin-aal (0.5.9) quantal; urgency=low
+
+  * Improve the positionChanged signal emission.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Wed, 30 Jan 2013 10:03:22 -0500
+
+mediaplayerplugin-aal (0.5.8) quantal; urgency=low
+
+  * Add missing mock function to unit test media_compatbility_layer.h.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Tue, 29 Jan 2013 18:08:48 -0500
+
+mediaplayerplugin-aal (0.5.7) quantal; urgency=low
+
+  * Temporary fix to get video to play back on Qt5 proper.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Tue, 29 Jan 2013 16:33:05 -0500
+
+mediaplayerplugin-aal (0.5.6) quantal; urgency=low
+
+  * Add a callback to be called by the AAL+ layer when the media is actually
+  ready (prepared) to be played. At that time, emit the durationChanged Qt signal.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Tue, 29 Jan 2013 15:37:44 -0500
+
+mediaplayerplugin-aal (0.5.5) quantal; urgency=low
+
+  * Qt5 final release.
+
+ -- Renato Araujo Oliveira Filho <renato@canonical.com>  Wed, 23 Jan 2013 19:43:58 -0300
+
 mediaplayerplugin-aal (0.4) quantal; urgency=low
 
   * Set the videoSizeCb as early as possible to make sure that it is always

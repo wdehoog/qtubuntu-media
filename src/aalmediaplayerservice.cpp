@@ -285,3 +285,10 @@ void AalMediaPlayerService::setPlaybackCompleteCb(on_playback_complete cb, void 
 
     android_media_set_playback_complete_cb(m_androidMediaPlayer, cb, context);
 }
+
+void AalMediaPlayerService::setMediaPreparedCb(on_media_prepared cb, void *context)
+{
+    assert(m_androidMediaPlayer != NULL);
+
+    android_media_set_media_prepared_cb(m_androidMediaPlayer, cb, context);
+}

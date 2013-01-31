@@ -55,14 +55,17 @@ public:
     virtual void stop();
 
     static void playbackCompleteCb(void *context);
+    static void mediaPreparedCb(void *context);
 
 private:
     AalMediaPlayerService *m_service;
     QMediaPlayer::State m_state;
     QMediaPlayer::MediaStatus m_status;
+    QMediaContent m_mediaContent;
     int m_cachedVolume;
 
     void playbackComplete();
+    void mediaPrepared();
 };
 
 #endif

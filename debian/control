@@ -7,7 +7,11 @@ Build-Depends:  debhelper (>= 9),
                 libgles2-mesa-dev,
                 libhybris-dev,
                 libpulse-dev,
-                qtmultimedia,
+                qt5-default,
+                qtbase5-dev,
+                qtmultimedia5-dev,
+                qtmultimedia5-private-dev,
+                libqt5opengl5-dev,
                 pkg-config
 Standards-Version: 3.9.3
 
@@ -16,7 +20,8 @@ Section: libs
 Architecture: armhf
 Depends:    ${shlibs:Depends},
             ${misc:Depends},
-            qtmultimedia,
+            qtmultimedia5-private-dev,
+            qtmultimedia5-dev,
             qtvideonode-plugin,
 Description: Multimedia plugin for AAL+
  Video and audio playback plugin for the hybris backend

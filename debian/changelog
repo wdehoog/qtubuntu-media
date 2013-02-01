@@ -1,3 +1,10 @@
+mediaplayerplugin-aal (0.6.1) quantal; urgency=low
+
+  * Increase the GL surface creation delay by 0.2 seconds so that it works
+    well on both the tablet and the phone.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Fri, 01 Feb 2013 11:23:23 -0500
+
 mediaplayerplugin-aal (0.6.0) quantal; urgency=low
 
   * Improve the signal emission including emitting when the media playback

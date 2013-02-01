@@ -46,7 +46,8 @@ public:
         Q_UNUSED(mode);
         Q_UNUSED(numBytes);
         Q_UNUSED(bytesPerLine);
-        return (uchar*)0;
+
+        return NULL;
     }
 
     void unmap()
@@ -104,9 +105,8 @@ void AalVideoRendererControl::setSurface(QAbstractVideoSurface *surface)
 
 void AalVideoRendererControl::updateVideoTextureCb(void *context)
 {
-    Q_UNUSED(context);
-    QMetaObject::invokeMethod(AalMediaPlayerService::instance()->videoOutputControl(),
-                              "updateVideoTexture", Qt::QueuedConnection);
+    Q_ASSERT(context != NULL);
+    QMetaObject::invokeMethod(static_cast<AalVideoRendererControl*>(context), "updateVideoTexture", Qt::QueuedConnection);
 }
 
 void AalVideoRendererControl::setVideoSizeCb(int height, int width, void *data)
@@ -131,7 +131,7 @@ void AalVideoRendererControl::getTextureId()
 {
     glGenTextures(1, &m_textureId);
     if (m_textureId == 0) {
-        qWarning() << "unanble to get texture ID";
+        qWarning() << "Unable to get texture ID";
         return;
     }
 
@@ -143,15 +143,19 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 {
     m_height = height;
     m_width = width;
-
-    qDebug() << "Height: " << height << " Width: " << width << endl;
 }
 
 void AalVideoRendererControl::updateVideoTexture()
 {
-    if (!m_surface || !m_textureBuffer)
+    if (!m_surface)
     {
-        qWarning() << "m_surface or m_textureBuffer is NULL, can't update video texture" << endl;
+        qWarning() << "m_surface is NULL, can't update video texture" << endl;
+        return;
+    }
+
+    if (!m_textureBuffer)
+    {
+        qWarning() << "m_textureBuffer is NULL, can't update video texture" << endl;
         return;
     }
 
@@ -162,9 +166,11 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     QVideoFrame frame(new AalGLTextureBuffer(m_textureId), QSize(m_width, m_height), QVideoFrame::Format_RGB32);
-
     if (!frame.isValid())
+    {
+        qWarning() << "Frame is invalid, not presenting." << endl;
         return;
+    }
 
     MediaPlayerWrapper *mp = m_service->androidControl();
     frame.setMetaData("MediaPlayerControl", (int)mp);

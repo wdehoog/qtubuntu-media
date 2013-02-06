@@ -1,25 +1,28 @@
 Source: mediaplayerplugin-aal
 Section: libs
 Priority: extra
-Maintainer: Ricardo Mendoza <ricardo.mendoza@canonical.com>
-Build-Depends:  debhelper (>= 9),
-                libgl-dev,
-                libgles2-mesa-dev,
-                libhybris-dev,
-                libpulse-dev,
-                qt5-default,
-                qtbase5-dev,
-                qtmultimedia5-dev,
-                qtmultimedia5-private-dev,
-                libqt5opengl5-dev,
-                pkg-config
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 9),
+               libgl-dev,
+               libgles2-mesa-dev,
+               libhybris-dev,
+               libubuntu-platform-api1-dev,
+               libpulse-dev,
+               qt5-default,
+               qtbase5-dev,
+               qtmultimedia5-dev,
+               qtmultimedia5-private-dev,
+               libqt5opengl5-dev,
+               pkg-config
 Standards-Version: 3.9.3
+Vcs-Bzr: lp:~amanzi-team/besancon/mediaplayerplugin-aal/
+Vcs-Browser: https://bazaar.launchpad.net/~amanzi-team/besancon/mediaplayerplugin-aal/files
 
 Package: mediaplayerplugin-aal
 Section: libs
 Architecture: armhf
-Depends:    ${shlibs:Depends},
-            ${misc:Depends},
-            qtvideonode-plugin,
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         qtvideonode-plugin,
 Description: Multimedia plugin for AAL+
  Video and audio playback plugin for the hybris backend

@@ -15,8 +15,8 @@ Build-Depends: debhelper (>= 9),
                libqt5opengl5-dev,
                pkg-config
 Standards-Version: 3.9.3
-Vcs-Bzr: lp:~amanzi-team/besancon/mediaplayerplugin-aal/
-Vcs-Browser: https://bazaar.launchpad.net/~amanzi-team/besancon/mediaplayerplugin-aal/files
+Vcs-Bzr: lp:qtubuntu-media
+Vcs-Browser: https://code.launchpad.net/qtubuntu-media
 
 Package: mediaplayerplugin-aal
 Section: libs
@@ -24,5 +24,6 @@ Architecture: armhf
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          qtvideonode-plugin,
-Description: Multimedia plugin for AAL+
- Video and audio playback plugin for the hybris backend
+Description: QtMultimedia plugin for AAL+
+ Video and audio playback plugin that interfaces Qt with
+ the hybris media backend on Android.

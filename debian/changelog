@@ -1,4 +1,4 @@
-mediaplayerplugin-aal (0.6.3) quantal; urgency=low
+mediaplayerplugin-aal (0.6.3-0ubuntu1) quantal; urgency=low
 
   * Updating build-dependency to use the new ubuntu-platform-api package
   * debian/control: updating entries to be compatible with Ubuntu standards

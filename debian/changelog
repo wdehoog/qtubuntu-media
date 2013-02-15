@@ -1,3 +1,12 @@
+mediaplayerplugin-aal (0.7.0-0ubuntu1) quantal; urgency=low
+
+  * Bump version number for a release.
+  * Add LGPL license text to debian/copyright and fix upstream-name. Fixes:
+    https://bugs.launchpad.net/bugs/1123065.
+  * Fixed license headers on source code and debian packaging copyright file.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Fri, 15 Feb 2013 14:44:42 -0500
+
 mediaplayerplugin-aal (0.6.3-0ubuntu1) quantal; urgency=low
 
   * Updating build-dependency to use the new ubuntu-platform-api package

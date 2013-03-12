@@ -183,8 +183,6 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
 {
     Q_ASSERT(m_surface != NULL);
 
-    // qDebug() << __PRETTY_FUNCTION__ << endl;
-
     if (!m_surface->isActive()) {
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
 

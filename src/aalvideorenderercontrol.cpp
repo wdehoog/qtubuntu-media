@@ -146,6 +146,9 @@ void AalVideoRendererControl::updateVideoTexture()
         return;
     }
 
+    // If this is the first video frame being rendered, it's ok that m_textureId == 0.
+    // This is necessary so that a ShaderVideoNode instance from qtvideo-node gets created,
+    // as it is responsible for creating and returning a new texture and ID respectively.
     if (m_textureId == 0 && !m_firstFrame) {
         qWarning() << "m_textureId == 0, can't update video texture" << endl;
         return;

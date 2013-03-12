@@ -8,7 +8,9 @@ QT += multimedia-private opengl
 
 INCLUDEPATH += ../src \
     /opt/qt5/include/QtMultimedia \
-    /usr/include/hybris
+    /usr/include/hybris \
+    /usr/include/libqtubuntu-media-signals
+LIBS += -lqtubuntu-media-signals
 
 HEADERS += \
     ../src/aalmediaplayercontrol.h \

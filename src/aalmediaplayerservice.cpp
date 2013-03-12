@@ -46,6 +46,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_setVideoSizeContext(0)
 {
     m_service = this;
+    if (!newMediaPlayer())
+        qWarning() << "Failed to create a new media player backend. Video playback will not function." << endl;
 
     m_videoOutput = new AalVideoRendererControl(this);
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
@@ -136,14 +138,19 @@ bool AalMediaPlayerService::newMediaPlayer()
         return false;
     }
 
+    return true;
+}
+
+void AalMediaPlayerService::setupMediaPlayer()
+{
+    assert(m_androidMediaPlayer != NULL);
+
     assert(m_setVideoSizeCb != NULL);
     android_media_set_video_size_cb(m_androidMediaPlayer, m_setVideoSizeCb, m_setVideoSizeContext);
 
     m_videoOutput->setupSurface();
     // Gets called when there is any type of media playback issue
     android_media_set_error_cb(m_androidMediaPlayer, error_msg_cb, static_cast<void *>(this));
-
-    return true;
 }
 
 void AalMediaPlayerService::setMedia(const QUrl &url)
@@ -172,6 +179,8 @@ void AalMediaPlayerService::play()
         qWarning() << "Failed to play media." << endl;
         return;
     }
+
+    Q_EMIT serviceReady();
 }
 
 void AalMediaPlayerService::pause()

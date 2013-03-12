@@ -29,7 +29,7 @@ struct MediaPlayerWrapper;
 
 class AalMediaPlayerService : public QMediaService
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     AalMediaPlayerService(QObject *parent = 0);
     ~AalMediaPlayerService();
@@ -43,6 +43,7 @@ public:
     MediaPlayerWrapper *androidControl();
 
     bool newMediaPlayer();
+    void setupMediaPlayer();
 
     void setMedia(const QUrl &url);
     void play();
@@ -61,6 +62,9 @@ public:
     void setMediaPreparedCb(on_media_prepared cb, void *context);
 
     static AalMediaPlayerService *instance() { return m_service; }
+
+Q_SIGNALS:
+    void serviceReady();
 
 private:
     static AalMediaPlayerService *m_service;

@@ -19,6 +19,7 @@
 #include "aalmediaplayerservice.h"
 
 #include <media/media_compatibility_layer.h>
+#include <qtubuntu_media_signals.h>
 
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
@@ -63,19 +64,22 @@ private:
     GLuint m_textureId;
 };
 
-
 AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service, QObject *parent)
-   : QVideoRendererControl(parent)
-   , m_surface(0),
+   : QVideoRendererControl(parent),
+     m_surface(0),
      m_service(service),
      m_textureBuffer(0),
      m_textureId(0),
      m_height(720),
-     m_width(1280)
+     m_width(1280),
+     m_firstFrame(true)
 {
     m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
 
-    QTimer::singleShot(2000, this, SLOT(getTextureId())); // delay until mainloop is running (GL context exists)
+    // Get notified when qtvideo-node creates a GL texture
+    connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
+    // Get notified when the AalMediaPlayerService is ready to play video
+    connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -124,18 +128,6 @@ void AalVideoRendererControl::setupSurface()
     android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
 }
 
-void AalVideoRendererControl::getTextureId()
-{
-    glGenTextures(1, &m_textureId);
-    if (m_textureId == 0) {
-        qWarning() << "Unable to get texture ID";
-        return;
-    }
-
-    m_textureBuffer = new AalGLTextureBuffer(m_textureId);
-    setupSurface();
-}
-
 void AalVideoRendererControl::setVideoSize(int height, int width)
 {
     m_height = height;
@@ -144,20 +136,17 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 
 void AalVideoRendererControl::updateVideoTexture()
 {
-    if (!m_surface)
-    {
+    if (!m_surface) {
         qWarning() << "m_surface is NULL, can't update video texture" << endl;
         return;
     }
 
-    if (!m_textureBuffer)
-    {
+    if (!m_textureBuffer) {
         qWarning() << "m_textureBuffer is NULL, can't update video texture" << endl;
         return;
     }
 
-    if (m_textureId == 0)
-    {
+    if (m_textureId == 0 && !m_firstFrame) {
         qWarning() << "m_textureId == 0, can't update video texture" << endl;
         return;
     }
@@ -171,6 +160,30 @@ void AalVideoRendererControl::updateVideoTexture()
 
     MediaPlayerWrapper *mp = m_service->androidControl();
     frame.setMetaData("MediaPlayerControl", (int)mp);
+
+    presentVideoFrame(frame);
+
+    if (m_firstFrame)
+        m_firstFrame = false;
+}
+
+void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
+{
+    qDebug() << "textureID: " << textureID << endl;
+    m_textureId = static_cast<GLuint>(textureID);
+}
+
+void AalVideoRendererControl::onServiceReady()
+{
+    m_textureBuffer = new AalGLTextureBuffer(m_textureId);
+    setupSurface();
+}
+
+void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool empty)
+{
+    Q_ASSERT(m_surface != NULL);
+
+    // qDebug() << __PRETTY_FUNCTION__ << endl;
 
     if (!m_surface->isActive()) {
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());

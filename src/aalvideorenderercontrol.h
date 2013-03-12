@@ -18,6 +18,7 @@
 #define AALVIDEORENDERERCONTROL_H
 
 #include <QImage>
+#include <QVideoFrame>
 #include <QVideoRendererControl>
 
 #include <qgl.h>
@@ -27,7 +28,7 @@ class AalGLTextureBuffer;
 
 class AalVideoRendererControl : public QVideoRendererControl
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     AalVideoRendererControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalVideoRendererControl();
@@ -46,11 +47,14 @@ Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);
 
 private Q_SLOTS:
-    void getTextureId();
     void setVideoSize(int height, int width);
     void updateVideoTexture();
+    void onTextureCreated(unsigned int textureID);
+    void onServiceReady();
 
 private:
+    void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
+
     QAbstractVideoSurface *m_surface;
     AalMediaPlayerService *m_service;
     AalGLTextureBuffer *m_textureBuffer;
@@ -58,6 +62,8 @@ private:
 
     int m_height;
     int m_width;
+
+    bool m_firstFrame;
 };
 
 #endif

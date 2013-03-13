@@ -172,7 +172,6 @@ void AalVideoRendererControl::updateVideoTexture()
 
 void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
-    qDebug() << "textureID: " << textureID << endl;
     m_textureId = static_cast<GLuint>(textureID);
 }
 

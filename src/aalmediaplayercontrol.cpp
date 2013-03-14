@@ -28,12 +28,7 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia)
 {
-    bool ok = m_service->newMediaPlayer();
-    if (!ok)
-    {
-        qDebug() << "Failed to create a new hybris media player." << endl;
-        return;
-    }
+    m_service->setupMediaPlayer();
 
     m_service->setPlaybackCompleteCb(AalMediaPlayerControl::playbackCompleteCb, static_cast<void *>(this));
     m_service->setMediaPreparedCb(AalMediaPlayerControl::mediaPreparedCb, static_cast<void *>(this));

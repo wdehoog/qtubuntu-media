@@ -1,3 +1,11 @@
+mediaplayerplugin-aal (0.7.1-0ubuntu1) quantal; urgency=low
+
+  * Bump version number for a package release.
+  * Allow the media player to still render video with Qt multithreaded
+    rendering turned on.
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Thu, 14 Mar 2013 12:40:04 -0400
+
 mediaplayerplugin-aal (0.7.0-0ubuntu1) quantal; urgency=low
 
   * Bump version number for a release.

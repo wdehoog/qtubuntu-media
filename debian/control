@@ -21,7 +21,7 @@ Vcs-Browser: https://code.launchpad.net/qtubuntu-media
 
 Package: mediaplayerplugin-aal
 Section: libs
-Architecture: armhf
+Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          qtvideonode-plugin,

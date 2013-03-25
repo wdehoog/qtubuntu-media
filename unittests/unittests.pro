@@ -7,7 +7,7 @@ QT += testlib
 QT += multimedia-private opengl
 
 INCLUDEPATH += ../src \
-    /opt/qt5/include/QtMultimedia \
+    /usr/include/qt5/QtMultimedia \
     /usr/include/hybris
 
 HEADERS += \

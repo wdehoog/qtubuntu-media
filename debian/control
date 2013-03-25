@@ -6,14 +6,14 @@ Build-Depends: debhelper (>= 9),
                libgl-dev,
                libgles2-mesa-dev,
                libhybris-dev,
-               libubuntu-platform-api1-dev,
                libpulse-dev,
+               libqt5opengl5-dev,
+               libubuntu-platform-api1-dev,
+               pkg-config,
                qt5-default,
                qtbase5-dev,
                qtmultimedia5-dev,
                qtmultimedia5-private-dev,
-               libqt5opengl5-dev,
-               pkg-config
 Standards-Version: 3.9.3
 Vcs-Bzr: lp:qtubuntu-media
 Vcs-Browser: https://code.launchpad.net/qtubuntu-media
@@ -21,8 +21,8 @@ Vcs-Browser: https://code.launchpad.net/qtubuntu-media
 Package: mediaplayerplugin-aal
 Section: libs
 Architecture: armhf
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: ${misc:Depends},
+         ${shlibs:Depends},
          qtvideonode-plugin,
 Description: QtMultimedia plugin for AAL+
  Video and audio playback plugin that interfaces Qt with

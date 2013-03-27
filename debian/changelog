@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1-0ubuntu2) UNRELEASED; urgency=low
+
+  * Rename source package to qtubuntu-media
+  * Clean up packaging
+
+ -- Michael Terry <mterry@ubuntu.com>  Wed, 27 Mar 2013 14:24:15 -0400
+
 mediaplayerplugin-aal (0.7.1-0ubuntu1) quantal; urgency=low
 
   * Bump version number for a package release.

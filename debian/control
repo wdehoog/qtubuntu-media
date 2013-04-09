@@ -24,7 +24,7 @@ Vcs-Browser: https://code.launchpad.net/qtubuntu-media
 
 Package: qtubuntu-media
 Section: libs
-Architecture: armhf
+Architecture: any
 Conflicts: mediaplayerplugin-aal
 Replaces: mediaplayerplugin-aal
 Provides: mediaplayerplugin-aal

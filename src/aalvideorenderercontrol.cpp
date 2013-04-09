@@ -162,7 +162,7 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     MediaPlayerWrapper *mp = m_service->androidControl();
-    frame.setMetaData("MediaPlayerControl", (int)mp);
+    frame.setMetaData("MediaPlayerControl", QVariant::fromValue((void*)mp));
 
     presentVideoFrame(frame);
 

@@ -127,8 +127,6 @@ MediaPlayerWrapper *AalMediaPlayerService::androidControl()
 
 bool AalMediaPlayerService::newMediaPlayer()
 {
-    assert(m_videoOutput != NULL);
-
     if (m_androidMediaPlayer)
         return true;
 

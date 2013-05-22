@@ -1,10 +1,27 @@
-qtubuntu-media (0.7.1-0ubuntu2) UNRELEASED; urgency=low
+qtubuntu-media (0.7.1daily13.05.22ubuntu.unity.next-0ubuntu1) raring; urgency=low
 
+  [ Michael Terry ]
   * Rename source package to qtubuntu-media
   * Clean up packaging
   * Automatic snapshot from revision 16 (bootstrap)
 
- -- Michael Terry <mterry@ubuntu.com>  Wed, 27 Mar 2013 14:24:15 -0400
+  [ Jim Hodapp ]
+  * Allow the media player to still render video with Qt multithreaded
+    rendering turned on.
+
+  [ Michael Terry ]
+  * Build on all arches and don't install /usr/tests.
+  * Qt5Multimedia uses qml, which is not available on powerpc. So drop
+    powerpc from the supported architecture list.
+
+  [ Gustavo Pichorim Boiko ]
+  * Remove an assertion that was causing some users of QMediaPlayer to
+    crash.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 22 (ubuntu-unity/next)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 22 May 2013 04:27:40 +0000
 
 mediaplayerplugin-aal (0.7.1-0ubuntu1) quantal; urgency=low
 

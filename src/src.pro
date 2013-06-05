@@ -9,7 +9,7 @@ target.path += $$[QT_INSTALL_PLUGINS]/$${PLUGIN_TYPE}
 INSTALLS = target
 
 INCLUDEPATH += /usr/include/hybris /usr/include/libqtubuntu-media-signals
-LIBS += -lhybris_ics -lubuntu_application_api -lmediaplayer -lqtubuntu-media-signals
+LIBS += -lhybris-common -lubuntu_application_api -lmedia -lqtubuntu-media-signals
 
 OTHER_FILES += aalmediaplayer.json
 

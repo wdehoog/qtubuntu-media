@@ -1,3 +1,26 @@
+qtubuntu-media (0.7.1daily13.06.07-0ubuntu1) saucy; urgency=low
+
+  [ Jim Hodapp ]
+  * Allow the media player to still render video with Qt multithreaded
+    rendering turned on.
+
+  [ Michael Terry ]
+  * Build on all arches and don't install /usr/tests.
+  * Qt5Multimedia uses qml, which is not available on powerpc. So drop
+    powerpc from the supported architecture list.
+
+  [ Gustavo Pichorim Boiko ]
+  * Remove an assertion that was causing some users of QMediaPlayer to
+    crash.
+
+  [ Ricardo Salveti de Araujo ]
+  * src/src.pro: updating lib names to match latest libhybris.
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 24
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Jun 2013 04:01:56 +0000
+
 qtubuntu-media (0.7.1daily13.05.22ubuntu.unity.next-0ubuntu1) raring; urgency=low
 
   [ Michael Terry ]

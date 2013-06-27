@@ -1,3 +1,13 @@
+qtubuntu-media (0.7.1+13.10.20130627-0ubuntu1) saucy; urgency=low
+
+  [ Ken VanDine ]
+  * Priority should be optional .
+
+  [ Ubuntu daily release ]
+  * Automatic snapshot from revision 26
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Thu, 27 Jun 2013 04:40:03 +0000
+
 qtubuntu-media (0.7.1daily13.06.07-0ubuntu1) saucy; urgency=low
 
   [ Jim Hodapp ]

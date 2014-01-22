@@ -4,7 +4,7 @@ CONFIG += testcase
 TARGET = tst_mediaplayerplugin
 
 QT += testlib
-QT += multimedia-private opengl
+QT += multimedia opengl
 
 INCLUDEPATH += ../src \
     /usr/include/qt5/QtMultimedia \

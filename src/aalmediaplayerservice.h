@@ -17,6 +17,10 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
+#include <core/media/service.h>
+#include <core/media/player.h>
+#include <core/media/property.h>
+#include <core/media/track_list.h>
 #include <media/media_compatibility_layer.h>
 
 #include <QMediaService>
@@ -45,6 +49,8 @@ public:
     bool newMediaPlayer();
     void setupMediaPlayer();
 
+    void createVideoSink(uint32_t texture_id);
+
     void setMedia(const QUrl &url);
     void play();
     void pause();
@@ -68,10 +74,11 @@ Q_SIGNALS:
 
 private:
     static AalMediaPlayerService *m_service;
+    std::shared_ptr<core::ubuntu::media::Service> m_hubService;
+    std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
-    MediaPlayerWrapper *m_androidMediaPlayer;
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;

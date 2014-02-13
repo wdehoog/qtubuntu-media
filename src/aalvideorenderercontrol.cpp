@@ -74,6 +74,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_width(1280),
      m_firstFrame(true)
 {
+    qDebug() << Q_FUNC_INFO;
     m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
 
     // Get notified when qtvideo-node creates a GL texture
@@ -120,12 +121,25 @@ void AalVideoRendererControl::setVideoSizeCb(int height, int width, void *data)
 
 void AalVideoRendererControl::setupSurface()
 {
-    if (!m_textureBuffer)
-        return;
+    qDebug() << Q_FUNC_INFO;
 
-    MediaPlayerWrapper *mp = m_service->androidControl();
+#if 0
+    // Get a new texture id and pass it on to the video sink
+    if (m_textureId == 0) {
+        glGenTextures(1, &m_textureId);
+        m_service->createVideoSink(m_textureId);
+        qDebug() << "m_textureId: " << m_textureId << endl;
+    }
+#endif
+
+    if (!m_textureBuffer)
+        m_textureBuffer = new AalGLTextureBuffer(m_textureId);
+
+    updateVideoTexture();
+
+    //MediaPlayerWrapper *mp = m_service->androidControl();
     m_service->setVideoTextureNeedsUpdateCb(AalVideoRendererControl::updateVideoTextureCb, static_cast<void *>(this));
-    android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
+    //android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
 }
 
 void AalVideoRendererControl::setVideoSize(int height, int width)
@@ -136,6 +150,7 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 
 void AalVideoRendererControl::updateVideoTexture()
 {
+    qDebug() << Q_FUNC_INFO;
     if (!m_surface) {
         qWarning() << "m_surface is NULL, can't update video texture" << endl;
         return;
@@ -161,8 +176,10 @@ void AalVideoRendererControl::updateVideoTexture()
         return;
     }
 
+#if 0
     MediaPlayerWrapper *mp = m_service->androidControl();
     frame.setMetaData("MediaPlayerControl", QVariant::fromValue((void*)mp));
+#endif
 
     presentVideoFrame(frame);
 
@@ -172,7 +189,9 @@ void AalVideoRendererControl::updateVideoTexture()
 
 void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
+    qDebug() << "textureId: " << textureID;
     m_textureId = static_cast<GLuint>(textureID);
+    m_service->createVideoSink(textureID);
 }
 
 void AalVideoRendererControl::onServiceReady()
@@ -183,7 +202,10 @@ void AalVideoRendererControl::onServiceReady()
 
 void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool empty)
 {
+    Q_UNUSED(empty);
     Q_ASSERT(m_surface != NULL);
+
+    qDebug() << Q_FUNC_INFO;
 
     if (!m_surface->isActive()) {
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());

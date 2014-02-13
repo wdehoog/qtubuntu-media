@@ -186,6 +186,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 
 void AalMediaPlayerControl::play()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->play();
 
     setState(QMediaPlayer::PlayingState);
@@ -193,6 +194,7 @@ void AalMediaPlayerControl::play()
 
 void AalMediaPlayerControl::pause()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->pause();
 
     setState(QMediaPlayer::PausedState);

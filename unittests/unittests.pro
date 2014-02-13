@@ -1,16 +1,20 @@
 include(../coverage.pri)
 
 CONFIG += testcase
+QMAKE_CXXFLAGS += -std=c++11
+DEFINES += QT_NO_KEYWORDS
 TARGET = tst_mediaplayerplugin
 
 QT += testlib
-QT += multimedia-private opengl
+QT += multimedia opengl
 
 INCLUDEPATH += ../src \
     /usr/include/qt5/QtMultimedia \
     /usr/include/hybris \
     /usr/include/libqtubuntu-media-signals
-LIBS += -lqtubuntu-media-signals
+LIBS += \
+    -lqtubuntu-media-signals \
+    -L/usr/local/lib/arm-linux-gnueabihf -lmedia-hub-client
 
 HEADERS += \
     ../src/aalmediaplayercontrol.h \

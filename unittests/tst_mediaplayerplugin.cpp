@@ -17,6 +17,7 @@
 #include "aalmediaplayerservice.h"
 #include "media_compatibility_layer.h"
 
+#include <QObject>
 #include <QMediaPlayerControl>
 #include <QVideoRendererControl>
 #include <QtTest/QtTest>
@@ -33,7 +34,7 @@ class tst_MediaPlayerPlugin : public QObject
     QMediaControl *m_playerControl;
     QMediaControl *m_rendererControl;
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
 

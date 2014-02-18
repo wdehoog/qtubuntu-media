@@ -231,6 +231,8 @@ void AalMediaPlayerService::pause()
     assert(m_hubPlayerSession != NULL);
 
     m_hubPlayerSession->pause();
+    //qDebug() << "position: " << m_hubPlayerSession->position() * 1e-6;
+    qDebug() << "duration: " << m_hubPlayerSession->duration() * 1e-6;
 #if 0
     assert(m_androidMediaPlayer != NULL);
 
@@ -275,8 +277,9 @@ int AalMediaPlayerService::position() const
 
     return pos_msec;
 #endif
-    qDebug() << "m_hubPlayerSession->position(): " << m_hubPlayerSession->position();
-    return m_hubPlayerSession->position();
+    //qDebug() << "m_hubPlayerSession->position(): " << m_hubPlayerSession->position() * 1e-6;
+    //return m_hubPlayerSession->position() * 1e-6;
+    return 0;
 }
 
 void AalMediaPlayerService::setPosition(int msec)
@@ -311,6 +314,8 @@ int AalMediaPlayerService::duration() const
 
     return duration_msec;
 #endif
+    //qDebug() << "m_hubPlayerSession->duration(): " << m_hubPlayerSession->duration() * 1e-6;
+    //return m_hubPlayerSession->duration() * 1e-6;
     return 0;
 }
 

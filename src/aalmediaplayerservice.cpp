@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -18,7 +18,6 @@
 #include "aalmediaplayerservice.h"
 #include "aalvideorenderercontrol.h"
 
-#include <cassert>
 #include <errno.h>
 
 #include <QDebug>
@@ -151,7 +150,13 @@ bool AalMediaPlayerService::newMediaPlayer()
     if (m_hubPlayerSession)
         return true;
 
-    m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
+    try {
+        m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to start a new media-hub player session: " << e.what();
+        return false;
+    }
 
     return true;
 }
@@ -174,7 +179,11 @@ void AalMediaPlayerService::setupMediaPlayer()
 
 void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    assert(m_hubPlayerSession != NULL);
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot create a video sink without a valid media-hub player session";
+        return;
+    }
 
     // TODO
     //m_hubPlayerSession->create_video_sink(texture_id);
@@ -182,6 +191,11 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 
 void AalMediaPlayerService::setMedia(const QUrl &url)
 {
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot open uri without a valid media-hub player session";
+        return;
+    }
     if (url.isEmpty())
     {
         qWarning() << "Failed to set media source, url must be set." << endl;
@@ -190,157 +204,139 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
 
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
-    qDebug() << "Got the uri from stdString";
-    m_hubPlayerSession->open_uri(uri);
+    try {
+        m_hubPlayerSession->open_uri(uri);
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to open media " << url << ": " << e.what();
+        return;
+    }
 
     // TODO
     //m_videoOutput->setupSurface();
-
-#if 0
-    int ret = android_media_set_data_source(m_androidMediaPlayer, url.path().toStdString().c_str());
-    if (ret != OK)
-    {
-        qWarning() << "Failed to set media source." << endl;
-        return;
-    }
-#endif
-    qDebug() << "Finished setMedia";
 }
 
 void AalMediaPlayerService::play()
 {
-    assert(m_hubPlayerSession != NULL);
-
-    m_hubPlayerSession->play();
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int ret = android_media_play(m_androidMediaPlayer);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to play media." << endl;
+        qWarning() << "Cannot start playback without a valid media-hub player session";
         return;
     }
-#endif
 
+    try {
+        m_hubPlayerSession->play();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to start playback: " << e.what();
+        return;
+    }
     Q_EMIT serviceReady();
 }
 
 void AalMediaPlayerService::pause()
 {
-    assert(m_hubPlayerSession != NULL);
-
-    m_hubPlayerSession->pause();
-    //qDebug() << "position: " << m_hubPlayerSession->position() * 1e-6;
-    qDebug() << "duration: " << m_hubPlayerSession->duration() * 1e-6;
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int ret = android_media_pause(m_androidMediaPlayer);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to pause media playback." << endl;
+        qWarning() << "Cannot pause playback without a valid media-hub player session";
         return;
     }
-#endif
+
+    try {
+        m_hubPlayerSession->pause();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to pause playback: " << e.what();
+        return;
+    }
 }
 
 void AalMediaPlayerService::stop()
 {
-    assert(m_hubPlayerSession != NULL);
-
-    m_hubPlayerSession->stop();
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int ret = android_media_stop(m_androidMediaPlayer);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to stop media playback." << endl;
+        qWarning() << "Cannot stop playback without a valid media-hub player session";
         return;
     }
-#endif
+
+    try {
+        m_hubPlayerSession->stop();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to stop playback: " << e.what();
+        return;
+    }
 }
 
 int AalMediaPlayerService::position() const
 {
-    assert(m_hubPlayerSession != NULL);
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int pos_msec = 0;
-    int ret = android_media_get_current_position(m_androidMediaPlayer, &pos_msec);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to get the current playback position." << endl;
+        qWarning() << "Cannot get current playback position without a valid media-hub player session";
+        return 0;
     }
 
-    return pos_msec;
-#endif
-    //qDebug() << "m_hubPlayerSession->position(): " << m_hubPlayerSession->position() * 1e-6;
-    //return m_hubPlayerSession->position() * 1e-6;
-    return 0;
+    try {
+        return m_hubPlayerSession->position() * 1e-6;
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to get current playback position: " << e.what();
+        return 0;
+    }
 }
 
 void AalMediaPlayerService::setPosition(int msec)
 {
-    assert(m_hubPlayerSession != NULL);
-
-    m_hubPlayerSession->seek_to(std::chrono::milliseconds{msec * 1000});
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int ret = android_media_seek_to(m_androidMediaPlayer, msec);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to set the current playback position." << endl;
+        qWarning() << "Cannot set current playback position without a valid media-hub player session";
         return;
     }
-#endif
+    m_hubPlayerSession->seek_to(std::chrono::milliseconds{msec * 1000});
 }
 
 int AalMediaPlayerService::duration() const
 {
-    assert(m_hubPlayerSession != NULL);
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int duration_msec = 0;
-    int ret = android_media_get_duration(m_androidMediaPlayer, &duration_msec);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to get the media duration." << endl;
+        qWarning() << "Cannot get playback duration without a valid media-hub player session";
+        return 0;
     }
 
-    return duration_msec;
-#endif
-    //qDebug() << "m_hubPlayerSession->duration(): " << m_hubPlayerSession->duration() * 1e-6;
-    //return m_hubPlayerSession->duration() * 1e-6;
-    return 0;
+    try {
+        qDebug() << "m_hubPlayerSession->duration(): " << m_hubPlayerSession->duration() * 1e-6;
+        return m_hubPlayerSession->duration() * 1e-6;
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to get current playback duration: " << e.what();
+        return 0;
+    }
 }
 
 int AalMediaPlayerService::getVolume() const
 {
-    assert(m_hubPlayerSession != NULL);
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int vol = 0;
-    int ret = android_media_get_volume(m_androidMediaPlayer, &vol);
-    if (ret != OK)
+    if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Failed to get the volume." << endl;
+        qWarning() << "Cannot get volume without a valid media-hub player session";
+        return 0;
     }
 
-    return vol;
-#endif
-    //return m_hubPlayerSession->volume();
-    return 0;
+    try {
+        return m_hubPlayerSession->volume();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to get current volume level: " << e.what();
+        return 0;
+    }
 }
 
 void AalMediaPlayerService::setVolume(int volume)
 {
-    assert(m_hubPlayerSession != NULL);
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot set volume without a valid media-hub player session";
+        return;
+    }
 
 #if 0
     assert(m_androidMediaPlayer != NULL);

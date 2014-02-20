@@ -13,7 +13,7 @@ INSTALLS = target
 INCLUDEPATH += /usr/include/hybris /usr/include/libqtubuntu-media-signals
 LIBS += \
     -lhybris-common -lubuntu_application_api -lmedia -lqtubuntu-media-signals \
-    -L/usr/local/lib/arm-linux-gnueabihf -lmedia-hub-client
+    -lmedia-hub-client
 
 OTHER_FILES += aalmediaplayer.json
 

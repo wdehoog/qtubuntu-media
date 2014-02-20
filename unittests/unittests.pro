@@ -14,7 +14,7 @@ INCLUDEPATH += ../src \
     /usr/include/libqtubuntu-media-signals
 LIBS += \
     -lqtubuntu-media-signals \
-    -L/usr/local/lib/arm-linux-gnueabihf -lmedia-hub-client
+    -lmedia-hub-client
 
 HEADERS += \
     ../src/aalmediaplayercontrol.h \

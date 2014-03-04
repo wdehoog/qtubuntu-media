@@ -1,3 +1,16 @@
+qtubuntu-media (0.7.1+14.04.20140304-0ubuntu1) trusty; urgency=low
+
+  [ CI bot ]
+  * No change rebuild against Qt 5.2.1.
+
+  [ Albert Astals ]
+  * No need for private, works fine without it .
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 04 Mar 2014 13:41:36 +0000
+
 qtubuntu-media (0.7.1+13.10.20130627-0ubuntu1) saucy; urgency=low
 
   [ Ken VanDine ]

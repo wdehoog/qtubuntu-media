@@ -78,6 +78,7 @@ private:
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
+    bool m_videoOutputReady;
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;

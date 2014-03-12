@@ -2,9 +2,8 @@ include(../coverage.pri)
 TARGET = aalmediaplayer
 QT += multimedia opengl
 TEMPLATE = lib
-CONFIG += plugin
+CONFIG += plugin no_keywords
 QMAKE_CXXFLAGS += -std=c++11
-DEFINES += QT_NO_KEYWORDS
 PLUGIN_TYPE = mediaservice
 
 target.path += $$[QT_INSTALL_PLUGINS]/$${PLUGIN_TYPE}

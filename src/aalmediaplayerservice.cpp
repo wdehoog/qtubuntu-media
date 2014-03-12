@@ -41,6 +41,7 @@ AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_mediaPlayerControlRef(0),
+    m_videoOutputReady(false),
     m_videoOutputRef(0),
     m_setVideoSizeCb(0),
     m_setVideoSizeContext(0)
@@ -152,6 +153,7 @@ bool AalMediaPlayerService::newMediaPlayer()
 
     try {
         m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
+
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
@@ -185,8 +187,8 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
         return;
     }
 
-    // TODO
-    //m_hubPlayerSession->create_video_sink(texture_id);
+    m_hubPlayerSession->create_video_sink(texture_id);
+    m_videoOutputReady = true;
 }
 
 void AalMediaPlayerService::setMedia(const QUrl &url)
@@ -212,8 +214,7 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         return;
     }
 
-    // TODO
-    //m_videoOutput->setupSurface();
+    m_videoOutput->setupSurface();
 }
 
 void AalMediaPlayerService::play()
@@ -224,14 +225,19 @@ void AalMediaPlayerService::play()
         return;
     }
 
-    try {
-        m_hubPlayerSession->play();
+    if (m_videoOutputReady)
+    {
+        try {
+            qDebug() << "Actually calling m_hubPlayerSession->play()";
+            m_hubPlayerSession->play();
+        }
+        catch (std::runtime_error &e) {
+            qWarning() << "Failed to start playback: " << e.what();
+            return;
+        }
     }
-    catch (std::runtime_error &e) {
-        qWarning() << "Failed to start playback: " << e.what();
-        return;
-    }
-    Q_EMIT serviceReady();
+    else
+        Q_EMIT serviceReady();
 }
 
 void AalMediaPlayerService::pause()

@@ -18,15 +18,19 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 
-#include <media/media_compatibility_layer.h>
 #include <qtubuntu_media_signals.h>
 
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QDebug>
+#include <QGuiApplication>
+#include <QObject>
 #include <QTimer>
 #include <QUrl>
 #include <QVideoSurfaceFormat>
+#include <QWindow>
+
+#include <qgl.h>
 
 class AalGLTextureBuffer : public QAbstractVideoBuffer
 {
@@ -79,8 +83,11 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
 
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
+    // Get notified when the application window is displayed and focused
+    //connect(QGuiApplication::instance(), SIGNAL(focusWindowChanged(QWindow*)), this,
+    //        SLOT(handleFocusWindowChanged(QWindow*)), Qt::QueuedConnection);
     // Get notified when the AalMediaPlayerService is ready to play video
-    connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
+    //connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -103,6 +110,11 @@ void AalVideoRendererControl::setSurface(QAbstractVideoSurface *surface)
         m_surface = surface;
         Q_EMIT surfaceChanged(surface);
     }
+}
+
+void AalVideoRendererControl::handleFocusWindowChanged(QWindow *window)
+{
+    qDebug() << "Handle focusWindowChanged!!";
 }
 
 void AalVideoRendererControl::updateVideoTextureCb(void *context)
@@ -170,10 +182,16 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     QVideoFrame frame(new AalGLTextureBuffer(m_textureId), QSize(m_width, m_height), QVideoFrame::Format_RGB32);
-    if (!frame.isValid())
-    {
+    if (!frame.isValid()) {
         qWarning() << "Frame is invalid, not presenting." << endl;
         return;
+    }
+
+    if (m_firstFrame) {
+        // If this is the first video frame, we need to get a texture id from qtvideo-node
+        // setMetaData triggers qtvideo-node to generate a texture id
+        frame.setMetaData("GetTextureId", QVariant(0));
+        m_firstFrame = false;
     }
 
 #if 0
@@ -182,20 +200,24 @@ void AalVideoRendererControl::updateVideoTexture()
 #endif
 
     presentVideoFrame(frame);
-
-    if (m_firstFrame)
-        m_firstFrame = false;
 }
 
 void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
-    qDebug() << "textureId: " << textureID;
-    m_textureId = static_cast<GLuint>(textureID);
-    m_service->createVideoSink(textureID);
+    qDebug() << __PRETTY_FUNCTION__ << ": textureId: " << textureID;
+    if (m_textureId == 0) {
+        m_textureId = static_cast<GLuint>(textureID);
+        m_service->createVideoSink(textureID);
+
+        m_service->play();
+    }
+    else
+        qDebug() << "Already have a texture id and video sink, not creating new ones";
 }
 
 void AalVideoRendererControl::onServiceReady()
 {
+    qDebug() << __PRETTY_FUNCTION__ << " - Service is ready!";
     m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
 }

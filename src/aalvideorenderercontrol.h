@@ -25,6 +25,7 @@
 
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
+class QWindow;
 
 class AalVideoRendererControl : public QVideoRendererControl
 {
@@ -42,6 +43,7 @@ public:
 
 public Q_SLOTS:
     void setupSurface();
+    void handleFocusWindowChanged(QWindow *window);
 
 Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);

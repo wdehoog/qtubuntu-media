@@ -30,6 +30,9 @@ class QWindow;
 class AalVideoRendererControl : public QVideoRendererControl
 {
     Q_OBJECT
+
+    friend class AalMediaPlayerService;
+
 public:
     AalVideoRendererControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalVideoRendererControl();
@@ -43,7 +46,6 @@ public:
 
 public Q_SLOTS:
     void setupSurface();
-    void handleFocusWindowChanged(QWindow *window);
 
 Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);
@@ -53,6 +55,7 @@ private Q_SLOTS:
     void updateVideoTexture();
     void onTextureCreated(unsigned int textureID);
     void onServiceReady();
+    void onGLConsumerSet();
 
 private:
     void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
@@ -66,6 +69,7 @@ private:
     int m_width;
 
     bool m_firstFrame;
+    bool m_secondFrame;
 };
 
 #endif

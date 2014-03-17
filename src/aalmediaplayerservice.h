@@ -27,6 +27,10 @@
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
+class QWindow;
+class QGLContext;
+class QOpenGLContext;
+class QSurfaceFormat;
 
 struct MediaPlayerWrapper;
 
@@ -34,6 +38,8 @@ class AalMediaPlayerService : public QMediaService
 {
     Q_OBJECT
 public:
+    typedef void *GLConsumerWrapperHybris;
+
     AalMediaPlayerService(QObject *parent = 0);
     ~AalMediaPlayerService();
 
@@ -44,6 +50,7 @@ public:
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
     MediaPlayerWrapper *androidControl();
+    GLConsumerWrapperHybris glConsumer() const;
 
     bool newMediaPlayer();
     void setupMediaPlayer();
@@ -71,7 +78,15 @@ public:
 Q_SIGNALS:
     void serviceReady();
 
+public Q_SLOTS:
+    void handleFocusWindowChanged(QWindow *window);
+
 private:
+    static void onFrameAvailableCb(void *context);
+    void onFrameAvailable();
+    QWindow *createOffscreenWindow(const QSurfaceFormat &format);
+    void makeCurrent(QWindow *window);
+
     static AalMediaPlayerService *m_service;
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
@@ -79,6 +94,11 @@ private:
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
+
+    /** Used to set the renderer context as current **/
+    QWindow *m_offscreenSurface;
+    QGLContext *m_context;
+    QOpenGLContext *m_glContext;
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;

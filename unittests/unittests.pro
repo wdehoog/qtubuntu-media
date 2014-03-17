@@ -6,7 +6,7 @@ DEFINES += QT_NO_KEYWORDS
 TARGET = tst_mediaplayerplugin
 
 QT += testlib
-QT += multimedia opengl
+QT += multimedia opengl quick
 
 INCLUDEPATH += ../src \
     /usr/include/qt5/QtMultimedia \

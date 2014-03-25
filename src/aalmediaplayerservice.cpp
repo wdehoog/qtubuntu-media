@@ -45,7 +45,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_mediaPlayerControlRef(0),
     m_videoOutputRef(0),
     m_setVideoSizeCb(0),
-    m_setVideoSizeContext(0)
+    m_setVideoSizeContext(0),
+    m_position(0)
 {
     m_service = this;
 
@@ -155,7 +156,7 @@ bool AalMediaPlayerService::newMediaPlayer()
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
         return false;
     }
-
+    
     return true;
 }
 
@@ -189,6 +190,22 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 
     m_hubPlayerSession->set_frame_available_callback(&AalMediaPlayerService::onFrameAvailableCb, static_cast<void*>(this));
     m_videoOutputReady = true;
+}
+
+void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
+{
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot set playlist without a valid media-hub player session";
+        return;
+    }
+    if (playlist.mediaCount() == 0)
+    {
+        qWarning() << "Failed to set background playlist, list is empty." << endl;
+        return;
+    }
+
+    m_mediaPlaylist = &playlist;
 }
 
 void AalMediaPlayerService::setMedia(const QUrl &url)
@@ -267,6 +284,7 @@ void AalMediaPlayerService::stop()
     }
 
     try {
+        m_position = position();
         m_hubPlayerSession->stop();
     }
     catch (std::runtime_error &e) {
@@ -372,6 +390,21 @@ void AalMediaPlayerService::onFrameAvailable()
 {
     qDebug() << "Calling m_videoOutput->updateVideoTexture()";
     m_videoOutput->updateVideoTexture();
+}
+
+void AalMediaPlayerService::pushPlaylist()
+{
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot push playlist without a valid media-hub player session";
+        return;
+    }
+
+    for (int i = 0; i < m_mediaPlaylist->mediaCount(); i++)
+    {
+        const media::Track::UriType uri(m_mediaPlaylist->media(i).canonicalUrl().url().toStdString());
+        m_hubPlayerSession->track_list()->add_track_with_uri_at(uri, media::TrackList::after_empty_track(), false);
+    }
 }
 
 void AalMediaPlayerService::setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context)

@@ -43,9 +43,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
-    m_videoOutputRef(0),
-    m_setVideoSizeCb(0),
-    m_setVideoSizeContext(0)
+    m_videoOutputRef(0)
 {
     m_service = this;
 
@@ -123,14 +121,6 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
     }
 }
 
-MediaPlayerWrapper *AalMediaPlayerService::androidControl()
-{
-#if 0
-    return m_androidMediaPlayer;
-#endif
-    return NULL;
-}
-
 AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const
 {
     if (m_hubPlayerSession == NULL)
@@ -157,22 +147,6 @@ bool AalMediaPlayerService::newMediaPlayer()
     }
 
     return true;
-}
-
-void AalMediaPlayerService::setupMediaPlayer()
-{
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    assert(m_setVideoSizeCb != NULL);
-    android_media_set_video_size_cb(m_androidMediaPlayer, m_setVideoSizeCb, m_setVideoSizeContext);
-#endif
-
-    //m_videoOutput->setupSurface();
-#if 0
-    // Gets called when there is any type of media playback issue
-    android_media_set_error_cb(m_androidMediaPlayer, error_msg_cb, static_cast<void *>(this));
-#endif
 }
 
 void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
@@ -225,7 +199,8 @@ void AalMediaPlayerService::play()
         return;
     }
 
-    if (m_videoOutputReady)
+    if ((m_videoOutputReady && isVideoSource())
+            || isAudioSource())
     {
         try {
             qDebug() << "Actually calling m_hubPlayerSession->play()";
@@ -311,14 +286,45 @@ int AalMediaPlayerService::duration() const
     }
 
     try {
-        int duration = m_hubPlayerSession->duration() * 1e-6;
-        qDebug() << "Duration: " << duration;
-        return duration;
-        //return m_hubPlayerSession->duration() * 1e-6;
+        return m_hubPlayerSession->duration() * 1e-6;
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to get current playback duration: " << e.what();
         return 0;
+    }
+}
+
+bool AalMediaPlayerService::isVideoSource() const
+{
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        return false;
+    }
+
+    try {
+        return m_hubPlayerSession->is_video_source();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to check if source is video: " << e.what();
+        return false;
+    }
+}
+
+bool AalMediaPlayerService::isAudioSource() const
+{
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        return false;
+    }
+
+    try {
+        return m_hubPlayerSession->is_audio_source();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to check if source is video: " << e.what();
+        return false;
     }
 }
 
@@ -341,28 +347,19 @@ int AalMediaPlayerService::getVolume() const
 
 void AalMediaPlayerService::setVolume(int volume)
 {
+    Q_UNUSED(volume);
+
     if (m_hubPlayerSession == NULL)
     {
         qWarning() << "Cannot set volume without a valid media-hub player session";
         return;
     }
-
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    int ret = android_media_set_volume(m_androidMediaPlayer, volume);
-    if (ret != OK)
-    {
-        qWarning() << "Failed to set the volume." << endl;
-    }
-#endif
 }
 
 void AalMediaPlayerService::onFrameAvailableCb(void *context)
 {
     if (context != NULL)
     {
-        qDebug() << "Calling onFrameAvailable()";
         AalMediaPlayerService *s = static_cast<AalMediaPlayerService*>(context);
         s->onFrameAvailable();
     }
@@ -370,39 +367,5 @@ void AalMediaPlayerService::onFrameAvailableCb(void *context)
 
 void AalMediaPlayerService::onFrameAvailable()
 {
-    qDebug() << "Calling m_videoOutput->updateVideoTexture()";
     m_videoOutput->updateVideoTexture();
-}
-
-void AalMediaPlayerService::setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context)
-{
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    android_media_set_video_texture_needs_update_cb(m_androidMediaPlayer, cb, context);
-#endif
-}
-
-void AalMediaPlayerService::setVideoSizeCb(on_msg_set_video_size cb, void *context)
-{
-    m_setVideoSizeCb = cb;
-    m_setVideoSizeContext = context;
-}
-
-void AalMediaPlayerService::setPlaybackCompleteCb(on_playback_complete cb, void *context)
-{
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    android_media_set_playback_complete_cb(m_androidMediaPlayer, cb, context);
-#endif
-}
-
-void AalMediaPlayerService::setMediaPreparedCb(on_media_prepared cb, void *context)
-{
-#if 0
-    assert(m_androidMediaPlayer != NULL);
-
-    android_media_set_media_prepared_cb(m_androidMediaPlayer, cb, context);
-#endif
 }

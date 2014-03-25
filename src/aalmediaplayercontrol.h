@@ -52,7 +52,7 @@ public:
     virtual void stop();
 
     static void playbackCompleteCb(void *context);
-    static void mediaPreparedCb(void *context);
+    void mediaPrepared();
 
 private:
     AalMediaPlayerService *m_service;
@@ -62,7 +62,6 @@ private:
     int m_cachedVolume;
 
     void playbackComplete();
-    void mediaPrepared();
 
     void setMediaStatus(QMediaPlayer::MediaStatus status);
     void setState(QMediaPlayer::State state);

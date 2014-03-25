@@ -18,15 +18,19 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 
-#include <media/media_compatibility_layer.h>
 #include <qtubuntu_media_signals.h>
 
 #include <QAbstractVideoBuffer>
 #include <QAbstractVideoSurface>
 #include <QDebug>
+#include <QGuiApplication>
+#include <QObject>
 #include <QTimer>
 #include <QUrl>
 #include <QVideoSurfaceFormat>
+#include <QWindow>
+
+#include <qgl.h>
 
 class AalGLTextureBuffer : public QAbstractVideoBuffer
 {
@@ -72,14 +76,17 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_textureId(0),
      m_height(720),
      m_width(1280),
-     m_firstFrame(true)
+     m_firstFrame(true),
+     m_secondFrame(false)
 {
+    qDebug() << Q_FUNC_INFO;
     m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
 
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
+    connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
     // Get notified when the AalMediaPlayerService is ready to play video
-    connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
+    //connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -120,12 +127,14 @@ void AalVideoRendererControl::setVideoSizeCb(int height, int width, void *data)
 
 void AalVideoRendererControl::setupSurface()
 {
-    if (!m_textureBuffer)
-        return;
+    qDebug() << Q_FUNC_INFO;
 
-    MediaPlayerWrapper *mp = m_service->androidControl();
+    if (!m_textureBuffer)
+        m_textureBuffer = new AalGLTextureBuffer(m_textureId);
+
+    updateVideoTexture();
+
     m_service->setVideoTextureNeedsUpdateCb(AalVideoRendererControl::updateVideoTextureCb, static_cast<void *>(this));
-    android_media_set_preview_texture(mp, m_textureBuffer->handle().toUInt());
 }
 
 void AalVideoRendererControl::setVideoSize(int height, int width)
@@ -136,6 +145,7 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 
 void AalVideoRendererControl::updateVideoTexture()
 {
+    qDebug() << Q_FUNC_INFO;
     if (!m_surface) {
         qWarning() << "m_surface is NULL, can't update video texture" << endl;
         return;
@@ -155,35 +165,65 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     QVideoFrame frame(new AalGLTextureBuffer(m_textureId), QSize(m_width, m_height), QVideoFrame::Format_RGB32);
-    if (!frame.isValid())
-    {
+    if (!frame.isValid()) {
         qWarning() << "Frame is invalid, not presenting." << endl;
         return;
     }
 
-    MediaPlayerWrapper *mp = m_service->androidControl();
-    frame.setMetaData("MediaPlayerControl", QVariant::fromValue((void*)mp));
+    if (m_firstFrame) {
+        qDebug() << "Presenting frame to get texture-id from qt-video node";
+        // If this is the first video frame, we need to get a texture id from qtvideo-node
+        // setMetaData triggers qtvideo-node to generate a texture id
+        frame.setMetaData("GetTextureId", QVariant(0));
+        m_firstFrame = false;
+        m_secondFrame = true;
+    }
+    else if (m_secondFrame) {
+        qDebug() << "Presenting frame to set GLConsumer on qtvideo-node glConsumer: " << m_service->glConsumer();
+        frame.setMetaData("GLConsumer", QVariant::fromValue((unsigned int)m_service->glConsumer()));
+        m_secondFrame = false;
+    }
 
     presentVideoFrame(frame);
-
-    if (m_firstFrame)
-        m_firstFrame = false;
 }
 
 void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
-    m_textureId = static_cast<GLuint>(textureID);
+    qDebug() << __PRETTY_FUNCTION__ << ": textureId: " << textureID;
+    if (m_textureId == 0) {
+        m_textureId = static_cast<GLuint>(textureID);
+        qDebug() << "Creating video sink!";
+        m_service->createVideoSink(textureID);
+
+        //qDebug() << "Calling updateVideoTexture()";
+        // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
+        //updateVideoTexture();
+
+        //m_service->play();
+    }
+    else
+        qDebug() << "Already have a texture id and video sink, not creating a new one";
 }
 
 void AalVideoRendererControl::onServiceReady()
 {
+    qDebug() << __PRETTY_FUNCTION__ << " - Service is ready!";
     m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
 }
 
+void AalVideoRendererControl::onGLConsumerSet()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_service->play();
+}
+
 void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool empty)
 {
+    Q_UNUSED(empty);
     Q_ASSERT(m_surface != NULL);
+
+    qDebug() << Q_FUNC_INFO;
 
     if (!m_surface->isActive()) {
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
@@ -194,6 +234,8 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
     }
 
     if (m_surface->isActive()) {
+        qDebug() << "m_surface->present(): frame: " << frame;
+        qDebug() << "m_firstFrame: " << m_firstFrame << " m_secondFrame: " << m_secondFrame;
         m_surface->present(frame);
     }
 }

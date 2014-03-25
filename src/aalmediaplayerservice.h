@@ -78,14 +78,9 @@ public:
 Q_SIGNALS:
     void serviceReady();
 
-public Q_SLOTS:
-    void handleFocusWindowChanged(QWindow *window);
-
 private:
     static void onFrameAvailableCb(void *context);
     void onFrameAvailable();
-    QWindow *createOffscreenWindow(const QSurfaceFormat &format);
-    void makeCurrent(QWindow *window);
 
     static AalMediaPlayerService *m_service;
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
@@ -94,11 +89,6 @@ private:
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
-
-    /** Used to set the renderer context as current **/
-    QWindow *m_offscreenSurface;
-    QGLContext *m_context;
-    QOpenGLContext *m_glContext;
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;

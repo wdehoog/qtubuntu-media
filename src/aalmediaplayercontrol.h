@@ -53,7 +53,6 @@ public:
     virtual void pause();
     virtual void stop();
 
-    static void playbackCompleteCb(void *context);
     void mediaPrepared();
 
 private:

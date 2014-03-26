@@ -28,10 +28,6 @@
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
-class QWindow;
-class QGLContext;
-class QOpenGLContext;
-class QSurfaceFormat;
 
 struct MediaPlayerWrapper;
 
@@ -50,11 +46,9 @@ public:
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
-    MediaPlayerWrapper *androidControl();
     GLConsumerWrapperHybris glConsumer() const;
 
     bool newMediaPlayer();
-    void setupMediaPlayer();
 
     void createVideoSink(uint32_t texture_id);
 
@@ -66,16 +60,13 @@ public:
     int position() const;
     void setPosition(int msec);
     int duration() const;
+    bool isVideoSource() const;
+    bool isAudioSource() const;
 
     int getVolume() const;
     void setVolume(int volume);
 
     void pushPlaylist();
-
-    void setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context);
-    void setVideoSizeCb(on_msg_set_video_size cb, void *context);
-    void setPlaybackCompleteCb(on_playback_complete cb, void *context);
-    void setMediaPreparedCb(on_media_prepared cb, void *context);
 
     static AalMediaPlayerService *instance() { return m_service; }
 
@@ -96,11 +87,6 @@ private:
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;
-
-    on_msg_set_video_size m_setVideoSizeCb;
-    void *m_setVideoSizeContext;
-
-    int m_position;
 
     const QMediaPlaylist* m_mediaPlaylist;
 };

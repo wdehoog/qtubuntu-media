@@ -31,10 +31,6 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_status(QMediaPlayer::NoMedia),
     m_applicationActive(true)
 {
-    m_service->setupMediaPlayer();
-
-    m_service->setPlaybackCompleteCb(AalMediaPlayerControl::playbackCompleteCb, static_cast<void *>(this));
-
     m_cachedVolume = volume();
 
     QApplication::instance()->installEventFilter(this);
@@ -75,13 +71,11 @@ QMediaPlayer::MediaStatus AalMediaPlayerControl::mediaStatus() const
 
 qint64 AalMediaPlayerControl::duration() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return static_cast<qint64>(m_service->duration());
 }
 
 qint64 AalMediaPlayerControl::position() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return static_cast<qint64>(m_service->position());
 }
 
@@ -129,51 +123,43 @@ void AalMediaPlayerControl::setMuted(bool muted)
 
 int AalMediaPlayerControl::bufferStatus() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // Until we are playing network streams, there is no buffering necessary
     return 100;
 }
 
 bool AalMediaPlayerControl::isAudioAvailable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
-    return true;
+    return m_service->isAudioSource();
 }
 
 bool AalMediaPlayerControl::isVideoAvailable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
-    return true;
+    return m_service->isVideoSource();
 }
 
 bool AalMediaPlayerControl::isSeekable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return true;
 }
 
 QMediaTimeRange AalMediaPlayerControl::availablePlaybackRanges() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // TODO: this will need to change once we can play networked sources
     return QMediaTimeRange(0, duration());
 }
 
 qreal AalMediaPlayerControl::playbackRate() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return 1.0;
 }
 
 void AalMediaPlayerControl::setPlaybackRate(qreal rate)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     Q_UNUSED(rate);
 }
 
 QMediaContent AalMediaPlayerControl::media() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return m_mediaContent;
 }
 
@@ -242,14 +228,6 @@ void AalMediaPlayerControl::stop()
     m_service->stop();
 
     setState(QMediaPlayer::StoppedState);
-}
-
-void AalMediaPlayerControl::playbackCompleteCb(void *context)
-{
-    if (context != NULL)
-        static_cast<AalMediaPlayerControl *>(context)->playbackComplete();
-    else
-        qWarning() << "Failed to call playbackComplete() since context is NULL." << endl;
 }
 
 void AalMediaPlayerControl::playbackComplete()

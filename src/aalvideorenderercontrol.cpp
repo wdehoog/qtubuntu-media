@@ -79,14 +79,9 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_firstFrame(true),
      m_secondFrame(false)
 {
-    qDebug() << Q_FUNC_INFO;
-    m_service->setVideoSizeCb(AalVideoRendererControl::setVideoSizeCb, static_cast<void *>(this));
-
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
-    // Get notified when the AalMediaPlayerService is ready to play video
-    //connect(m_service, SIGNAL(serviceReady()), this, SLOT(onServiceReady()));
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -111,20 +106,6 @@ void AalVideoRendererControl::setSurface(QAbstractVideoSurface *surface)
     }
 }
 
-void AalVideoRendererControl::updateVideoTextureCb(void *context)
-{
-    Q_ASSERT(context != NULL);
-    QMetaObject::invokeMethod(static_cast<AalVideoRendererControl*>(context), "updateVideoTexture", Qt::QueuedConnection);
-}
-
-void AalVideoRendererControl::setVideoSizeCb(int height, int width, void *data)
-{
-    if (data != NULL)
-        static_cast<AalVideoRendererControl *>(data)->setVideoSize(height, width);
-    else
-        qWarning() << "Failed to call setVideoSize() since data is NULL." << endl;
-}
-
 void AalVideoRendererControl::setupSurface()
 {
     qDebug() << Q_FUNC_INFO;
@@ -133,8 +114,6 @@ void AalVideoRendererControl::setupSurface()
         m_textureBuffer = new AalGLTextureBuffer(m_textureId);
 
     updateVideoTexture();
-
-    m_service->setVideoTextureNeedsUpdateCb(AalVideoRendererControl::updateVideoTextureCb, static_cast<void *>(this));
 }
 
 void AalVideoRendererControl::setVideoSize(int height, int width)
@@ -192,14 +171,8 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
     qDebug() << __PRETTY_FUNCTION__ << ": textureId: " << textureID;
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
-        qDebug() << "Creating video sink!";
+        qDebug() << "Creating video sink";
         m_service->createVideoSink(textureID);
-
-        //qDebug() << "Calling updateVideoTexture()";
-        // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
-        //updateVideoTexture();
-
-        //m_service->play();
     }
     else
         qDebug() << "Already have a texture id and video sink, not creating a new one";
@@ -207,7 +180,7 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 
 void AalVideoRendererControl::onServiceReady()
 {
-    qDebug() << __PRETTY_FUNCTION__ << " - Service is ready!";
+    qDebug() << __PRETTY_FUNCTION__ << " - Service is ready";
     m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
 }
@@ -234,8 +207,6 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
     }
 
     if (m_surface->isActive()) {
-        qDebug() << "m_surface->present(): frame: " << frame;
-        qDebug() << "m_firstFrame: " << m_firstFrame << " m_secondFrame: " << m_secondFrame;
         m_surface->present(frame);
     }
 }

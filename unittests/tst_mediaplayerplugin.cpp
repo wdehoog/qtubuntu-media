@@ -40,7 +40,6 @@ private Q_SLOTS:
 
     void tst_requestRelease();
     void tst_newMediaPlayer();
-    void tst_androidControl();
 };
 
 void tst_MediaPlayerPlugin::initTestCase()
@@ -81,12 +80,6 @@ void tst_MediaPlayerPlugin::tst_newMediaPlayer()
 {
     bool ret = m_service.newMediaPlayer();
     QVERIFY(ret == true);
-}
-
-void tst_MediaPlayerPlugin::tst_androidControl()
-{
-    MediaPlayerWrapper *mp = m_service.androidControl();
-    QVERIFY(mp != NULL);
 }
 
 QTEST_MAIN(tst_MediaPlayerPlugin)

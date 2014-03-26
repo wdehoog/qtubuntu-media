@@ -258,7 +258,6 @@ void AalMediaPlayerService::stop()
     }
 
     try {
-        m_position = position();
         m_hubPlayerSession->stop();
     }
     catch (std::runtime_error &e) {

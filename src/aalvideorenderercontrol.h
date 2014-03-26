@@ -21,7 +21,7 @@
 #include <QVideoFrame>
 #include <QVideoRendererControl>
 
-#include <qgl.h>
+#include <media/media_compatibility_layer.h>
 
 class AalMediaPlayerService;
 class AalGLTextureBuffer;

@@ -5,7 +5,6 @@ QMAKE_CXXFLAGS += -std=c++11
 DEFINES += QT_NO_KEYWORDS
 TARGET = tst_mediaplayerplugin
 
-QT += testlib
 QT += multimedia opengl quick
 
 INCLUDEPATH += ../src \

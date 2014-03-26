@@ -28,6 +28,8 @@ public:
     AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalMediaPlayerControl();
 
+    bool eventFilter(QObject *obj, QEvent *event);
+    
     virtual QMediaPlayer::State state() const;
     virtual QMediaPlayer::MediaStatus mediaStatus() const;
     virtual qint64 duration() const;
@@ -59,6 +61,7 @@ private:
     QMediaPlayer::MediaStatus m_status;
     QMediaContent m_mediaContent;
     int m_cachedVolume;
+    bool m_applicationActive;
 
     void playbackComplete();
 

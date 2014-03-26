@@ -22,6 +22,7 @@
 #include <core/media/track_list.h>
 #include <media/media_compatibility_layer.h>
 
+#include <QMediaPlaylist>
 #include <QMediaService>
 
 class AalMediaPlayerControl;
@@ -52,6 +53,7 @@ public:
     void createVideoSink(uint32_t texture_id);
 
     void setMedia(const QUrl &url);
+    void setMediaPlaylist(const QMediaPlaylist& playlist);
     void play();
     void pause();
     void stop();
@@ -63,6 +65,8 @@ public:
 
     int getVolume() const;
     void setVolume(int volume);
+
+    void pushPlaylist();
 
     static AalMediaPlayerService *instance() { return m_service; }
 
@@ -83,6 +87,8 @@ private:
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;
+
+    const QMediaPlaylist* m_mediaPlaylist;
 };
 
 #endif

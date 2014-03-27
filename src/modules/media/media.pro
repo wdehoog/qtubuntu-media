@@ -2,7 +2,7 @@ TARGET = ubuntumediaplugin
 TEMPLATE = lib
 CONFIG += plugin 
 
-QT += qml quick quick-private core-private qml-private multimedia multimedia-private qtmultimediaquicktools-private
+QT += qml quick quick core qml multimedia multimedia qtmultimediaquicktools
 
 #QMAKE_CXXFLAGS += -std=c++11 -fvisibility=hidden -fvisibility-inlines-hidden
 #QMAKE_CXXFLAGS_RELEASE += -Werror     # so no stop on warning in debug builds

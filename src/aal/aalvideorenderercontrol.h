@@ -21,11 +21,12 @@
 #include <QVideoFrame>
 #include <QVideoRendererControl>
 
-#include <media/media_compatibility_layer.h>
-
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
-class QWindow;
+
+// Avoids a clash between Qt5's opengl headers and the platform GLES
+// headers
+typedef unsigned int GLuint;
 
 class AalVideoRendererControl : public QVideoRendererControl
 {

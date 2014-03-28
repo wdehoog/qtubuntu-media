@@ -29,7 +29,7 @@ public:
     ~AalMediaPlayerControl();
 
     bool eventFilter(QObject *obj, QEvent *event);
-    
+
     virtual QMediaPlayer::State state() const;
     virtual QMediaPlayer::MediaStatus mediaStatus() const;
     virtual qint64 duration() const;

@@ -159,7 +159,7 @@ void AalVideoRendererControl::updateVideoTexture()
     }
     else if (m_secondFrame) {
         qDebug() << "Presenting frame to set GLConsumer on qtvideo-node glConsumer: " << m_service->glConsumer();
-        frame.setMetaData("GLConsumer", QVariant::fromValue((unsigned int)m_service->glConsumer()));
+        frame.setMetaData("GLConsumer", QVariant::fromValue((uint64_t)m_service->glConsumer()));
         m_secondFrame = false;
     }
 

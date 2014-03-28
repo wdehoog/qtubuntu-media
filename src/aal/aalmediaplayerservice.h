@@ -20,7 +20,6 @@
 #include <core/media/service.h>
 #include <core/media/player.h>
 #include <core/media/track_list.h>
-#include <media/media_compatibility_layer.h>
 
 #include <QMediaPlaylist>
 #include <QMediaService>
@@ -28,8 +27,6 @@
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
-
-struct MediaPlayerWrapper;
 
 class AalMediaPlayerService : public QMediaService
 {

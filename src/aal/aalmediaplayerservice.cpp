@@ -145,7 +145,7 @@ bool AalMediaPlayerService::newMediaPlayer()
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
         return false;
     }
-    
+
     return true;
 }
 

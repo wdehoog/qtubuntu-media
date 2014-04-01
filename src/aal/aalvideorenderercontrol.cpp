@@ -150,15 +150,12 @@ void AalVideoRendererControl::updateVideoTexture()
     }
 
     if (m_firstFrame) {
-        qDebug() << "Presenting frame to get texture-id from qt-video node";
-        // If this is the first video frame, we need to get a texture id from qtvideo-node
-        // setMetaData triggers qtvideo-node to generate a texture id
-        frame.setMetaData("GetTextureId", QVariant(0));
+        // If this is the first video frame, we need to get a texture id from qtvideo-node.
+        // Sending an empty frame triggers qtvideo-node to generate a texture id
         m_firstFrame = false;
         m_secondFrame = true;
     }
     else if (m_secondFrame) {
-        qDebug() << "Presenting frame to set GLConsumer on qtvideo-node glConsumer: " << m_service->glConsumer();
         frame.setMetaData("GLConsumer", QVariant::fromValue((uint64_t)m_service->glConsumer()));
         m_secondFrame = false;
     }

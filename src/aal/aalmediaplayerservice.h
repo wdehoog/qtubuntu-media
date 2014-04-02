@@ -17,20 +17,29 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
-#include <core/media/service.h>
-#include <core/media/player.h>
-#include <core/media/track_list.h>
-
 #include <QMediaPlaylist>
 #include <QMediaService>
+
+#include <memory>
 
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
+class txt_MediaPlayerPlugin;
+
+namespace core { namespace ubuntu { namespace media {
+    class Service;
+    class Player;
+    class TrackList;
+} } }
 
 class AalMediaPlayerService : public QMediaService
 {
     Q_OBJECT
+
+    // For unit testing purposes
+    friend class tst_MediaPlayerPlugin;
+
 public:
     typedef void *GLConsumerWrapperHybris;
 
@@ -66,6 +75,10 @@ public:
     void pushPlaylist();
 
     static AalMediaPlayerService *instance() { return m_service; }
+
+    /* This is for unittest purposes to be able to set a mock-object version of a
+     * player object */
+    void setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player);
 
 Q_SIGNALS:
     void serviceReady();

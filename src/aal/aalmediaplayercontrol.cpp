@@ -181,7 +181,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
         {
             list = reinterpret_cast<QMediaPlaylist*>(stream);
             m_service->setMediaPlaylist(*list);
-       
+
             // Stream is a QMediaPlaylist object
             m_mediaContent = QMediaContent(list);
         }
@@ -192,10 +192,9 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
             stop();
             return;
         }
-
-           } else {    
+    } else {
         m_mediaContent = media;
-        
+
         // Make sure we can actually load something valid
         if (!media.isNull())
         {
@@ -211,7 +210,7 @@ void AalMediaPlayerControl::play()
     qDebug() << __PRETTY_FUNCTION__ << endl;
 
     setState(QMediaPlayer::PlayingState);
-    
+
     m_service->play();
 }
 
@@ -225,6 +224,7 @@ void AalMediaPlayerControl::pause()
 
 void AalMediaPlayerControl::stop()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->stop();
 
     setState(QMediaPlayer::StoppedState);
@@ -232,7 +232,9 @@ void AalMediaPlayerControl::stop()
 
 void AalMediaPlayerControl::playbackComplete()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     setMediaStatus(QMediaPlayer::EndOfMedia);
+
     setState(QMediaPlayer::StoppedState);
 }
 

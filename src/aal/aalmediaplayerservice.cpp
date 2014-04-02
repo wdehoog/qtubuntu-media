@@ -18,14 +18,13 @@
 #include "aalmediaplayerservice.h"
 #include "aalvideorenderercontrol.h"
 
+#include <core/media/service.h>
+#include <core/media/player.h>
+#include <core/media/track_list.h>
+
 #include <errno.h>
 
 #include <QAbstractVideoSurface>
-#include <qgl.h>
-#include <QGuiApplication>
-#include <QOpenGLContext>
-#include <QGLContext>
-#include <QtQuick/QQuickWindow>
 
 #include <QDebug>
 
@@ -41,6 +40,7 @@ AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
 
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
+    m_hubPlayerSession(NULL),
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
     m_videoOutputRef(0)
@@ -134,12 +134,17 @@ AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer
 bool AalMediaPlayerService::newMediaPlayer()
 {
     // Only one player session needed
-    if (m_hubPlayerSession)
+    if (m_hubPlayerSession != NULL)
         return true;
+
+    if (m_hubService == NULL)
+    {
+        qWarning() << "Cannot create new media player instance without a valid media-hub service instance";
+        return false;
+    }
 
     try {
         m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
-
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
@@ -157,11 +162,18 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
         return;
     }
 
-    m_hubPlayerSession->create_video_sink(texture_id);
-    // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
-    m_videoOutput->updateVideoTexture();
+    try {
+        m_hubPlayerSession->create_video_sink(texture_id);
+        // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
+        m_videoOutput->updateVideoTexture();
 
-    m_hubPlayerSession->set_frame_available_callback(&AalMediaPlayerService::onFrameAvailableCb, static_cast<void*>(this));
+        m_hubPlayerSession->set_frame_available_callback(&AalMediaPlayerService::onFrameAvailableCb, static_cast<void*>(this));
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "Failed to create video sink: " << e.what();
+        return;
+    }
+
     m_videoOutputReady = true;
 }
 
@@ -399,4 +411,9 @@ void AalMediaPlayerService::pushPlaylist()
         const media::Track::UriType uri(m_mediaPlaylist->media(i).canonicalUrl().url().toStdString());
         m_hubPlayerSession->track_list()->add_track_with_uri_at(uri, media::TrackList::after_empty_track(), false);
     }
+}
+
+void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player)
+{
+    m_hubPlayerSession = player;
 }

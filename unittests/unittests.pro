@@ -12,14 +12,14 @@ INCLUDEPATH += ../src/aal \
     /usr/include/hybris \
     /usr/include/libqtubuntu-media-signals
 LIBS += \
-    -lqtubuntu-media-signals \
-    -lmedia-hub-client
+    -lqtubuntu-media-signals
 
 HEADERS += \
     ../src/aal/aalmediaplayercontrol.h \
     ../src/aal/aalmediaplayerservice.h \
     ../src/aal/aalmediaplayerserviceplugin.h \
-    ../src/aal/aalvideorenderercontrol.h
+    ../src/aal/aalvideorenderercontrol.h \
+    player.h
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \

@@ -32,8 +32,6 @@
 using namespace std;
 using namespace core::ubuntu::media;
 
-struct MediaPlayerWrapper;
-
 class tst_MediaPlayerPlugin : public QObject
 {
     Q_OBJECT

@@ -124,7 +124,6 @@ void AalVideoRendererControl::setVideoSize(int height, int width)
 
 void AalVideoRendererControl::updateVideoTexture()
 {
-    qDebug() << Q_FUNC_INFO;
     if (!m_surface) {
         qWarning() << "m_surface is NULL, can't update video texture" << endl;
         return;
@@ -192,8 +191,6 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
 {
     Q_UNUSED(empty);
     Q_ASSERT(m_surface != NULL);
-
-    qDebug() << Q_FUNC_INFO;
 
     if (!m_surface->isActive()) {
         QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());

@@ -71,17 +71,17 @@ QMediaPlayer::MediaStatus AalMediaPlayerControl::mediaStatus() const
 
 qint64 AalMediaPlayerControl::duration() const
 {
-    return static_cast<qint64>(m_service->duration());
+    return m_service->duration();
 }
 
 qint64 AalMediaPlayerControl::position() const
 {
-    return static_cast<qint64>(m_service->position());
+    return m_service->position();
 }
 
 void AalMediaPlayerControl::setPosition(qint64 msec)
 {
-    m_service->setPosition(static_cast<int>(msec));
+    m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);
 }
 

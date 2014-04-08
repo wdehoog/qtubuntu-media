@@ -63,9 +63,9 @@ public:
     void play();
     void pause();
     void stop();
-    int position() const;
-    void setPosition(int msec);
-    int duration() const;
+    int64_t position() const;
+    void setPosition(int64_t msec);
+    int64_t duration() const;
     bool isVideoSource() const;
     bool isAudioSource() const;
 

@@ -43,7 +43,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_hubPlayerSession(NULL),
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
-    m_videoOutputRef(0)
+    m_videoOutputRef(0),
+    m_mediaPlaylist(NULL)
 {
     m_service = this;
 
@@ -416,6 +417,9 @@ void AalMediaPlayerService::pushPlaylist()
         return;
     }
 
+    if (m_mediaPlaylist == NULL)
+        return;
+    
     for (int i = 0; i < m_mediaPlaylist->mediaCount(); i++)
     {
         const media::Track::UriType uri(m_mediaPlaylist->media(i).canonicalUrl().url().toStdString());

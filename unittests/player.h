@@ -49,6 +49,7 @@ public:
     virtual void stop();
 
     virtual void set_frame_available_callback(FrameAvailableCb cb, void *context);
+    virtual void set_playback_complete_callback(PlaybackCompleteCb cb, void *context);
 
     virtual const core::Property<bool>& can_play() const;
     virtual const core::Property<bool>& can_pause() const;

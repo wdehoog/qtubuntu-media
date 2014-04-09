@@ -101,18 +101,6 @@ void TestPlayer::seek_to(const std::chrono::microseconds& offset)
     m_position.set(offset.count());
 }
 
-void TestPlayer::set_frame_available_callback(FrameAvailableCb cb, void *context)
-{
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
-}
-
-void TestPlayer::set_playback_complete_callback(PlaybackCompleteCb cb, void *context)
-{
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
-}
-
 const core::Property<bool>& TestPlayer::can_play() const
 {
     static core::Property<bool> ret(true);
@@ -260,6 +248,18 @@ const Track::Id& TrackList::after_empty_track()
 {
     static const Track::Id track_id;
     return track_id;
+}
+
+void TestPlayer::set_frame_available_callback(FrameAvailableCb cb, void *context)
+{
+    Q_UNUSED(cb);
+    Q_UNUSED(context);
+}
+
+void TestPlayer::set_playback_complete_callback(PlaybackCompleteCb cb, void *context)
+{
+    Q_UNUSED(cb);
+    Q_UNUSED(context);
 }
 
 }

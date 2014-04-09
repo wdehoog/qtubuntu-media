@@ -55,6 +55,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_videoOutput = new AalVideoRendererControl(this);
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
 
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_hubPlayerSession->set_playback_complete_callback([](void *context)
     {
         auto control = static_cast<AalMediaPlayerControl*>(context);

@@ -21,14 +21,19 @@
 #include <QVideoFrame>
 #include <QVideoRendererControl>
 
-#include <media/media_compatibility_layer.h>
-
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
+
+// Avoids a clash between Qt5's opengl headers and the platform GLES
+// headers
+typedef unsigned int GLuint;
 
 class AalVideoRendererControl : public QVideoRendererControl
 {
     Q_OBJECT
+
+    friend class AalMediaPlayerService;
+
 public:
     AalVideoRendererControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalVideoRendererControl();
@@ -51,6 +56,7 @@ private Q_SLOTS:
     void updateVideoTexture();
     void onTextureCreated(unsigned int textureID);
     void onServiceReady();
+    void onGLConsumerSet();
 
 private:
     void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
@@ -64,6 +70,7 @@ private:
     int m_width;
 
     bool m_firstFrame;
+    bool m_secondFrame;
 };
 
 #endif

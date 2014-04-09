@@ -20,20 +20,20 @@
 
 #include <media/media_compatibility_layer.h>
 
+#include <QMediaPlaylist>
 #include <QDebug>
+#include <QApplication>
 
 AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent)
    : QMediaPlayerControl(parent),
     m_service(service),
     m_state(QMediaPlayer::StoppedState),
-    m_status(QMediaPlayer::NoMedia)
+    m_status(QMediaPlayer::NoMedia),
+    m_applicationActive(true)
 {
-    m_service->setupMediaPlayer();
-
-    m_service->setPlaybackCompleteCb(AalMediaPlayerControl::playbackCompleteCb, static_cast<void *>(this));
-    m_service->setMediaPreparedCb(AalMediaPlayerControl::mediaPreparedCb, static_cast<void *>(this));
-
     m_cachedVolume = volume();
+
+    QApplication::instance()->installEventFilter(this);
 }
 
 AalMediaPlayerControl::~AalMediaPlayerControl()
@@ -42,6 +42,19 @@ AalMediaPlayerControl::~AalMediaPlayerControl()
     m_state = QMediaPlayer::StoppedState;
     m_status = QMediaPlayer::NoMedia;
     m_cachedVolume = 0;
+}
+
+bool AalMediaPlayerControl::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::ApplicationDeactivate) {
+       m_applicationActive = false; 
+       m_service->pushPlaylist();
+    }
+    else if (event->type() == QEvent::ApplicationActivate) {
+       m_applicationActive = true;
+    }
+
+    return QObject::eventFilter(obj, event);
 }
 
 QMediaPlayer::State AalMediaPlayerControl::state() const
@@ -58,17 +71,17 @@ QMediaPlayer::MediaStatus AalMediaPlayerControl::mediaStatus() const
 
 qint64 AalMediaPlayerControl::duration() const
 {
-    return static_cast<qint64>(m_service->duration());
+    return m_service->duration();
 }
 
 qint64 AalMediaPlayerControl::position() const
 {
-    return static_cast<qint64>(m_service->position());
+    return m_service->position();
 }
 
 void AalMediaPlayerControl::setPosition(qint64 msec)
 {
-    m_service->setPosition(static_cast<int>(msec));
+    m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);
 }
 
@@ -110,51 +123,43 @@ void AalMediaPlayerControl::setMuted(bool muted)
 
 int AalMediaPlayerControl::bufferStatus() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // Until we are playing network streams, there is no buffering necessary
     return 100;
 }
 
 bool AalMediaPlayerControl::isAudioAvailable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
-    return true;
+    return m_service->isAudioSource();
 }
 
 bool AalMediaPlayerControl::isVideoAvailable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
-    return true;
+    return m_service->isVideoSource();
 }
 
 bool AalMediaPlayerControl::isSeekable() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return true;
 }
 
 QMediaTimeRange AalMediaPlayerControl::availablePlaybackRanges() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // TODO: this will need to change once we can play networked sources
     return QMediaTimeRange(0, duration());
 }
 
 qreal AalMediaPlayerControl::playbackRate() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return 1.0;
 }
 
 void AalMediaPlayerControl::setPlaybackRate(qreal rate)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     Q_UNUSED(rate);
 }
 
 QMediaContent AalMediaPlayerControl::media() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return m_mediaContent;
 }
 
@@ -169,30 +174,49 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 {
     Q_UNUSED(stream);
     qDebug() << __PRETTY_FUNCTION__ << endl;
+    QMediaPlaylist *list;
 
-    stop();
+    if (stream != NULL) {
+        try
+        {
+            list = reinterpret_cast<QMediaPlaylist*>(stream);
+            m_service->setMediaPlaylist(*list);
 
-    m_mediaContent = media;
-    Q_EMIT mediaChanged(m_mediaContent);
+            // Stream is a QMediaPlaylist object
+            m_mediaContent = QMediaContent(list);
+        }
+        catch (const std::bad_cast &e)
+        {
+            // TODO: Support real streams
+            qDebug() << "Streams are not currently supported";
+            stop();
+            return;
+        }
+    } else {
+        m_mediaContent = media;
 
-    // Make sure we can actually load something valid
-    if (!media.isNull())
-    {
-        setMediaStatus(QMediaPlayer::LoadingMedia);
-
-        m_service->setMedia(media.canonicalUrl());
+        // Make sure we can actually load something valid
+        if (!media.isNull())
+        {
+            setMediaStatus(QMediaPlayer::LoadingMedia);
+            m_service->setMedia(media.canonicalUrl());
+        }
     }
+    Q_EMIT mediaChanged(m_mediaContent);
 }
 
 void AalMediaPlayerControl::play()
 {
-    m_service->play();
+    qDebug() << __PRETTY_FUNCTION__ << endl;
 
     setState(QMediaPlayer::PlayingState);
+
+    m_service->play();
 }
 
 void AalMediaPlayerControl::pause()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->pause();
 
     setState(QMediaPlayer::PausedState);
@@ -200,31 +224,18 @@ void AalMediaPlayerControl::pause()
 
 void AalMediaPlayerControl::stop()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_service->stop();
 
     setState(QMediaPlayer::StoppedState);
 }
 
-void AalMediaPlayerControl::playbackCompleteCb(void *context)
-{
-    if (context != NULL)
-        static_cast<AalMediaPlayerControl *>(context)->playbackComplete();
-    else
-        qWarning() << "Failed to call playbackComplete() since context is NULL." << endl;
-}
-
 void AalMediaPlayerControl::playbackComplete()
 {
+    qDebug() << __PRETTY_FUNCTION__ << endl;
     setMediaStatus(QMediaPlayer::EndOfMedia);
-    setState(QMediaPlayer::StoppedState);
-}
 
-void AalMediaPlayerControl::mediaPreparedCb(void *context)
-{
-    if (context != NULL)
-        static_cast<AalMediaPlayerControl *>(context)->mediaPrepared();
-    else
-        qWarning() << "Failed to call mediaPrepared() since context is NULL." << endl;
+    setState(QMediaPlayer::StoppedState);
 }
 
 void AalMediaPlayerControl::mediaPrepared()

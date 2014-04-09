@@ -55,6 +55,8 @@ public:
 
     void mediaPrepared();
 
+    void playbackComplete();
+
 private:
     AalMediaPlayerService *m_service;
     QMediaPlayer::State m_state;
@@ -62,8 +64,6 @@ private:
     QMediaContent m_mediaContent;
     int m_cachedVolume;
     bool m_applicationActive;
-
-    void playbackComplete();
 
     void setMediaStatus(QMediaPlayer::MediaStatus status);
     void setState(QMediaPlayer::State state);

@@ -54,6 +54,16 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_videoOutput = new AalVideoRendererControl(this);
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
+
+    if (m_hubPlayerSession == NULL)
+        return;
+
+    m_hubPlayerSession->set_playback_complete_callback([](void *context)
+    {
+        auto control = static_cast<AalMediaPlayerControl*>(context);
+        control->playbackComplete();
+    },
+    static_cast<void*>(m_mediaPlayerControl));
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
@@ -278,7 +288,7 @@ void AalMediaPlayerService::stop()
     }
 }
 
-int AalMediaPlayerService::position() const
+int64_t AalMediaPlayerService::position() const
 {
     if (m_hubPlayerSession == NULL)
     {
@@ -287,7 +297,7 @@ int AalMediaPlayerService::position() const
     }
 
     try {
-        return m_hubPlayerSession->position() * 1e-6;
+        return m_hubPlayerSession->position() / 1e6;
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to get current playback position: " << e.what();
@@ -295,7 +305,7 @@ int AalMediaPlayerService::position() const
     }
 }
 
-void AalMediaPlayerService::setPosition(int msec)
+void AalMediaPlayerService::setPosition(int64_t msec)
 {
     if (m_hubPlayerSession == NULL)
     {
@@ -305,7 +315,7 @@ void AalMediaPlayerService::setPosition(int msec)
     m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
 }
 
-int AalMediaPlayerService::duration() const
+int64_t AalMediaPlayerService::duration() const
 {
     if (m_hubPlayerSession == NULL)
     {
@@ -314,7 +324,7 @@ int AalMediaPlayerService::duration() const
     }
 
     try {
-        return m_hubPlayerSession->duration() * 1e-6;
+        return m_hubPlayerSession->duration() / 1e6;
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to get current playback duration: " << e.what();

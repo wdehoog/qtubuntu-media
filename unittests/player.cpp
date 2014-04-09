@@ -250,6 +250,8 @@ const Track::Id& TrackList::after_empty_track()
     return track_id;
 }
 
+// FIXME: For some reason these functions need to be at the end of the file
+// or else all core::Property members become unstable and prone to corruption.
 void TestPlayer::set_frame_available_callback(FrameAvailableCb cb, void *context)
 {
     Q_UNUSED(cb);

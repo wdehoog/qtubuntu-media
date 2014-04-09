@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -17,20 +17,32 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
-#include <media/media_compatibility_layer.h>
-
+#include <QMediaPlaylist>
 #include <QMediaService>
+
+#include <memory>
 
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
+class txt_MediaPlayerPlugin;
 
-struct MediaPlayerWrapper;
+namespace core { namespace ubuntu { namespace media {
+    class Service;
+    class Player;
+    class TrackList;
+} } }
 
 class AalMediaPlayerService : public QMediaService
 {
     Q_OBJECT
+
+    // For unit testing purposes
+    friend class tst_MediaPlayerPlugin;
+
 public:
+    typedef void *GLConsumerWrapperHybris;
+
     AalMediaPlayerService(QObject *parent = 0);
     ~AalMediaPlayerService();
 
@@ -40,44 +52,53 @@ public:
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
-    MediaPlayerWrapper *androidControl();
+    GLConsumerWrapperHybris glConsumer() const;
 
     bool newMediaPlayer();
-    void setupMediaPlayer();
+
+    void createVideoSink(uint32_t texture_id);
 
     void setMedia(const QUrl &url);
+    void setMediaPlaylist(const QMediaPlaylist& playlist);
     void play();
     void pause();
     void stop();
-    int position() const;
-    void setPosition(int msec);
-    int duration() const;
+    int64_t position() const;
+    void setPosition(int64_t msec);
+    int64_t duration() const;
+    bool isVideoSource() const;
+    bool isAudioSource() const;
 
     int getVolume() const;
     void setVolume(int volume);
 
-    void setVideoTextureNeedsUpdateCb(on_video_texture_needs_update cb, void *context);
-    void setVideoSizeCb(on_msg_set_video_size cb, void *context);
-    void setPlaybackCompleteCb(on_playback_complete cb, void *context);
-    void setMediaPreparedCb(on_media_prepared cb, void *context);
+    void pushPlaylist();
 
     static AalMediaPlayerService *instance() { return m_service; }
+
+    /* This is for unittest purposes to be able to set a mock-object version of a
+     * player object */
+    void setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player);
 
 Q_SIGNALS:
     void serviceReady();
 
 private:
+    static void onFrameAvailableCb(void *context);
+    void onFrameAvailable();
+
     static AalMediaPlayerService *m_service;
+    std::shared_ptr<core::ubuntu::media::Service> m_hubService;
+    std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
-    MediaPlayerWrapper *m_androidMediaPlayer;
+    bool m_videoOutputReady;
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;
 
-    on_msg_set_video_size m_setVideoSizeCb;
-    void *m_setVideoSizeContext;
+    const QMediaPlaylist* m_mediaPlaylist;
 };
 
 #endif

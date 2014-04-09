@@ -5,14 +5,16 @@ Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 9),
                libgl1-mesa-dev | libgl-dev,
                libgles2-mesa-dev,
-               libhybris-dev,
+               libhybris-dev (>= 0.1.0+git20131207+e452e83-0ubuntu13),
+               libmedia-hub-dev (>= 0.0.1+14.04.20140327.3-0ubuntu1),
                libpulse-dev,
                libqt5opengl5-dev,
-               libqtubuntu-media-signals-dev,
+               libqtubuntu-media-signals-dev (>= 0.3+14.04.20140307-0ubuntu2),
                libubuntu-platform-api1-dev,
                pkg-config,
                qt5-default,
                qtbase5-dev,
+               qtdeclarative5-dev,
                qtmultimedia5-dev,
 Standards-Version: 3.9.4
 # If you don't have commit rights to lp:qtubuntu-media but need to upload

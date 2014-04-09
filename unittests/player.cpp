@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -14,136 +14,248 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "media_compatibility_layer.h"
+#include "player.h"
+
 
 #include <QtGlobal>
+#include <QtTest/QtTest>
 
-// Mock object so that we don't get an incomplete type compiler error
-struct MediaPlayerWrapper
+using namespace std;
+
+struct core::ubuntu::media::TestPlayer::Configuration
 {
-    MediaPlayerWrapper() { }
 };
 
-void android_media_set_video_size_cb(MediaPlayerWrapper *mp, on_msg_set_video_size cb, void *context)
+namespace core {
+namespace ubuntu {
+namespace media {
+
+typedef void* GLConsumerWrapperHybris;
+
+const TestPlayer::Configuration& TestPlayer::Client::default_configuration()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
+    static const TestPlayer::Configuration config;
+    return config;
 }
 
-void android_media_set_video_texture_needs_update_cb(MediaPlayerWrapper *mp, on_video_texture_needs_update cb, void *context)
+Player::Player()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
 }
 
-void android_media_set_error_cb(MediaPlayerWrapper *mp, on_msg_error cb, void *context)
+Player::~Player()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
 }
 
-void android_media_set_playback_complete_cb(MediaPlayerWrapper *mp, on_playback_complete cb, void *context)
+TestPlayer::TestPlayer()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
 }
 
-void android_media_set_media_prepared_cb(MediaPlayerWrapper *mp, on_media_prepared cb, void *context)
+TestPlayer::~TestPlayer()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
 }
 
-MediaPlayerWrapper *android_media_new_player()
+shared_ptr<TrackList> TestPlayer::track_list()
 {
-    return new MediaPlayerWrapper();
+    static shared_ptr<TrackList> ret(NULL);
+    return ret;
 }
 
-int android_media_set_data_source(MediaPlayerWrapper *mp, const char* url)
+bool TestPlayer::open_uri(const Track::UriType& uri)
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(url);
-    return 0;
-}
-
-int android_media_set_preview_texture(MediaPlayerWrapper *mp, int texture_id)
-{
-    Q_UNUSED(mp);
-    Q_UNUSED(texture_id);
-    return 0;
-}
-
-void android_media_update_surface_texture(MediaPlayerWrapper *mp)
-{
-    Q_UNUSED(mp);
-}
-
-void android_media_surface_texture_get_transformation_matrix(MediaPlayerWrapper *mp, GLfloat* matrix)
-{
-    Q_UNUSED(mp);
-    Q_UNUSED(matrix);
-}
-
-int android_media_play(MediaPlayerWrapper *mp)
-{
-    Q_UNUSED(mp);
-    return 0;
-}
-
-int android_media_pause(MediaPlayerWrapper *mp)
-{
-    Q_UNUSED(mp);
-    return 0;
-}
-
-int android_media_stop(MediaPlayerWrapper *mp)
-{
-    Q_UNUSED(mp);
-    return 0;
-}
-
-bool android_media_is_playing(MediaPlayerWrapper *mp)
-{
-    Q_UNUSED(mp);
+    Q_UNUSED(uri);
     return true;
 }
 
-int android_media_seek_to(MediaPlayerWrapper *mp, int msec)
+void TestPlayer::create_video_sink(uint32_t texture_id)
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(msec);
-    return 0;
+    Q_UNUSED(texture_id);
 }
 
-int android_media_get_current_position(MediaPlayerWrapper *mp, int *msec)
+GLConsumerWrapperHybris TestPlayer::gl_consumer() const
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(msec);
-    return 0;
+    return NULL;
 }
 
-int android_media_get_duration(MediaPlayerWrapper *mp, int *msec)
+void TestPlayer::next()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(msec);
-    return 0;
 }
 
-int android_media_get_volume(MediaPlayerWrapper *mp, int *volume)
+void TestPlayer::previous()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(volume);
-    return 0;
 }
 
-int android_media_set_volume(MediaPlayerWrapper *mp, int volume)
+void TestPlayer::play()
 {
-    Q_UNUSED(mp);
-    Q_UNUSED(volume);
-    return 0;
+}
+
+void TestPlayer::pause()
+{
+}
+
+void TestPlayer::stop()
+{
+}
+
+void TestPlayer::seek_to(const std::chrono::microseconds& offset)
+{
+    m_position.set(offset.count());
+}
+
+void TestPlayer::set_frame_available_callback(FrameAvailableCb cb, void *context)
+{
+    Q_UNUSED(cb);
+    Q_UNUSED(context);
+}
+
+const core::Property<bool>& TestPlayer::can_play() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::can_pause() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::can_seek() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::can_go_previous() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::can_go_next() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::is_video_source() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::is_audio_source() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() const
+{
+    static core::Property<Player::PlaybackStatus> ret(Player::PlaybackStatus::null);
+    return ret;
+}
+
+const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
+{
+    static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
+    return ret;
+}
+
+const core::Property<Player::PlaybackRate>& TestPlayer::playback_rate() const
+{
+    static core::Property<Player::PlaybackRate> ret(1);
+    return ret;
+}
+
+const core::Property<bool>& TestPlayer::is_shuffle() const
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+const core::Property<Track::MetaData>& TestPlayer::meta_data_for_current_track() const
+{
+    static core::Property<Track::MetaData> ret;
+    return ret;
+}
+
+const core::Property<Player::Volume>& TestPlayer::volume() const
+{
+    static core::Property<Volume> ret(1);
+    return ret;
+}
+
+const core::Property<Player::PlaybackRate>& TestPlayer::minimum_playback_rate() const
+{
+    static core::Property<Volume> ret(1);
+    return ret;
+}
+
+const core::Property<Player::PlaybackRate>& TestPlayer::maximum_playback_rate() const
+{
+    static core::Property<Volume> ret(8);
+    return ret;
+}
+
+const core::Property<uint64_t>& TestPlayer::position() const
+{
+    return m_position;
+}
+
+const core::Property<uint64_t>& TestPlayer::duration() const
+{
+    static const core::Property<uint64_t> dur(1e6);
+    return dur;
+}
+
+core::Property<Player::LoopStatus>& TestPlayer::loop_status()
+{
+    static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
+    return ret;
+}
+
+core::Property<Player::PlaybackRate>& TestPlayer::playback_rate()
+{
+    static core::Property<Player::PlaybackRate> ret(1);
+    return ret;
+}
+
+core::Property<bool>& TestPlayer::is_shuffle()
+{
+    static core::Property<bool> ret(true);
+    return ret;
+}
+
+core::Property<Player::Volume>& TestPlayer::volume()
+{
+    static core::Property<Volume> ret(1);
+    return ret;
+}
+
+
+const core::Signal<uint64_t>& TestPlayer::seeked_to() const
+{
+    static core::Signal<uint64_t> ret;
+    return ret;
+}
+
+const core::Signal<void>& TestPlayer::end_of_stream() const
+{
+    static core::Signal<void> ret;
+    return ret;
+}
+
+const std::shared_ptr<Service> Service::Client::instance()
+{
+    return NULL;
+}
+
+const Track::Id& TrackList::after_empty_track()
+{
+    static const Track::Id track_id;
+    return track_id;
+}
+
+}
+}
 }

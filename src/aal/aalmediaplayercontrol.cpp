@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -234,8 +234,6 @@ void AalMediaPlayerControl::playbackComplete()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
     setMediaStatus(QMediaPlayer::EndOfMedia);
-
-    setState(QMediaPlayer::StoppedState);
 }
 
 void AalMediaPlayerControl::mediaPrepared()

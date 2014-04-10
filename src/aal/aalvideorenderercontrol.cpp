@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -106,6 +106,11 @@ void AalVideoRendererControl::setSurface(QAbstractVideoSurface *surface)
         m_surface = surface;
         Q_EMIT surfaceChanged(surface);
     }
+}
+
+GLuint AalVideoRendererControl::textureId() const
+{
+    return m_textureId;
 }
 
 void AalVideoRendererControl::setupSurface()

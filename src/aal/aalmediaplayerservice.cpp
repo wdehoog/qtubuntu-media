@@ -238,6 +238,11 @@ void AalMediaPlayerService::play()
         return;
     }
 
+    // If we previously played and hit the end-of-stream, stop will be called which
+    // tears down the video sink. We need a new video sink in order to render video again
+    if (!m_videoOutputReady && m_videoOutput->textureId() > 0)
+        createVideoSink(m_videoOutput->textureId());
+
     if ((m_videoOutputReady && isVideoSource())
             || isAudioSource())
     {
@@ -282,6 +287,7 @@ void AalMediaPlayerService::stop()
 
     try {
         m_hubPlayerSession->stop();
+        m_videoOutputReady = false;
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to stop playback: " << e.what();

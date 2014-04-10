@@ -88,7 +88,9 @@ AalVideoRendererControl::~AalVideoRendererControl()
 {
     if (m_textureBuffer) {
         GLuint textureId = m_textureBuffer->handle().toUInt();
-        glDeleteTextures(1, &textureId);
+        if (textureId > 0)
+            glDeleteTextures(1, &textureId);
+
         delete m_textureBuffer;
     }
 }

@@ -419,7 +419,7 @@ void AalMediaPlayerService::pushPlaylist()
 
     if (m_mediaPlaylist == NULL)
         return;
-    
+
     for (int i = 0; i < m_mediaPlaylist->mediaCount(); i++)
     {
         const media::Track::UriType uri(m_mediaPlaylist->media(i).canonicalUrl().url().toStdString());

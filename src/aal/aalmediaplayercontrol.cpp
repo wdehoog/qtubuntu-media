@@ -23,13 +23,17 @@
 #include <QMediaPlaylist>
 #include <QDebug>
 #include <QApplication>
+#include <QTimer>
 
 AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent)
    : QMediaPlayerControl(parent),
     m_service(service),
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia),
-    m_applicationActive(true)
+    m_applicationActive(true),
+    m_lastSeek(0),
+    m_cachedSeek(0),
+    m_allowSeek(true)
 {
     m_cachedVolume = volume();
 
@@ -47,7 +51,7 @@ AalMediaPlayerControl::~AalMediaPlayerControl()
 bool AalMediaPlayerControl::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::ApplicationDeactivate) {
-       m_applicationActive = false; 
+       m_applicationActive = false;
        m_service->pushPlaylist();
     }
     else if (event->type() == QEvent::ApplicationActivate) {
@@ -79,10 +83,31 @@ qint64 AalMediaPlayerControl::position() const
     return m_service->position();
 }
 
+void AalMediaPlayerControl::debounceSeek()
+{
+    m_allowSeek = true;
+}
+
 void AalMediaPlayerControl::setPosition(qint64 msec)
 {
-    m_service->setPosition(msec);
-    Q_EMIT positionChanged(msec);
+    m_cachedSeek = msec;
+    // The actual debouncing
+    if (!m_allowSeek)
+        return;
+
+    int forward = (msec > m_lastSeek ? 1 : 0);
+
+    // Debounce seek requests with this single shot timer every 250 ms period
+    QTimer::singleShot(250, this, SLOT(debounceSeek()));
+
+    if ((forward && (msec > m_lastSeek+(1000))) ||
+        (!forward && (msec < m_lastSeek-(1000))))
+    {
+        m_lastSeek = msec;
+        m_service->setPosition(msec);
+        Q_EMIT positionChanged(msec);
+    }
+    m_allowSeek = false;
 }
 
 int AalMediaPlayerControl::volume() const
@@ -209,6 +234,8 @@ void AalMediaPlayerControl::play()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
 
+    m_allowSeek = true;
+    setPosition(m_cachedSeek);
     setState(QMediaPlayer::PlayingState);
 
     m_service->play();

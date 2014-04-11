@@ -57,6 +57,9 @@ public:
 
     void playbackComplete();
 
+public Q_SLOTS:
+    void debounceSeek();
+
 private:
     AalMediaPlayerService *m_service;
     QMediaPlayer::State m_state;
@@ -64,6 +67,9 @@ private:
     QMediaContent m_mediaContent;
     int m_cachedVolume;
     bool m_applicationActive;
+    qint64 m_lastSeek;
+    qint64 m_cachedSeek;
+    bool m_allowSeek;
 
     void setMediaStatus(QMediaPlayer::MediaStatus status);
     void setState(QMediaPlayer::State state);

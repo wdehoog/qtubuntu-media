@@ -134,6 +134,7 @@ void tst_MediaPlayerPlugin::tst_stop()
 void tst_MediaPlayerPlugin::tst_position()
 {
     m_mediaPlayerControl->setPosition(1e6);
+    qDebug() << "position: " << m_mediaPlayerControl->position();
     QVERIFY(m_mediaPlayerControl->position() == 1e3);
 }
 

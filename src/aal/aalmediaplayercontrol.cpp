@@ -31,7 +31,6 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia),
     m_applicationActive(true),
-    m_lastSeek(0),
     m_cachedSeek(0),
     m_allowSeek(true)
 {
@@ -95,18 +94,13 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
     if (!m_allowSeek)
         return;
 
-    int forward = (msec > m_lastSeek ? 1 : 0);
-
     // Debounce seek requests with this single shot timer every 250 ms period
     QTimer::singleShot(250, this, SLOT(debounceSeek()));
 
-    if ((forward && (msec > m_lastSeek+(1000))) ||
-        (!forward && (msec < m_lastSeek-(1000))))
-    {
-        m_lastSeek = msec;
-        m_service->setPosition(msec);
-        Q_EMIT positionChanged(msec);
-    }
+    m_service->setPosition(msec);
+    Q_EMIT positionChanged(msec);
+
+    // Protect from another setPosition until the timer expires
     m_allowSeek = false;
 }
 
@@ -236,8 +230,10 @@ void AalMediaPlayerControl::play()
 
     m_allowSeek = true;
     setPosition(m_cachedSeek);
-    setState(QMediaPlayer::PlayingState);
+    // Make sure that a single setPosition works after this previous setPosition
+    m_allowSeek = true;
 
+    setState(QMediaPlayer::PlayingState);
     m_service->play();
 }
 

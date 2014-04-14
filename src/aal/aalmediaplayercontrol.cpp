@@ -266,6 +266,11 @@ void AalMediaPlayerControl::mediaPrepared()
     Q_EMIT positionChanged(position());
 }
 
+void AalMediaPlayerControl::emitDurationChanged(qint64 duration)
+{
+    Q_EMIT durationChanged(duration);
+}
+
 void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)
 {
     if (status != m_status)

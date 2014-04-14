@@ -65,7 +65,7 @@ public:
     void stop();
     int64_t position() const;
     void setPosition(int64_t msec);
-    int64_t duration() const;
+    int64_t duration();
     bool isVideoSource() const;
     bool isAudioSource() const;
 
@@ -97,6 +97,8 @@ private:
 
     int m_mediaPlayerControlRef;
     int m_videoOutputRef;
+
+    int64_t m_cachedDuration;
 
     const QMediaPlaylist* m_mediaPlaylist;
 };

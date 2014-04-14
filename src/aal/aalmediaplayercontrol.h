@@ -54,7 +54,7 @@ public:
     virtual void stop();
 
     void mediaPrepared();
-
+    void emitDurationChanged(qint64 duration);
     void playbackComplete();
 
 public Q_SLOTS:

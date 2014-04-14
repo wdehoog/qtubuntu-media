@@ -44,6 +44,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
     m_videoOutputRef(0),
+    m_cachedDuration(0),
     m_mediaPlaylist(NULL)
 {
     m_service = this;
@@ -322,7 +323,7 @@ void AalMediaPlayerService::setPosition(int64_t msec)
     m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
 }
 
-int64_t AalMediaPlayerService::duration() const
+int64_t AalMediaPlayerService::duration()
 {
     if (m_hubPlayerSession == NULL)
     {
@@ -331,7 +332,14 @@ int64_t AalMediaPlayerService::duration() const
     }
 
     try {
-        return m_hubPlayerSession->duration() / 1e6;
+        const int64_t d = m_hubPlayerSession->duration();
+        // Make sure that apps get updated if the duration does in fact change
+        if (d != m_cachedDuration)
+        {
+            m_cachedDuration = d;
+            m_mediaPlayerControl->emitDurationChanged(d / 1e6);
+        }
+        return d / 1e6;
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to get current playback duration: " << e.what();

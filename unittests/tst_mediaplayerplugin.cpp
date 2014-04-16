@@ -15,7 +15,6 @@
  */
 
 #include "player.h"
-#include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 
 #include <core/media/player.h>
@@ -28,6 +27,8 @@
 #include <QtTest/QtTest>
 
 #define private public
+
+#include "aalmediaplayercontrol.h"
 
 using namespace std;
 using namespace core::ubuntu::media;
@@ -49,6 +50,7 @@ private Q_SLOTS:
     void tst_requestRelease();
     void tst_newMediaPlayer();
     void tst_setMedia();
+    void tst_unescape();
     void tst_play();
     void tst_pause();
     void tst_stop();
@@ -111,6 +113,17 @@ void tst_MediaPlayerPlugin::tst_setMedia()
     m_mediaPlayerControl->setMedia(media, NULL);
     QVERIFY(m_mediaPlayerControl->mediaStatus() == QMediaPlayer::LoadingMedia);
     QVERIFY(m_mediaPlayerControl->media() == media);
+}
+
+void tst_MediaPlayerPlugin::tst_unescape()
+{
+    QString uri_str("file:///home/phablet/Videos/sintel[REC].mp4");
+    QUrl uri("file:///home/phablet/Videos/sintel%5BREC%5D.mp4");
+    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
+
+    uri_str = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
+    uri = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
+    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
 }
 
 void tst_MediaPlayerPlugin::tst_play()

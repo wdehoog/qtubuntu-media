@@ -70,6 +70,7 @@ private:
     qint64 m_cachedSeek;
     bool m_allowSeek;
 
+    QUrl unescape(const QMediaContent &media) const;
     void setMediaStatus(QMediaPlayer::MediaStatus status);
     void setState(QMediaPlayer::State state);
 };

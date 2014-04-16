@@ -218,7 +218,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
         if (!media.isNull())
         {
             setMediaStatus(QMediaPlayer::LoadingMedia);
-            m_service->setMedia(media.canonicalUrl());
+            m_service->setMedia(unescape(media));
         }
     }
     Q_EMIT mediaChanged(m_mediaContent);
@@ -269,6 +269,14 @@ void AalMediaPlayerControl::mediaPrepared()
 void AalMediaPlayerControl::emitDurationChanged(qint64 duration)
 {
     Q_EMIT durationChanged(duration);
+}
+
+QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const
+{
+    if (media.isNull())
+        return QUrl();
+
+    return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
 }
 
 void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)

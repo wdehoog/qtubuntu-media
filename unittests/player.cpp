@@ -60,6 +60,11 @@ shared_ptr<TrackList> TestPlayer::track_list()
     return ret;
 }
 
+Player::PlayerKey TestPlayer::key() const
+{
+    return 0;
+}
+
 bool TestPlayer::open_uri(const Track::UriType& uri)
 {
     Q_UNUSED(uri);

@@ -37,6 +37,7 @@ public:
     virtual ~TestPlayer();
 
     virtual std::shared_ptr<TrackList> track_list();
+    virtual PlayerKey key() const;
 
     virtual bool open_uri(const Track::UriType& uri);
     virtual void create_video_sink(uint32_t texture_id);

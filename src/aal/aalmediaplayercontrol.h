@@ -69,7 +69,6 @@ private:
     QMediaContent m_mediaContent;
     int m_cachedVolume;
     bool m_applicationActive;
-    qint64 m_cachedSeek;
     bool m_allowSeek;
 
     QUrl unescape(const QMediaContent &media) const;

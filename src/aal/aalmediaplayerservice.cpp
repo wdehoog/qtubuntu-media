@@ -441,7 +441,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
             break;
         case media::Player::PlaybackStatus::stopped:
             // FIXME: Disabled for now since this causes next/previous to not work in music-app
-            m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
+            //m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
             break;
         case media::Player::PlaybackStatus::paused:
             m_mediaPlayerControl->setState(QMediaPlayer::PausedState);

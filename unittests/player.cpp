@@ -16,7 +16,6 @@
 
 #include "player.h"
 
-
 #include <QtGlobal>
 #include <QtTest/QtTest>
 
@@ -241,6 +240,18 @@ const core::Signal<uint64_t>& TestPlayer::seeked_to() const
 const core::Signal<void>& TestPlayer::end_of_stream() const
 {
     static core::Signal<void> ret;
+    return ret;
+}
+
+const core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed() const
+{
+    static core::Signal<Player::PlaybackStatus> ret;
+    return ret;
+}
+
+core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
+{
+    static core::Signal<Player::PlaybackStatus> ret;
     return ret;
 }
 

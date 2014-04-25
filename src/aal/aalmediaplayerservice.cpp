@@ -19,7 +19,6 @@
 #include "aalvideorenderercontrol.h"
 
 #include <core/media/service.h>
-#include <core/media/player.h>
 #include <core/media/track_list.h>
 
 #include <errno.h>
@@ -29,6 +28,8 @@
 #include <QDebug>
 
 namespace media = core::ubuntu::media;
+
+using namespace std::placeholders;
 
 enum {
     OK          = 0,
@@ -66,6 +67,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
         control->playbackComplete();
     },
     static_cast<void*>(m_mediaPlayerControl));
+
+    m_hubPlayerSession->playback_status_changed().connect(
+            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
@@ -425,6 +429,27 @@ void AalMediaPlayerService::onFrameAvailableCb(void *context)
 void AalMediaPlayerService::onFrameAvailable()
 {
     m_videoOutput->updateVideoTexture();
+}
+
+void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
+{
+    // If the playback status changes from underneath (e.g. GStreamer or media-hub), make sure
+    // the app is notified about this so it can change it's status
+    switch (status)
+    {
+        case media::Player::PlaybackStatus::ready:
+        case media::Player::PlaybackStatus::stopped:
+            m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
+            break;
+        case media::Player::PlaybackStatus::paused:
+            m_mediaPlayerControl->setState(QMediaPlayer::PausedState);
+            break;
+        case media::Player::PlaybackStatus::playing:
+            m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
+            break;
+        default:
+            qWarning() << "Unknown PlaybackStatus: " << status;
+    }
 }
 
 void AalMediaPlayerService::pushPlaylist()

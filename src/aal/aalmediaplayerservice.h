@@ -17,6 +17,8 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
+#include <core/media/player.h>
+
 #include <QMediaPlaylist>
 #include <QMediaService>
 
@@ -86,6 +88,7 @@ Q_SIGNALS:
 private:
     static void onFrameAvailableCb(void *context);
     void onFrameAvailable();
+    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
     static AalMediaPlayerService *m_service;
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;

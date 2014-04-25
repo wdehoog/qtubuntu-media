@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Canonical, Ltd.
+ * Copyright (C) 2013-2014 Canonical, Ltd.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -25,6 +25,8 @@ class AalMediaPlayerControl : public QMediaPlayerControl
 {
 Q_OBJECT
 public:
+    friend class AalMediaPlayerService;
+
     AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalMediaPlayerControl();
 

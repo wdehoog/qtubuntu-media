@@ -15,6 +15,7 @@
  */
 
 #include "player.h"
+#include "service.h"
 #include "aalmediaplayerservice.h"
 
 #include <core/media/player.h>
@@ -42,6 +43,7 @@ class tst_MediaPlayerPlugin : public QObject
     QMediaControl *m_playerControl;
     QMediaControl *m_rendererControl;
     shared_ptr<Player> m_player;
+    shared_ptr<Service> m_hubService;
 
 private Q_SLOTS:
     void initTestCase();
@@ -63,7 +65,9 @@ private Q_SLOTS:
 
 void tst_MediaPlayerPlugin::initTestCase()
 {
+    m_hubService.reset(new TestService());
     m_service.reset(new AalMediaPlayerService(this));
+    m_service->setService(m_hubService);
     m_mediaPlayerControl = m_service->mediaPlayerControl();
     m_player.reset(new TestPlayer());
     m_service->setPlayer(m_player);
@@ -71,7 +75,6 @@ void tst_MediaPlayerPlugin::initTestCase()
     QVERIFY(m_playerControl != NULL);
     m_rendererControl = m_service->requestControl(QVideoRendererControl_iid);
     QVERIFY(m_rendererControl != NULL);
-
 }
 
 void tst_MediaPlayerPlugin::cleanupTestCase()

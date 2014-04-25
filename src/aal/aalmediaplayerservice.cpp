@@ -476,3 +476,8 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
 {
     m_hubPlayerSession = player;
 }
+
+void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)
+{
+    m_hubService = service;
+}

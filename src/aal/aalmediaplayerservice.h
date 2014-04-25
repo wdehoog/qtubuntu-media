@@ -81,6 +81,9 @@ public:
     /* This is for unittest purposes to be able to set a mock-object version of a
      * player object */
     void setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player);
+    /* This is for unittest purposes to be able to set a mock-object version of a
+     * service object */
+    void setService(const std::shared_ptr<core::ubuntu::media::Service> &service);
 
 Q_SIGNALS:
     void serviceReady();

@@ -226,9 +226,6 @@ void AalMediaPlayerControl::play()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
 
-    // Make sure that a single setPosition works after this previous setPosition
-    m_allowSeek = true;
-
     setState(QMediaPlayer::PlayingState);
     m_service->play();
 }

@@ -1,3 +1,26 @@
+qtubuntu-media (0.7.1+14.10.20140429-0ubuntu1) utopic; urgency=low
+
+  [ Jim Hodapp ]
+  * Make seek work by switching to the expected microseconds on the
+    seek_to() call instead of milliseconds. Add initial video support
+    using media-hub as the backend. Add frame available listener
+    callback and glConsumer setup. Some code cleanup of unnecessary
+    methods and make duration and position reporting work. Add
+    background playlist support .
+  * Pause other playing sessions when starting playback of a new
+    foreground player. Connect to the playback_status_changed signal
+    from media-hub so that qtubuntu-media can update the app when
+    PlaybackStatus changes (i.e. play, pause, stop, etc). Make seeking
+    more accurate and resume exactly where playback left off after
+    pressing pause and then play. Make sure next/previous works in
+    music-app. Make sure unit tst_play() doesn't crash due to new
+    m_hubService->pause_other_sessions(key) call in
+    AalMediaPlayerService::play(). Disable setting stopped state in
+    onPlaybackStatusChanged for now since this causes next/previous to
+    not work in music-app .
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 29 Apr 2014 13:59:02 +0000
+
 qtubuntu-media (0.7.1+14.04.20140304-0ubuntu1) trusty; urgency=low
 
   [ CI bot ]

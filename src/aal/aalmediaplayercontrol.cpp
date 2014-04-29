@@ -31,7 +31,6 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia),
     m_applicationActive(true),
-    m_cachedSeek(0),
     m_allowSeek(true)
 {
     m_cachedVolume = volume();
@@ -89,7 +88,6 @@ void AalMediaPlayerControl::debounceSeek()
 
 void AalMediaPlayerControl::setPosition(qint64 msec)
 {
-    m_cachedSeek = msec;
     // The actual debouncing
     if (!m_allowSeek)
         return;
@@ -227,11 +225,6 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 void AalMediaPlayerControl::play()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
-
-    m_allowSeek = true;
-    setPosition(m_cachedSeek);
-    // Make sure that a single setPosition works after this previous setPosition
-    m_allowSeek = true;
 
     setState(QMediaPlayer::PlayingState);
     m_service->play();

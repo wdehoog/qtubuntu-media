@@ -17,6 +17,8 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
+#include <core/media/player.h>
+
 #include <QMediaPlaylist>
 #include <QMediaService>
 
@@ -79,6 +81,9 @@ public:
     /* This is for unittest purposes to be able to set a mock-object version of a
      * player object */
     void setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player);
+    /* This is for unittest purposes to be able to set a mock-object version of a
+     * service object */
+    void setService(const std::shared_ptr<core::ubuntu::media::Service> &service);
 
 Q_SIGNALS:
     void serviceReady();
@@ -86,6 +91,7 @@ Q_SIGNALS:
 private:
     static void onFrameAvailableCb(void *context);
     void onFrameAvailable();
+    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
     static AalMediaPlayerService *m_service;
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;

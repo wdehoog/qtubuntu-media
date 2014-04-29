@@ -19,11 +19,13 @@ HEADERS += \
     ../src/aal/aalmediaplayerservice.h \
     ../src/aal/aalmediaplayerserviceplugin.h \
     ../src/aal/aalvideorenderercontrol.h \
-    player.h
+    player.h \
+    service.h
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \
     player.cpp \
+    service.cpp \
     ../src/aal/aalmediaplayercontrol.cpp \
     ../src/aal/aalmediaplayerservice.cpp \
     ../src/aal/aalmediaplayerserviceplugin.cpp \

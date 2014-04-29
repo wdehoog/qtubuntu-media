@@ -37,6 +37,7 @@ public:
     virtual ~TestPlayer();
 
     virtual std::shared_ptr<TrackList> track_list();
+    virtual PlayerKey key() const;
 
     virtual bool open_uri(const Track::UriType& uri);
     virtual void create_video_sink(uint32_t texture_id);
@@ -76,6 +77,8 @@ public:
 
     virtual const core::Signal<uint64_t>& seeked_to() const;
     virtual const core::Signal<void>& end_of_stream() const;
+    virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
+    virtual core::Signal<PlaybackStatus>& playback_status_changed();
 
 private:
     core::Property<uint64_t> m_position;

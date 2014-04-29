@@ -14,46 +14,70 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "player.h"
 #include "aalmediaplayerservice.h"
-#include "media_compatibility_layer.h"
 
+#include <core/media/player.h>
+
+#include <memory>
+
+#include <QObject>
 #include <QMediaPlayerControl>
 #include <QVideoRendererControl>
 #include <QtTest/QtTest>
 
 #define private public
 
-struct MediaPlayerWrapper;
+#include "aalmediaplayercontrol.h"
+
+using namespace std;
+using namespace core::ubuntu::media;
 
 class tst_MediaPlayerPlugin : public QObject
 {
     Q_OBJECT
 
-    AalMediaPlayerService m_service;
+    shared_ptr<AalMediaPlayerService> m_service;
+    AalMediaPlayerControl *m_mediaPlayerControl;
     QMediaControl *m_playerControl;
     QMediaControl *m_rendererControl;
+    shared_ptr<Player> m_player;
 
-private slots:
+private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
 
     void tst_requestRelease();
     void tst_newMediaPlayer();
-    void tst_androidControl();
+    void tst_setMedia();
+    void tst_unescape();
+    void tst_play();
+    void tst_pause();
+    void tst_stop();
+    void tst_position();
+    void tst_duration();
+    void tst_isAudioSource();
+    void tst_isVideoSource();
+    void tst_volume();
 };
 
 void tst_MediaPlayerPlugin::initTestCase()
 {
-    m_playerControl = m_service.requestControl(QMediaPlayerControl_iid);
+    m_service.reset(new AalMediaPlayerService(this));
+    m_mediaPlayerControl = m_service->mediaPlayerControl();
+    m_player.reset(new TestPlayer());
+    m_service->setPlayer(m_player);
+    m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
     QVERIFY(m_playerControl != NULL);
-    m_rendererControl = m_service.requestControl(QVideoRendererControl_iid);
+    m_rendererControl = m_service->requestControl(QVideoRendererControl_iid);
     QVERIFY(m_rendererControl != NULL);
+
 }
 
 void tst_MediaPlayerPlugin::cleanupTestCase()
 {
-    m_service.releaseControl(m_playerControl);
-    m_service.releaseControl(m_rendererControl);
+    m_service->releaseControl(m_playerControl);
+    m_service->releaseControl(m_rendererControl);
 }
 
 void tst_MediaPlayerPlugin::tst_requestRelease()
@@ -63,31 +87,90 @@ void tst_MediaPlayerPlugin::tst_requestRelease()
 
     // Request a new reference to the media player control and verify that
     // it's the same pointer as the original reference.
-    mpControl = m_service.requestControl(QMediaPlayerControl_iid);
+    mpControl = m_service->requestControl(QMediaPlayerControl_iid);
     QVERIFY(mpControl == m_playerControl);
-    rendererControl = m_service.requestControl(QVideoRendererControl_iid);
+    rendererControl = m_service->requestControl(QVideoRendererControl_iid);
     QVERIFY(rendererControl == m_rendererControl);
 
     // Now release the reference and make sure that the original media player
     // control reference still exists.
-    m_service.releaseControl(mpControl);
+    m_service->releaseControl(mpControl);
     QVERIFY(mpControl == m_playerControl);
-    m_service.releaseControl(rendererControl);
+    m_service->releaseControl(rendererControl);
     QVERIFY(rendererControl == m_rendererControl);
 }
 
 void tst_MediaPlayerPlugin::tst_newMediaPlayer()
 {
-    bool ret = m_service.newMediaPlayer();
+    bool ret = m_service->newMediaPlayer();
     QVERIFY(ret == true);
 }
 
-void tst_MediaPlayerPlugin::tst_androidControl()
+void tst_MediaPlayerPlugin::tst_setMedia()
 {
-    MediaPlayerWrapper *mp = m_service.androidControl();
-    QVERIFY(mp != NULL);
+    QUrl url("blah.mp4");
+    QMediaContent media(url);
+    m_mediaPlayerControl->setMedia(media, NULL);
+    QVERIFY(m_mediaPlayerControl->mediaStatus() == QMediaPlayer::LoadingMedia);
+    QVERIFY(m_mediaPlayerControl->media() == media);
 }
 
-QTEST_MAIN(tst_MediaPlayerPlugin)
+void tst_MediaPlayerPlugin::tst_unescape()
+{
+    QString uri_str("file:///home/phablet/Videos/sintel[REC].mp4");
+    QUrl uri("file:///home/phablet/Videos/sintel%5BREC%5D.mp4");
+    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
+
+    uri_str = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
+    uri = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
+    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
+}
+
+void tst_MediaPlayerPlugin::tst_play()
+{
+    m_mediaPlayerControl->play();
+    QVERIFY(m_mediaPlayerControl->mediaStatus() == QMediaPlayer::LoadedMedia);
+}
+
+void tst_MediaPlayerPlugin::tst_pause()
+{
+    m_mediaPlayerControl->pause();
+    QVERIFY(m_mediaPlayerControl->state() == QMediaPlayer::PausedState);
+}
+
+void tst_MediaPlayerPlugin::tst_stop()
+{
+    m_mediaPlayerControl->stop();
+    QVERIFY(m_mediaPlayerControl->state() == QMediaPlayer::StoppedState);
+}
+
+void tst_MediaPlayerPlugin::tst_position()
+{
+    m_mediaPlayerControl->setPosition(1e6);
+    qDebug() << "position: " << m_mediaPlayerControl->position();
+    QVERIFY(m_mediaPlayerControl->position() == 1e3);
+}
+
+void tst_MediaPlayerPlugin::tst_duration()
+{
+    QVERIFY(m_mediaPlayerControl->duration() == 1);
+}
+
+void tst_MediaPlayerPlugin::tst_isAudioSource()
+{
+    QVERIFY(m_mediaPlayerControl->isAudioAvailable());
+}
+
+void tst_MediaPlayerPlugin::tst_isVideoSource()
+{
+    QVERIFY(m_mediaPlayerControl->isVideoAvailable());
+}
+
+void tst_MediaPlayerPlugin::tst_volume()
+{
+    QVERIFY(m_mediaPlayerControl->volume() == 1);
+}
+
+QTEST_GUILESS_MAIN(tst_MediaPlayerPlugin)
 
 #include "tst_mediaplayerplugin.moc"

@@ -215,8 +215,14 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
         // Make sure we can actually load something valid
         if (!media.isNull())
         {
+            QMediaPlayer::MediaStatus priorStatus = mediaStatus();
             setMediaStatus(QMediaPlayer::LoadingMedia);
             m_service->setMedia(unescape(media));
+            // This is important to do for QMediaPlaylist instances that
+            // are set to loop. Without this, such a playlist will only
+            // play once
+            if (priorStatus == QMediaPlayer::EndOfMedia)
+                stop();
         }
     }
     Q_EMIT mediaChanged(m_mediaContent);
@@ -249,6 +255,11 @@ void AalMediaPlayerControl::stop()
 void AalMediaPlayerControl::playbackComplete()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+    // The order of these lines is very important to keep music-app,
+    // mediaplayer-app and the QMediaPlaylist loop cases all happy
+    m_service->setPosition(0);
+    Q_EMIT positionChanged(position());
+    stop();
     setMediaStatus(QMediaPlayer::EndOfMedia);
 }
 

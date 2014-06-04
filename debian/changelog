@@ -1,3 +1,12 @@
+qtubuntu-media (0.7.1+14.10.20140604-0ubuntu1) utopic; urgency=low
+
+  [ Jim Hodapp ]
+  * Allow the QMediaPlaylist loop=true case to work correctly while
+    still keeping compatability with music-app and mediaplayer-app (LP:
+    #1320008)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 04 Jun 2014 20:34:27 +0000
+
 qtubuntu-media (0.7.1+14.10.20140429-0ubuntu1) utopic; urgency=low
 
   [ Jim Hodapp ]

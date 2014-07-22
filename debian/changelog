@@ -1,3 +1,9 @@
+qtubuntu-media (0.7.1+14.10.20140604-0ubuntu2) utopic; urgency=medium
+
+  * Replace libubuntu-platform-api1-dev with libplatform-api1-dev.
+
+ -- Dimitri John Ledkov <xnox@ubuntu.com>  Mon, 23 Jun 2014 12:13:17 +0100
+
 qtubuntu-media (0.7.1+14.10.20140604-0ubuntu1) utopic; urgency=low
 
   [ Jim Hodapp ]

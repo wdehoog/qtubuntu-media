@@ -195,14 +195,14 @@ const core::Property<Player::PlaybackRate>& TestPlayer::maximum_playback_rate() 
     return ret;
 }
 
-const core::Property<uint64_t>& TestPlayer::position() const
+const core::Property<int64_t>& TestPlayer::position() const
 {
     return m_position;
 }
 
-const core::Property<uint64_t>& TestPlayer::duration() const
+const core::Property<int64_t>& TestPlayer::duration() const
 {
-    static const core::Property<uint64_t> dur(1e6);
+    static const core::Property<int64_t> dur(1e6);
     return dur;
 }
 
@@ -231,9 +231,9 @@ core::Property<Player::Volume>& TestPlayer::volume()
 }
 
 
-const core::Signal<uint64_t>& TestPlayer::seeked_to() const
+const core::Signal<int64_t>& TestPlayer::seeked_to() const
 {
-    static core::Signal<uint64_t> ret;
+    static core::Signal<int64_t> ret;
     return ret;
 }
 

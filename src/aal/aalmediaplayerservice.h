@@ -19,6 +19,7 @@
 
 #include <core/media/player.h>
 
+#include <qmediaplayer.h>
 #include <QMediaPlaylist>
 #include <QMediaService>
 
@@ -59,6 +60,9 @@ public:
     bool newMediaPlayer();
 
     void createVideoSink(uint32_t texture_id);
+
+    QMediaPlayer::AudioRole audioRole() const;
+    void setAudioRole(QMediaPlayer::AudioRole audioRole);
 
     void setMedia(const QUrl &url);
     void setMediaPlaylist(const QMediaPlaylist& playlist);

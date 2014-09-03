@@ -193,6 +193,17 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
     m_videoOutputReady = true;
 }
 
+QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
+{
+    return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
+}
+
+void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
+{
+    qDebug() << __PRETTY_FUNCTION__;
+    m_hubPlayerSession->audio_stream_role().set(static_cast<media::Player::AudioStreamRole>(audioRole));
+}
+
 void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
 {
     if (m_hubPlayerSession == NULL)

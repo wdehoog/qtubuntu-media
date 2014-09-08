@@ -206,6 +206,12 @@ const core::Property<int64_t>& TestPlayer::duration() const
     return dur;
 }
 
+const core::Property<Player::AudioStreamRole>& TestPlayer::audio_stream_role() const
+{
+    static const core::Property<Player::AudioStreamRole> role(Player::AudioStreamRole::multimedia);
+    return role;
+}
+
 core::Property<Player::LoopStatus>& TestPlayer::loop_status()
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
@@ -230,6 +236,11 @@ core::Property<Player::Volume>& TestPlayer::volume()
     return ret;
 }
 
+core::Property<Player::AudioStreamRole>& TestPlayer::audio_stream_role()
+{
+    static core::Property<Player::AudioStreamRole> role(Player::AudioStreamRole::multimedia);
+    return role;
+}
 
 const core::Signal<int64_t>& TestPlayer::seeked_to() const
 {

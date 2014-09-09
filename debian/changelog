@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1+14.10.20140909-0ubuntu1) utopic; urgency=low
+
+  [ thomas-voss ]
+  * Bump build dep version on media hub.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 09 Sep 2014 18:28:41 +0000
+
 qtubuntu-media (0.7.1+14.10.20140903-0ubuntu1) utopic; urgency=low
 
   [ Jim Hodapp ]

@@ -30,6 +30,10 @@
 #include <QVideoSurfaceFormat>
 #include <QWindow>
 
+#ifdef MEASURE_PERFORMANCE
+#include <QDateTime>
+#endif
+
 #include <qgl.h>
 
 class AalGLTextureBuffer : public QAbstractVideoBuffer
@@ -78,6 +82,12 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_width(1280),
      m_firstFrame(true),
      m_secondFrame(false)
+#ifdef MEASURE_PERFORMANCE
+     , m_lastFrameRenderStart(0)
+     , m_currentFrameRenderStart(0)
+     , m_avgCount(0)
+     , m_frameRenderAvg(0)
+#endif
 {
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
@@ -206,6 +216,28 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
             qWarning() << "Failed to start video surface with format:" << format;
         }
     }
+
+#ifdef MEASURE_PERFORMANCE
+    m_currentFrameRenderStart = QDateTime::currentMSecsSinceEpoch();
+    const qint64 delta = m_currentFrameRenderStart - m_lastFrameRenderStart;
+    if (m_currentFrameRenderStart != m_lastFrameRenderStart) {
+        m_lastFrameRenderStart = QDateTime::currentMSecsSinceEpoch();
+        if (delta > 0)
+        {
+            m_frameRenderAvg += delta;
+            qDebug() << "Frame-to-frame delta (ms): " << delta;
+        }
+    }
+
+    if (m_avgCount == 30) {
+        // Ideally if playing a video that was recorded at 30 fps, the average for
+        // playback should be close to 30 fps too
+        qDebug() << "Frame-to-frame average (ms) (30 frames times counted): " << (m_frameRenderAvg / 30);
+        m_avgCount = m_frameRenderAvg = 0;
+    }
+    else
+        ++m_avgCount;
+#endif
 
     if (m_surface->isActive()) {
         m_surface->present(frame);

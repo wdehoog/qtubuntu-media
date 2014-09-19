@@ -16,7 +16,6 @@
 
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
-#include "aalvideorenderercontrol.h"
 
 #include <core/media/service.h>
 #include <core/media/track_list.h>
@@ -24,6 +23,12 @@
 #include <errno.h>
 
 #include <QAbstractVideoSurface>
+#include <QTimerEvent>
+
+// Defined in aalvideorenderercontrol.h
+#ifdef MEASURE_PERFORMANCE
+#include <QDateTime>
+#endif
 
 #include <QDebug>
 
@@ -47,6 +52,12 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_videoOutputRef(0),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
+#ifdef MEASURE_PERFORMANCE
+     , m_lastFrameDecodeStart(0)
+     , m_currentFrameDecodeStart(0)
+     , m_avgCount(0)
+     , m_frameDecodeAvg(0)
+#endif
 {
     m_service = this;
 
@@ -70,6 +81,12 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_hubPlayerSession->playback_status_changed().connect(
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+}
+
+void AalMediaPlayerService::timerEvent(QTimerEvent *event)
+{
+    qDebug() << "AalMediaPlayerService::timerEvent Timer ID:" << event->timerId();
+    //m_videoOutput->updateVideoTexture();
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
@@ -183,7 +200,19 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
         // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
         m_videoOutput->updateVideoTexture();
 
-        m_hubPlayerSession->set_frame_available_callback(&AalMediaPlayerService::onFrameAvailableCb, static_cast<void*>(this));
+        // This lambda gets called after every successfully decoded video frame
+        m_hubPlayerSession->set_frame_available_callback([](void *context)
+        {
+            if (context != NULL)
+            {
+                auto s = static_cast<AalMediaPlayerService*>(context);
+#ifdef MEASURE_PERFORMANCE
+                s->measurePerformance();
+#endif
+                s->videoOutputControl()->updateVideoTexture();
+            }
+        },
+        static_cast<void*>(this));
     }
     catch (std::runtime_error &e) {
         qWarning() << "Failed to create video sink: " << e.what();
@@ -270,6 +299,9 @@ void AalMediaPlayerService::play()
             qDebug() << "Actually calling m_hubPlayerSession->play()";
             m_hubPlayerSession->play();
             m_mediaPlayerControl->mediaPrepared();
+            // This timer seems to keep the QSGThreadedRenderer events firing at a even rate,
+            // even though the timer does nothing else
+            this->startTimer(40, Qt::PreciseTimer);
         }
         catch (std::runtime_error &e) {
             qWarning() << "Failed to start playback: " << e.what();
@@ -428,20 +460,6 @@ void AalMediaPlayerService::setVolume(int volume)
     }
 }
 
-void AalMediaPlayerService::onFrameAvailableCb(void *context)
-{
-    if (context != NULL)
-    {
-        AalMediaPlayerService *s = static_cast<AalMediaPlayerService*>(context);
-        s->onFrameAvailable();
-    }
-}
-
-void AalMediaPlayerService::onFrameAvailable()
-{
-    m_videoOutput->updateVideoTexture();
-}
-
 void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
 {
     // If the playback status changes from underneath (e.g. GStreamer or media-hub), make sure
@@ -492,3 +510,28 @@ void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media
 {
     m_hubService = service;
 }
+
+#ifdef MEASURE_PERFORMANCE
+void AalMediaPlayerService::measurePerformance()
+{
+    m_currentFrameDecodeStart = QDateTime::currentMSecsSinceEpoch();
+    const qint64 delta = m_currentFrameDecodeStart - m_lastFrameDecodeStart;
+    if (m_currentFrameDecodeStart != m_lastFrameDecodeStart) {
+        m_lastFrameDecodeStart = QDateTime::currentMSecsSinceEpoch();
+        if (delta > 0) {
+            m_frameDecodeAvg += delta;
+            qDebug() << "Frame-to-frame decode delta (ms): " << delta;
+        }
+    }
+
+    if (m_avgCount == 30) {
+        // Ideally if playing a video that was recorded at 30 fps, the average for
+        // playback should be close to 30 fps too
+        qDebug() << "Frame-to-frame decode average (ms) (30 frames times counted): " << (m_frameDecodeAvg / 30);
+        m_avgCount = m_frameDecodeAvg = 0;
+    }
+    else
+        ++m_avgCount;
+}
+#endif
+

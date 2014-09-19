@@ -30,6 +30,8 @@
 #include <QVideoSurfaceFormat>
 #include <QWindow>
 
+#include <QThread>
+
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>
 #endif
@@ -225,7 +227,8 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
         if (delta > 0)
         {
             m_frameRenderAvg += delta;
-            qDebug() << "Frame-to-frame delta (ms): " << delta;
+            qDebug() << "-------------------------------------------------------------------";
+            qDebug() << "Frame-to-frame delta (ms): " << delta << "(thread id: " << QThread::currentThreadId() << ")";
         }
     }
 

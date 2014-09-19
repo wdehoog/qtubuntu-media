@@ -25,6 +25,8 @@
 #include <QAbstractVideoSurface>
 #include <QTimerEvent>
 
+#include <QThread>
+
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>
@@ -200,16 +202,19 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
         // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
         m_videoOutput->updateVideoTexture();
 
+        qDebug() << " -- Thread id outside of callback: " << QThread::currentThreadId();
+
         // This lambda gets called after every successfully decoded video frame
         m_hubPlayerSession->set_frame_available_callback([](void *context)
         {
             if (context != NULL)
             {
+                qDebug() << " -- Thread id inside of callback: " << QThread::currentThreadId();
                 auto s = static_cast<AalMediaPlayerService*>(context);
 #ifdef MEASURE_PERFORMANCE
                 s->measurePerformance();
 #endif
-                s->videoOutputControl()->updateVideoTexture();
+                QMetaObject::invokeMethod(s->videoOutputControl(), "updateVideoTexture", Qt::QueuedConnection);
             }
         },
         static_cast<void*>(this));
@@ -299,9 +304,6 @@ void AalMediaPlayerService::play()
             qDebug() << "Actually calling m_hubPlayerSession->play()";
             m_hubPlayerSession->play();
             m_mediaPlayerControl->mediaPrepared();
-            // This timer seems to keep the QSGThreadedRenderer events firing at a even rate,
-            // even though the timer does nothing else
-            this->startTimer(40, Qt::PreciseTimer);
         }
         catch (std::runtime_error &e) {
             qWarning() << "Failed to start playback: " << e.what();

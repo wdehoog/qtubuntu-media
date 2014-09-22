@@ -23,7 +23,7 @@
 
 // Uncomment to measure video frame rendering timing and performance. Will display
 // metrics to stdout
-#define MEASURE_PERFORMANCE
+//#define MEASURE_PERFORMANCE
 
 class AalMediaPlayerService;
 class AalGLTextureBuffer;

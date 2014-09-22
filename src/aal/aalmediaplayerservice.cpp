@@ -85,12 +85,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
 }
 
-void AalMediaPlayerService::timerEvent(QTimerEvent *event)
-{
-    qDebug() << "AalMediaPlayerService::timerEvent Timer ID:" << event->timerId();
-    //m_videoOutput->updateVideoTexture();
-}
-
 AalMediaPlayerService::~AalMediaPlayerService()
 {
     if (m_mediaPlayerControl != NULL)
@@ -202,14 +196,11 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
         // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
         m_videoOutput->updateVideoTexture();
 
-        qDebug() << " -- Thread id outside of callback: " << QThread::currentThreadId();
-
         // This lambda gets called after every successfully decoded video frame
         m_hubPlayerSession->set_frame_available_callback([](void *context)
         {
             if (context != NULL)
             {
-                qDebug() << " -- Thread id inside of callback: " << QThread::currentThreadId();
                 auto s = static_cast<AalMediaPlayerService*>(context);
 #ifdef MEASURE_PERFORMANCE
                 s->measurePerformance();
@@ -536,4 +527,3 @@ void AalMediaPlayerService::measurePerformance()
         ++m_avgCount;
 }
 #endif
-

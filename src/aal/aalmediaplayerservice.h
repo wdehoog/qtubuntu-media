@@ -96,7 +96,6 @@ Q_SIGNALS:
     void serviceReady();
 
 protected:
-    void timerEvent(QTimerEvent *event);
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif

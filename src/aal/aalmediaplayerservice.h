@@ -17,6 +17,8 @@
 #ifndef AALMEDIAPLAYERSERVICE_H
 #define AALMEDIAPLAYERSERVICE_H
 
+#include "aalvideorenderercontrol.h"
+
 #include <core/media/player.h>
 
 #include <qmediaplayer.h>
@@ -29,6 +31,7 @@ class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
 class txt_MediaPlayerPlugin;
+class QTimerEvent;
 
 namespace core { namespace ubuntu { namespace media {
     class Service;
@@ -92,9 +95,12 @@ public:
 Q_SIGNALS:
     void serviceReady();
 
+protected:
+#ifdef MEASURE_PERFORMANCE
+    void measurePerformance();
+#endif
+
 private:
-    static void onFrameAvailableCb(void *context);
-    void onFrameAvailable();
     void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
     static AalMediaPlayerService *m_service;
@@ -111,6 +117,13 @@ private:
     int64_t m_cachedDuration;
 
     const QMediaPlaylist* m_mediaPlaylist;
+
+#ifdef MEASURE_PERFORMANCE
+    qint64 m_lastFrameDecodeStart;
+    qint64 m_currentFrameDecodeStart;
+    qint16 m_avgCount;
+    qint64 m_frameDecodeAvg;
+#endif
 };
 
 #endif

@@ -21,6 +21,10 @@
 #include <QVideoFrame>
 #include <QVideoRendererControl>
 
+// Uncomment to measure video frame rendering timing and performance. Will display
+// metrics to stdout
+//#define MEASURE_PERFORMANCE
+
 class AalMediaPlayerService;
 class AalGLTextureBuffer;
 
@@ -73,6 +77,13 @@ private:
 
     bool m_firstFrame;
     bool m_secondFrame;
+
+#ifdef MEASURE_PERFORMANCE
+    qint64 m_lastFrameRenderStart;
+    qint64 m_currentFrameRenderStart;
+    qint16 m_avgCount;
+    qint64 m_frameRenderAvg;
+#endif
 };
 
 #endif

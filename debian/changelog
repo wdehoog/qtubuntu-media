@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1+14.10.20140926-0ubuntu1) 14.09; urgency=low
+
+  [ Jim Hodapp ]
+  * Update to use the latest Property types for libmedia-hub2 .
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 26 Sep 2014 19:29:26 +0000
+
 qtubuntu-media (0.7.1+14.10.20140923.2-0ubuntu1) 14.09; urgency=low
 
   [ Jim Hodapp ]

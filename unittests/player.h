@@ -67,8 +67,8 @@ public:
     virtual const core::Property<Volume>& volume() const;
     virtual const core::Property<PlaybackRate>& minimum_playback_rate() const;
     virtual const core::Property<PlaybackRate>& maximum_playback_rate() const;
-    virtual const core::Property<uint64_t>& position() const;
-    virtual const core::Property<uint64_t>& duration() const;
+    virtual const core::Property<int64_t>& position() const;
+    virtual const core::Property<int64_t>& duration() const;
     virtual const core::Property<AudioStreamRole>& audio_stream_role() const;
 
     virtual core::Property<LoopStatus>& loop_status();
@@ -77,13 +77,13 @@ public:
     virtual core::Property<Volume>& volume();
     virtual core::Property<AudioStreamRole>& audio_stream_role();
 
-    virtual const core::Signal<uint64_t>& seeked_to() const;
+    virtual const core::Signal<int64_t>& seeked_to() const;
     virtual const core::Signal<void>& end_of_stream() const;
     virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
 
 private:
-    core::Property<uint64_t> m_position;
+    core::Property<int64_t> m_position;
 };
 
 }

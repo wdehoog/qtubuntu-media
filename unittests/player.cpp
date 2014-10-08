@@ -70,6 +70,12 @@ bool TestPlayer::open_uri(const Track::UriType& uri)
     return true;
 }
 
+bool TestPlayer::open_uri(const Track::UriType& uri, const HeadersType&)
+{
+    Q_UNUSED(uri);
+    return true;
+}
+
 void TestPlayer::create_video_sink(uint32_t texture_id)
 {
     Q_UNUSED(texture_id);
@@ -212,6 +218,12 @@ const core::Property<Player::AudioStreamRole>& TestPlayer::audio_stream_role() c
     return role;
 }
 
+const core::Property<Player::Lifetime>& TestPlayer::lifetime() const
+{
+    static const core::Property<Player::Lifetime> lifetime(Player::Lifetime::normal);
+    return lifetime;
+}
+
 core::Property<Player::LoopStatus>& TestPlayer::loop_status()
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
@@ -240,6 +252,12 @@ core::Property<Player::AudioStreamRole>& TestPlayer::audio_stream_role()
 {
     static core::Property<Player::AudioStreamRole> role(Player::AudioStreamRole::multimedia);
     return role;
+}
+
+core::Property<Player::Lifetime>& TestPlayer::lifetime()
+{
+    static core::Property<Player::Lifetime> lifetime(Player::Lifetime::normal);
+    return lifetime;
 }
 
 const core::Signal<int64_t>& TestPlayer::seeked_to() const

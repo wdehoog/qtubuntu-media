@@ -153,6 +153,12 @@ const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() 
     return ret;
 }
 
+const core::Property<TestPlayer::Orientation>& TestPlayer::orientation() const
+{
+    static core::Property<Player::Orientation> ret(Player::Orientation::rotate0);
+    return ret;
+}
+
 const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);

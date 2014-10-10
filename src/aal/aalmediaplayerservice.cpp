@@ -74,6 +74,11 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     if (m_hubPlayerSession == NULL)
         return;
 
+    m_hubPlayerSession->orientation().changed().connect([this](const media::Player::Orientation &orientation)
+    {
+        qDebug() << "orientation() property changed: " << orientation;
+    });
+
     m_hubPlayerSession->set_playback_complete_callback([](void *context)
     {
         auto control = static_cast<AalMediaPlayerControl*>(context);

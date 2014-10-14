@@ -85,6 +85,8 @@ public:
 
     static AalMediaPlayerService *instance() { return m_service; }
 
+    const std::shared_ptr<core::ubuntu::media::Player>& getPlayer() const { return m_hubPlayerSession; }
+
     /* This is for unittest purposes to be able to set a mock-object version of a
      * player object */
     void setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player);

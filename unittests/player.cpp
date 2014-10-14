@@ -272,6 +272,12 @@ core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
     return ret;
 }
 
+const core::Signal<uint64_t>& TestPlayer::video_dimension_changed() const
+{
+    static core::Signal<uint64_t> ret;
+    return ret;
+}
+
 const std::shared_ptr<Service> Service::Client::instance()
 {
     return NULL;

@@ -82,6 +82,7 @@ public:
     virtual const core::Signal<void>& end_of_stream() const;
     virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
+    virtual const core::Signal<uint64_t>& video_dimension_changed() const;
 
 private:
     core::Property<int64_t> m_position;

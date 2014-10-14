@@ -38,6 +38,9 @@
 
 #include <qgl.h>
 
+namespace media = core::ubuntu::media;
+using namespace std::placeholders;
+
 class AalGLTextureBuffer : public QAbstractVideoBuffer
 {
 public:
@@ -80,6 +83,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_service(service),
      m_textureBuffer(0),
      m_textureId(0),
+     m_orientation(media::Player::Orientation::rotate0),
      m_height(720),
      m_width(1280),
      m_firstFrame(true),
@@ -94,6 +98,15 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
+
+    m_service->getPlayer()->video_dimension_changed().connect(
+            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
+
+    // When orientation changes during playback, cache a copy here
+    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
+    {
+        m_orientation = orientation;
+    });
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -125,6 +138,16 @@ GLuint AalVideoRendererControl::textureId() const
     return m_textureId;
 }
 
+uint32_t AalVideoRendererControl::height() const
+{
+    return m_height;
+}
+
+uint32_t AalVideoRendererControl::width() const
+{
+    return m_width;
+}
+
 void AalVideoRendererControl::setupSurface()
 {
     qDebug() << Q_FUNC_INFO;
@@ -135,10 +158,16 @@ void AalVideoRendererControl::setupSurface()
     updateVideoTexture();
 }
 
-void AalVideoRendererControl::setVideoSize(int height, int width)
+void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
 {
-    m_height = height;
-    m_width = width;
+    m_width = static_cast<uint32_t>(mask & 0xFFFF);
+    m_height = static_cast<uint32_t>(mask >> 32);
+
+    // FIXME: Ideally the frameSize will get set early enough for this to apply to the very first frame,
+    // but it seems to not be. That is why the m_height, m_width non-zero initialization is needed in
+    // the constructor.
+    QSize frameSize(m_width, m_height);
+    Q_EMIT SharedSignal::instance()->setOrientation(static_cast<SharedSignal::Orientation>(m_orientation), frameSize);
 }
 
 void AalVideoRendererControl::updateVideoTexture()

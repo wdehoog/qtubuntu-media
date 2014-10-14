@@ -17,6 +17,8 @@
 #ifndef AALVIDEORENDERERCONTROL_H
 #define AALVIDEORENDERERCONTROL_H
 
+#include <core/media/player.h>
+
 #include <QImage>
 #include <QVideoFrame>
 #include <QVideoRendererControl>
@@ -47,9 +49,11 @@ public:
 
     GLuint textureId() const;
 
+    uint32_t height() const;
+    uint32_t width() const;
+
     // Callbacks
     static void updateVideoTextureCb(void *context);
-    static void setVideoSizeCb(int height, int width, void *data);
 
 public Q_SLOTS:
     void setupSurface();
@@ -58,13 +62,13 @@ Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);
 
 private Q_SLOTS:
-    void setVideoSize(int height, int width);
     void updateVideoTexture();
     void onTextureCreated(unsigned int textureID);
     void onServiceReady();
     void onGLConsumerSet();
 
 private:
+    void onVideoDimensionChanged(uint64_t mask);
     void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
 
     QAbstractVideoSurface *m_surface;
@@ -72,8 +76,9 @@ private:
     AalGLTextureBuffer *m_textureBuffer;
     GLuint m_textureId;
 
-    int m_height;
-    int m_width;
+    core::ubuntu::media::Player::Orientation m_orientation;
+    uint32_t m_height;
+    uint32_t m_width;
 
     bool m_firstFrame;
     bool m_secondFrame;

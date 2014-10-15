@@ -38,13 +38,22 @@ namespace media = core::ubuntu::media;
 
 using namespace std::placeholders;
 
+namespace
+{
 enum {
     OK          = 0,
     NO_ERROR    = 0,
     BAD_VALUE   = -EINVAL,
 };
 
-AalMediaPlayerService *AalMediaPlayerService::m_service = 0;
+core::ubuntu::media::Player::FrameAvailableCb empty_frame_available_cb = [](void*)
+{
+};
+
+core::ubuntu::media::Player::PlaybackCompleteCb empty_playback_complete_cb = [](void*)
+{
+};
+}
 
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
@@ -61,25 +70,17 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
      , m_frameDecodeAvg(0)
 #endif
 {
-    m_service = this;
 
     m_hubService = media::Service::Client::instance();
 
     if (!newMediaPlayer())
         qWarning() << "Failed to create a new media player backend. Video playback will not function." << endl;
 
-    m_videoOutput = new AalVideoRendererControl(this);
-    m_mediaPlayerControl = new AalMediaPlayerControl(this);
-
     if (m_hubPlayerSession == NULL)
         return;
 
-    m_hubPlayerSession->set_playback_complete_callback([](void *context)
-    {
-        auto control = static_cast<AalMediaPlayerControl*>(context);
-        control->playbackComplete();
-    },
-    static_cast<void*>(m_mediaPlayerControl));
+    createMediaPlayerControl();
+    createVideoRendererControl();
 
     m_hubPlayerSession->playback_status_changed().connect(
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
@@ -87,10 +88,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
-    if (m_mediaPlayerControl != NULL)
-        delete m_mediaPlayerControl;
-    if (m_videoOutput != NULL)
-        delete m_videoOutput;
+    deleteMediaPlayerControl();
+    deleteVideoRendererControl();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -98,7 +97,7 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
         if (m_mediaPlayerControlRef == 0 && m_mediaPlayerControl == NULL)
-            m_mediaPlayerControl = new AalMediaPlayerControl(this);
+            createMediaPlayerControl();
 
         ++m_mediaPlayerControlRef;
         return m_mediaPlayerControl;
@@ -107,7 +106,7 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)
     {
         if (m_videoOutputRef == 0 && m_videoOutput == NULL)
-            m_videoOutput = new AalVideoRendererControl(this);
+            createVideoRendererControl();
 
         ++m_videoOutputRef;
         return m_videoOutput;
@@ -124,14 +123,7 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
             --m_mediaPlayerControlRef;
 
         if (m_mediaPlayerControlRef == 0)
-        {
-            if (m_mediaPlayerControl != NULL)
-            {
-                delete m_mediaPlayerControl;
-                m_mediaPlayerControl = NULL;
-                control = NULL;
-            }
-        }
+            deleteMediaPlayerControl();
     }
     else if (control == m_videoOutput)
     {
@@ -139,14 +131,7 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
             --m_videoOutputRef;
 
         if (m_videoOutputRef == 0)
-        {
-            if (m_videoOutput != NULL)
-            {
-                delete m_videoOutput;
-                m_videoOutput = NULL;
-                control = NULL;
-            }
-        }
+            deleteVideoRendererControl();
     }
 }
 
@@ -202,6 +187,12 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
             if (context != NULL)
             {
                 auto s = static_cast<AalMediaPlayerService*>(context);
+
+                // We might receive this callback after the control has been released.
+                // In that case, we return early.
+                if (not s->videoOutputControl())
+                    return;
+
 #ifdef MEASURE_PERFORMANCE
                 s->measurePerformance();
 #endif
@@ -453,8 +444,49 @@ void AalMediaPlayerService::setVolume(int volume)
     }
 }
 
+void AalMediaPlayerService::createMediaPlayerControl()
+{
+    m_mediaPlayerControl = new AalMediaPlayerControl(this);
+    m_hubPlayerSession->set_playback_complete_callback([](void *context)
+    {
+        auto control = static_cast<AalMediaPlayerControl*>(context);
+        control->playbackComplete();
+    },
+    m_mediaPlayerControl);
+}
+
+void AalMediaPlayerService::createVideoRendererControl()
+{
+    m_videoOutput = new AalVideoRendererControl(this);
+}
+
+void AalMediaPlayerService::deleteMediaPlayerControl()
+{
+    m_hubPlayerSession->set_playback_complete_callback(
+                empty_playback_complete_cb,
+                nullptr);
+
+    delete m_mediaPlayerControl;
+    m_mediaPlayerControl = NULL;
+}
+
+void AalMediaPlayerService::deleteVideoRendererControl()
+{
+    m_hubPlayerSession->set_frame_available_callback(
+                empty_frame_available_cb,
+                nullptr);
+
+    delete m_videoOutput;
+    m_videoOutput = NULL;
+}
+
 void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
 {
+    // The media player control might have been released prior to this call. For that, we check for
+    // null and return early in that case.
+    if (m_mediaPlayerControl == nullptr)
+        return;
+
     // If the playback status changes from underneath (e.g. GStreamer or media-hub), make sure
     // the app is notified about this so it can change it's status
     switch (status)

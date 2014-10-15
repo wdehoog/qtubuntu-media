@@ -98,15 +98,6 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
-
-    m_service->getPlayer()->video_dimension_changed().connect(
-            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
-
-    // When orientation changes during playback, cache a copy here
-    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
-    {
-        m_orientation = orientation;
-    });
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -227,6 +218,15 @@ void AalVideoRendererControl::onServiceReady()
     qDebug() << __PRETTY_FUNCTION__ << " - Service is ready";
     m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
+
+    m_service->getPlayer()->video_dimension_changed().connect(
+            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
+
+    // When orientation changes during playback, cache a copy here
+    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
+    {
+        m_orientation = orientation;
+    });
 }
 
 void AalVideoRendererControl::onGLConsumerSet()

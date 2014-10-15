@@ -70,7 +70,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
      , m_frameDecodeAvg(0)
 #endif
 {
-
     m_hubService = media::Service::Client::instance();
 
     if (!newMediaPlayer())
@@ -529,6 +528,12 @@ void AalMediaPlayerService::pushPlaylist()
 void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player)
 {
     m_hubPlayerSession = player;
+
+    createMediaPlayerControl();
+    createVideoRendererControl();
+
+    m_hubPlayerSession->playback_status_changed().connect(
+            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
 }
 
 void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)

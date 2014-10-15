@@ -67,10 +67,10 @@ void tst_MediaPlayerPlugin::initTestCase()
 {
     m_hubService.reset(new TestService());
     m_service.reset(new AalMediaPlayerService(this));
-    m_service->setService(m_hubService);
-    m_mediaPlayerControl = m_service->mediaPlayerControl();
+    m_service->setService(m_hubService);    
     m_player.reset(new TestPlayer());
     m_service->setPlayer(m_player);
+    m_mediaPlayerControl = m_service->mediaPlayerControl();
     m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
     QVERIFY(m_playerControl != NULL);
     m_rendererControl = m_service->requestControl(QVideoRendererControl_iid);

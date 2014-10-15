@@ -143,6 +143,15 @@ void AalVideoRendererControl::setupSurface()
 {
     qDebug() << Q_FUNC_INFO;
 
+    m_service->getPlayer()->video_dimension_changed().connect(
+            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
+
+    // When orientation changes during playback, cache a copy here
+    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
+    {
+        m_orientation = orientation;
+    });
+
     if (!m_textureBuffer)
         m_textureBuffer = new AalGLTextureBuffer(m_textureId);
 
@@ -151,6 +160,7 @@ void AalVideoRendererControl::setupSurface()
 
 void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
 {
+    qDebug() << Q_FUNC_INFO;
     m_width = static_cast<uint32_t>(mask & 0xFFFF);
     m_height = static_cast<uint32_t>(mask >> 32);
 
@@ -218,15 +228,6 @@ void AalVideoRendererControl::onServiceReady()
     qDebug() << __PRETTY_FUNCTION__ << " - Service is ready";
     m_textureBuffer = new AalGLTextureBuffer(m_textureId);
     setupSurface();
-
-    m_service->getPlayer()->video_dimension_changed().connect(
-            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
-
-    // When orientation changes during playback, cache a copy here
-    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
-    {
-        m_orientation = orientation;
-    });
 }
 
 void AalVideoRendererControl::onGLConsumerSet()

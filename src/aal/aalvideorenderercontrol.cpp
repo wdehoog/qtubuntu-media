@@ -84,8 +84,10 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_textureBuffer(0),
      m_textureId(0),
      m_orientation(media::Player::Orientation::rotate0),
-     m_height(720),
-     m_width(1280),
+     m_height(0),
+     m_width(0),
+     m_surfaceStarted(false),
+     m_flipped(false),
      m_firstFrame(true),
      m_secondFrame(false)
 #ifdef MEASURE_PERFORMANCE
@@ -161,12 +163,20 @@ void AalVideoRendererControl::setupSurface()
 void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
 {
     qDebug() << Q_FUNC_INFO;
-    m_width = static_cast<uint32_t>(mask & 0xFFFF);
-    m_height = static_cast<uint32_t>(mask >> 32);
+    const uint32_t width = static_cast<uint32_t>(mask & 0xFFFF);
+    const uint32_t height = static_cast<uint32_t>(mask >> 32);
 
-    // FIXME: Ideally the frameSize will get set early enough for this to apply to the very first frame,
-    // but it seems to not be. That is why the m_height, m_width non-zero initialization is needed in
-    // the constructor.
+    // Make sure that X & Y remain flipped between multiple playbacks in the
+    // same session
+    if (m_orientation == media::Player::Orientation::rotate90 && !m_flipped) {
+        m_height = width;
+        m_width = height;
+        m_flipped = true;
+    } else if (m_orientation == media::Player::Orientation::rotate0) {
+        m_height = height;
+        m_width = width;
+    }
+
     QSize frameSize(m_width, m_height);
     Q_EMIT SharedSignal::instance()->setOrientation(static_cast<SharedSignal::Orientation>(m_orientation), frameSize);
 }
@@ -241,11 +251,19 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
     Q_UNUSED(empty);
     Q_ASSERT(m_surface != NULL);
 
-    if (!m_surface->isActive()) {
-        QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
+    // Wait until we have a height and width to start m_surface
+    if (!m_surface->isActive() || (m_height != 0 && m_width != 0)) {
+        if (!m_surfaceStarted) {
+            qDebug() << "Setting up surface with height: " << m_height << " width: " << m_width;
+            QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
 
-        if (!m_surface->start(format)) {
-            qWarning() << "Failed to start video surface with format:" << format;
+            if (!m_surface->start(format)) {
+                qWarning() << "Failed to start video surface with format:" << format;
+            }
+            // Make sure we don't create any more new QVideoSurfaceFormat instances
+            // after we have a proper height and width set
+            if (m_height != 0 && m_width != 0)
+                m_surfaceStarted = true;
         }
     }
 

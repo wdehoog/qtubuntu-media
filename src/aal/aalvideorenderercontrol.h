@@ -79,6 +79,8 @@ private:
     core::ubuntu::media::Player::Orientation m_orientation;
     uint32_t m_height;
     uint32_t m_width;
+    bool m_surfaceStarted;
+    bool m_flipped;
 
     bool m_firstFrame;
     bool m_secondFrame;

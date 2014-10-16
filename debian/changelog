@@ -1,3 +1,12 @@
+qtubuntu-media (0.7.1+14.10.20141015.1~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ thomas-voss ]
+  * Make sure that invocations on probably deleted objects in async
+    callbacks are guarded. Condense creation/deletion of controls in one
+    place. (LP: #1376467)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 15 Oct 2014 10:33:19 +0000
+
 qtubuntu-media (0.7.1+14.10.20140926-0ubuntu1) 14.09; urgency=low
 
   [ Jim Hodapp ]

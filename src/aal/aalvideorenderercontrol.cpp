@@ -168,11 +168,12 @@ void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
 
     // Make sure that X & Y remain flipped between multiple playbacks in the
     // same session
-    if (m_orientation == media::Player::Orientation::rotate90 && !m_flipped) {
+    if ((m_orientation == media::Player::Orientation::rotate90 ||
+         m_orientation == media::Player::Orientation::rotate270) && !m_flipped) {
         m_height = width;
         m_width = height;
         m_flipped = true;
-    } else if (m_orientation == media::Player::Orientation::rotate0) {
+    } else {
         m_height = height;
         m_width = width;
     }

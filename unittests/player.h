@@ -60,6 +60,7 @@ public:
     virtual const core::Property<bool>& is_video_source() const;
     virtual const core::Property<bool>& is_audio_source() const;
     virtual const core::Property<PlaybackStatus>& playback_status() const;
+    virtual const core::Property<Orientation>& orientation() const;
     virtual const core::Property<LoopStatus>& loop_status() const;
     virtual const core::Property<PlaybackRate>& playback_rate() const;
     virtual const core::Property<bool>& is_shuffle() const;
@@ -81,6 +82,7 @@ public:
     virtual const core::Signal<void>& end_of_stream() const;
     virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
+    virtual const core::Signal<uint64_t>& video_dimension_changed() const;
 
 private:
     core::Property<int64_t> m_position;

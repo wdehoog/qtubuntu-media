@@ -27,6 +27,8 @@
 
 #include <QThread>
 
+#include <qtubuntu_media_signals.h>
+
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>

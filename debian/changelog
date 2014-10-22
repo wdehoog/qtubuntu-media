@@ -1,3 +1,12 @@
+qtubuntu-media (0.7.1+14.10.20141022~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ Jim Hodapp ]
+  * Add simple support for Orientation Property changed signal that
+    comes from media-hub. Pass the video frame dimension in from media-
+    hub through to qtvideo-node (LP: #1191934)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 22 Oct 2014 16:21:31 +0000
+
 qtubuntu-media (0.7.1+14.10.20141015.1~rtm-0ubuntu1) 14.09; urgency=low
 
   [ thomas-voss ]

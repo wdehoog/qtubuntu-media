@@ -291,7 +291,14 @@ QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const
     if (media.isNull())
         return QUrl();
 
-    return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
+    if (media.canonicalUrl().isLocalFile()) {
+        qDebug() << "Local file URI: " << QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
+        return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
+    }
+    else {
+        qDebug() << "Remote stream URI: " << QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
+        return QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
+    }
 }
 
 void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)

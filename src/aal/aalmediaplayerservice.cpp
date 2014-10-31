@@ -55,11 +55,14 @@ core::ubuntu::media::Player::FrameAvailableCb empty_frame_available_cb = [](void
 core::ubuntu::media::Player::PlaybackCompleteCb empty_playback_complete_cb = [](void*)
 {
 };
+
+core::Signal<void> the_void;
 }
 
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_hubPlayerSession(NULL),
+    m_playbackStatusChangedConnection(the_void.connect([](){})),
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
     m_videoOutputRef(0),
@@ -83,12 +86,14 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     createMediaPlayerControl();
     createVideoRendererControl();
 
-    m_hubPlayerSession->playback_status_changed().connect(
+    m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
+    m_playbackStatusChangedConnection.disconnect();
+
     deleteMediaPlayerControl();
     deleteVideoRendererControl();
 }

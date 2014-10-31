@@ -111,6 +111,7 @@ private:
 
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
+    core::Connection playback_status_changed_connection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;

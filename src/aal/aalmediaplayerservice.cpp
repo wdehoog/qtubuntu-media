@@ -62,7 +62,7 @@ core::Signal<void> the_void;
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_hubPlayerSession(NULL),
-    playback_status_changed_connection(the_void.connect([]())),
+    m_playbackStatusChangedConnection(the_void.connect([](){})),
     m_videoOutputReady(false),
     m_mediaPlayerControlRef(0),
     m_videoOutputRef(0),
@@ -86,16 +86,16 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     createMediaPlayerControl();
     createVideoRendererControl();
 
-    playback_status_changed_connection = m_hubPlayerSession->playback_status_changed().connect(
+    m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
+    m_playbackStatusChangedConnection.disconnect();
+
     deleteMediaPlayerControl();
     deleteVideoRendererControl();
-
-    playback_status_changed_connection.disconnect();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)

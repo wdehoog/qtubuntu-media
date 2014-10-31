@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1+14.10.20141031~rtm-0ubuntu1) 14.09; urgency=low
+
+  [ thomas-voss ]
+  * Cut event connections on destruction. (LP: #1386803)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 31 Oct 2014 13:13:47 +0000
+
 qtubuntu-media (0.7.1+14.10.20141022~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Jim Hodapp ]

@@ -27,21 +27,16 @@ AalServicePlugin::AalServicePlugin() : m_service(nullptr)
 QMediaService* AalServicePlugin::create(QString const& key)
 {
     qDebug() << Q_FUNC_INFO << key;
+
     if (key == QLatin1String(Q_MEDIASERVICE_MEDIAPLAYER))
-    {
-        if (not m_service)
-            m_service = new AalMediaPlayerService();
+        return new AalMediaPlayerService();
 
-        return m_service;
-    }
-
-    qWarning() << "Key not supported:" << key;
     return nullptr;
 }
 
 void AalServicePlugin::release(QMediaService *service)
 {
-    qDebug() << Q_FUNC_INFO << service;
+    delete service;
 }
 
 QList<QByteArray> AalServicePlugin::devices(const QByteArray &service) const

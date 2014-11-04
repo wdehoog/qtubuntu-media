@@ -36,9 +36,6 @@ public:
 
     QList<QByteArray> devices(const QByteArray &service) const;
     QString deviceDescription(const QByteArray &service, const QByteArray &device);
-
-private:
-    AalMediaPlayerService* m_service;
 };
 
 #endif

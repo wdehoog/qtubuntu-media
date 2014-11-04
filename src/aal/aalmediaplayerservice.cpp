@@ -95,20 +95,32 @@ AalMediaPlayerService::~AalMediaPlayerService()
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
+    {
+        if (not m_mediaPlayerControl)
+            createMediaPlayerControl();
+
         return m_mediaPlayerControl;
+    }
 
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)    
+    {
+        if (not m_videoOutput)
+            createVideoRendererControl();
+
         return m_videoOutput;
+    }
 
     return NULL;
 }
 
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
-    // We just recycle the instance we used before. At any rate,
-    // on destruction of this instance, the respective controls are
-    // cleaned up as well due to this instance being their parent.
-    Q_UNUSED(control);
+    if (control == m_mediaPlayerControl)
+        m_mediaPlayerControl = nullptr;
+    if (control == m_videoOutput)
+        m_videoOutput = nullptr;
+
+    delete control;
 }
 
 AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const

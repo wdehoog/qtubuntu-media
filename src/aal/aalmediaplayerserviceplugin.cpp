@@ -19,7 +19,7 @@
 
 #include <QDebug>
 
-AalServicePlugin::AalServicePlugin() : m_service(nullptr)
+AalServicePlugin::AalServicePlugin()
 {
     qDebug() << "Initializing AalServicePlugin";
 }

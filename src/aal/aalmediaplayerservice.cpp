@@ -24,7 +24,6 @@
 
 #include <QAbstractVideoSurface>
 #include <QTimerEvent>
-
 #include <QThread>
 
 #include <qtubuntu_media_signals.h>
@@ -64,8 +63,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_hubPlayerSession(NULL),
     m_playbackStatusChangedConnection(the_void.connect([](){})),
     m_videoOutputReady(false),
-    m_mediaPlayerControlRef(0),
-    m_videoOutputRef(0),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
 #ifdef MEASURE_PERFORMANCE
@@ -101,44 +98,20 @@ AalMediaPlayerService::~AalMediaPlayerService()
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
-    {
-        if (m_mediaPlayerControlRef == 0 && m_mediaPlayerControl == NULL)
-            createMediaPlayerControl();
-
-        ++m_mediaPlayerControlRef;
         return m_mediaPlayerControl;
-    }
 
-    if (qstrcmp(name, QVideoRendererControl_iid) == 0)
-    {
-        if (m_videoOutputRef == 0 && m_videoOutput == NULL)
-            createVideoRendererControl();
-
-        ++m_videoOutputRef;
+    if (qstrcmp(name, QVideoRendererControl_iid) == 0)    
         return m_videoOutput;
-    }
 
     return NULL;
 }
 
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
-    if (control == m_mediaPlayerControl)
-    {
-        if (m_mediaPlayerControlRef > 0)
-            --m_mediaPlayerControlRef;
-
-        if (m_mediaPlayerControlRef == 0)
-            deleteMediaPlayerControl();
-    }
-    else if (control == m_videoOutput)
-    {
-        if (m_videoOutputRef > 0)
-            --m_videoOutputRef;
-
-        if (m_videoOutputRef == 0)
-            deleteVideoRendererControl();
-    }
+    // We just recycle the instance we used before. At any rate,
+    // on destruction of this instance, the respective controls are
+    // cleaned up as well due to this instance being their parent.
+    Q_UNUSED(control);
 }
 
 AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const

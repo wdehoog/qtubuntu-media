@@ -21,6 +21,8 @@
 
 #include <core/media/player.h>
 
+#include <QAtomicInteger>
+
 #include <qmediaplayer.h>
 #include <QMediaPlaylist>
 #include <QMediaService>
@@ -116,9 +118,6 @@ private:
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
-
-    int m_mediaPlayerControlRef;
-    int m_videoOutputRef;
 
     int64_t m_cachedDuration;
 

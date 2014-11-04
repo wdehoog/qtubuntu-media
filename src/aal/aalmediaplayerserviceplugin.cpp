@@ -42,8 +42,6 @@ QMediaService* AalServicePlugin::create(QString const& key)
 void AalServicePlugin::release(QMediaService *service)
 {
     qDebug() << Q_FUNC_INFO << service;
-    Q_UNUSED(service);
-    delete service;
 }
 
 QList<QByteArray> AalServicePlugin::devices(const QByteArray &service) const

@@ -91,10 +91,10 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
+    m_playbackStatusChangedConnection.disconnect();
+
     deleteMediaPlayerControl();
     deleteVideoRendererControl();
-
-    m_playbackStatusChangedConnection.disconnect();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)

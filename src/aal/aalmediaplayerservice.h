@@ -21,8 +21,6 @@
 
 #include <core/media/player.h>
 
-#include <QAtomicInteger>
-
 #include <qmediaplayer.h>
 #include <QMediaPlaylist>
 #include <QMediaService>

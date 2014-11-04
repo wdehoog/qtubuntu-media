@@ -91,6 +91,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
+    deleteMediaPlayerControl();
+    deleteVideoRendererControl();
+
     m_playbackStatusChangedConnection.disconnect();
 }
 
@@ -118,11 +121,11 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
     if (control == m_mediaPlayerControl)
-        m_mediaPlayerControl = nullptr;
-    if (control == m_videoOutput)
-        m_videoOutput = nullptr;
-
-    delete control;
+        deleteMediaPlayerControl();
+    else if (control == m_videoOutput)
+        deleteVideoRendererControl();
+    else
+        delete control;
 }
 
 AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const
@@ -450,6 +453,9 @@ void AalMediaPlayerService::createMediaPlayerControl()
 
 void AalMediaPlayerService::createVideoRendererControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_videoOutput = new AalVideoRendererControl(this);
 }
 

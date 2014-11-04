@@ -19,6 +19,8 @@
 
 #include <QMediaServiceProviderPlugin>
 
+class AalMediaPlayerService;
+
 class AalServicePlugin : public QMediaServiceProviderPlugin,
                          public QMediaServiceSupportedDevicesInterface
 {

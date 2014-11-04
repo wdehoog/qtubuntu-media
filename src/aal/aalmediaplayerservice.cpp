@@ -434,6 +434,9 @@ void AalMediaPlayerService::setVolume(int volume)
 
 void AalMediaPlayerService::createMediaPlayerControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
     m_hubPlayerSession->set_playback_complete_callback([](void *context)
     {
@@ -450,6 +453,9 @@ void AalMediaPlayerService::createVideoRendererControl()
 
 void AalMediaPlayerService::deleteMediaPlayerControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_hubPlayerSession->set_playback_complete_callback(
                 empty_playback_complete_cb,
                 nullptr);
@@ -460,6 +466,9 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
 void AalMediaPlayerService::deleteVideoRendererControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_hubPlayerSession->set_frame_available_callback(
                 empty_frame_available_cb,
                 nullptr);

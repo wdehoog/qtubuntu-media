@@ -62,6 +62,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_hubPlayerSession(NULL),
     m_playbackStatusChangedConnection(the_void.connect([](){})),
+    m_mediaPlayerControl(nullptr),
+    m_videoOutput(nullptr),
     m_videoOutputReady(false),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)

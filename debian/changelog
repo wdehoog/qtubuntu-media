@@ -1,3 +1,11 @@
+qtubuntu-media (0.7.1+15.04.20141105.2-0ubuntu1) vivid; urgency=low
+
+  [ thomas-voss ]
+  * Get rid of custom ref-counting and reuse pre-created object. (LP:
+    #1387959)
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 05 Nov 2014 12:10:39 +0000
+
 qtubuntu-media (0.7.1+15.04.20141104-0ubuntu1) vivid; urgency=low
 
   * New rebuild forced

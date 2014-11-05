@@ -117,9 +117,6 @@ private:
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
 
-    int m_mediaPlayerControlRef;
-    int m_videoOutputRef;
-
     int64_t m_cachedDuration;
 
     const QMediaPlaylist* m_mediaPlaylist;

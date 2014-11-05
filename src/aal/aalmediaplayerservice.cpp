@@ -24,7 +24,6 @@
 
 #include <QAbstractVideoSurface>
 #include <QTimerEvent>
-
 #include <QThread>
 
 #include <qtubuntu_media_signals.h>
@@ -63,9 +62,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_hubPlayerSession(NULL),
     m_playbackStatusChangedConnection(the_void.connect([](){})),
+    m_mediaPlayerControl(nullptr),
+    m_videoOutput(nullptr),
     m_videoOutputReady(false),
-    m_mediaPlayerControlRef(0),
-    m_videoOutputRef(0),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
 #ifdef MEASURE_PERFORMANCE
@@ -102,19 +101,17 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
-        if (m_mediaPlayerControlRef == 0 && m_mediaPlayerControl == NULL)
+        if (not m_mediaPlayerControl)
             createMediaPlayerControl();
 
-        ++m_mediaPlayerControlRef;
         return m_mediaPlayerControl;
     }
 
-    if (qstrcmp(name, QVideoRendererControl_iid) == 0)
+    if (qstrcmp(name, QVideoRendererControl_iid) == 0)    
     {
-        if (m_videoOutputRef == 0 && m_videoOutput == NULL)
+        if (not m_videoOutput)
             createVideoRendererControl();
 
-        ++m_videoOutputRef;
         return m_videoOutput;
     }
 
@@ -124,21 +121,11 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
     if (control == m_mediaPlayerControl)
-    {
-        if (m_mediaPlayerControlRef > 0)
-            --m_mediaPlayerControlRef;
-
-        if (m_mediaPlayerControlRef == 0)
-            deleteMediaPlayerControl();
-    }
+        deleteMediaPlayerControl();
     else if (control == m_videoOutput)
-    {
-        if (m_videoOutputRef > 0)
-            --m_videoOutputRef;
-
-        if (m_videoOutputRef == 0)
-            deleteVideoRendererControl();
-    }
+        deleteVideoRendererControl();
+    else
+        delete control;
 }
 
 AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const
@@ -217,11 +204,17 @@ void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
 {
+    if (m_hubPlayerSession == NULL)
+        return QMediaPlayer::MultimediaRole;
+
     return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
 }
 
 void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     qDebug() << __PRETTY_FUNCTION__;
     m_hubPlayerSession->audio_stream_role().set(static_cast<media::Player::AudioStreamRole>(audioRole));
 }
@@ -452,6 +445,9 @@ void AalMediaPlayerService::setVolume(int volume)
 
 void AalMediaPlayerService::createMediaPlayerControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
     m_hubPlayerSession->set_playback_complete_callback([](void *context)
     {
@@ -463,11 +459,17 @@ void AalMediaPlayerService::createMediaPlayerControl()
 
 void AalMediaPlayerService::createVideoRendererControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_videoOutput = new AalVideoRendererControl(this);
 }
 
 void AalMediaPlayerService::deleteMediaPlayerControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_hubPlayerSession->set_playback_complete_callback(
                 empty_playback_complete_cb,
                 nullptr);
@@ -478,6 +480,9 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
 void AalMediaPlayerService::deleteVideoRendererControl()
 {
+    if (m_hubPlayerSession == NULL)
+        return;
+
     m_hubPlayerSession->set_frame_available_callback(
                 empty_frame_available_cb,
                 nullptr);

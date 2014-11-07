@@ -83,7 +83,7 @@ public:
 
     void pushPlaylist();
 
-    static AalMediaPlayerService *instance() { return m_service; }
+    const std::shared_ptr<core::ubuntu::media::Player>& getPlayer() const { return m_hubPlayerSession; }
 
     /* This is for unittest purposes to be able to set a mock-object version of a
      * player object */
@@ -101,18 +101,21 @@ protected:
 #endif
 
 private:
+    void createMediaPlayerControl();
+    void createVideoRendererControl();
+
+    void deleteMediaPlayerControl();
+    void deleteVideoRendererControl();
+
     void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
-    static AalMediaPlayerService *m_service;
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
+    core::Connection m_playbackStatusChangedConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
-
-    int m_mediaPlayerControlRef;
-    int m_videoOutputRef;
 
     int64_t m_cachedDuration;
 

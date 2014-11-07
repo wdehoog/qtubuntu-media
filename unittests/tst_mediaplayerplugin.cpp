@@ -38,7 +38,7 @@ class tst_MediaPlayerPlugin : public QObject
 {
     Q_OBJECT
 
-    shared_ptr<AalMediaPlayerService> m_service;
+    AalMediaPlayerService *m_service;
     AalMediaPlayerControl *m_mediaPlayerControl;
     QMediaControl *m_playerControl;
     QMediaControl *m_rendererControl;
@@ -46,8 +46,9 @@ class tst_MediaPlayerPlugin : public QObject
     shared_ptr<Service> m_hubService;
 
 private Q_SLOTS:
-    void initTestCase();
-    void cleanupTestCase();
+    // We want the setup to be run prior to every test case to
+    // ensure correct test isolation, see http://qt-project.org/doc/qt-5/qtest-overview.html.
+    void init();
 
     void tst_requestRelease();
     void tst_newMediaPlayer();
@@ -63,24 +64,18 @@ private Q_SLOTS:
     void tst_volume();
 };
 
-void tst_MediaPlayerPlugin::initTestCase()
+void tst_MediaPlayerPlugin::init()
 {
     m_hubService.reset(new TestService());
-    m_service.reset(new AalMediaPlayerService(this));
-    m_service->setService(m_hubService);
-    m_mediaPlayerControl = m_service->mediaPlayerControl();
+    m_service = new AalMediaPlayerService(this);
+    m_service->setService(m_hubService);    
     m_player.reset(new TestPlayer());
     m_service->setPlayer(m_player);
     m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
+    m_mediaPlayerControl = m_service->mediaPlayerControl();
     QVERIFY(m_playerControl != NULL);
     m_rendererControl = m_service->requestControl(QVideoRendererControl_iid);
     QVERIFY(m_rendererControl != NULL);
-}
-
-void tst_MediaPlayerPlugin::cleanupTestCase()
-{
-    m_service->releaseControl(m_playerControl);
-    m_service->releaseControl(m_rendererControl);
 }
 
 void tst_MediaPlayerPlugin::tst_requestRelease()

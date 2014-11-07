@@ -159,6 +159,12 @@ const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() 
     return ret;
 }
 
+const core::Property<TestPlayer::Orientation>& TestPlayer::orientation() const
+{
+    static core::Property<Player::Orientation> ret(Player::Orientation::rotate0);
+    return ret;
+}
+
 const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
@@ -281,6 +287,12 @@ const core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed(
 core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
 {
     static core::Signal<Player::PlaybackStatus> ret;
+    return ret;
+}
+
+const core::Signal<uint64_t>& TestPlayer::video_dimension_changed() const
+{
+    static core::Signal<uint64_t> ret;
     return ret;
 }
 

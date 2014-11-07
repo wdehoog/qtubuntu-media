@@ -38,6 +38,9 @@
 
 #include <qgl.h>
 
+namespace media = core::ubuntu::media;
+using namespace std::placeholders;
+
 class AalGLTextureBuffer : public QAbstractVideoBuffer
 {
 public:
@@ -80,8 +83,11 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_service(service),
      m_textureBuffer(0),
      m_textureId(0),
-     m_height(720),
-     m_width(1280),
+     m_orientation(media::Player::Orientation::rotate0),
+     m_height(0),
+     m_width(0),
+     m_surfaceStarted(false),
+     m_flipped(false),
      m_firstFrame(true),
      m_secondFrame(false)
 #ifdef MEASURE_PERFORMANCE
@@ -125,9 +131,28 @@ GLuint AalVideoRendererControl::textureId() const
     return m_textureId;
 }
 
+uint32_t AalVideoRendererControl::height() const
+{
+    return m_height;
+}
+
+uint32_t AalVideoRendererControl::width() const
+{
+    return m_width;
+}
+
 void AalVideoRendererControl::setupSurface()
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_service->getPlayer()->video_dimension_changed().connect(
+            std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
+
+    // When orientation changes during playback, cache a copy here
+    m_service->getPlayer()->orientation().changed().connect([this](const media::Player::Orientation &orientation)
+    {
+        m_orientation = orientation;
+    });
 
     if (!m_textureBuffer)
         m_textureBuffer = new AalGLTextureBuffer(m_textureId);
@@ -135,10 +160,26 @@ void AalVideoRendererControl::setupSurface()
     updateVideoTexture();
 }
 
-void AalVideoRendererControl::setVideoSize(int height, int width)
+void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
 {
-    m_height = height;
-    m_width = width;
+    qDebug() << Q_FUNC_INFO;
+    const uint32_t width = static_cast<uint32_t>(mask & 0xFFFF);
+    const uint32_t height = static_cast<uint32_t>(mask >> 32);
+
+    // Make sure that X & Y remain flipped between multiple playbacks in the
+    // same session
+    if ((m_orientation == media::Player::Orientation::rotate90 ||
+         m_orientation == media::Player::Orientation::rotate270) && !m_flipped) {
+        m_height = width;
+        m_width = height;
+        m_flipped = true;
+    } else {
+        m_height = height;
+        m_width = width;
+    }
+
+    QSize frameSize(m_width, m_height);
+    Q_EMIT SharedSignal::instance()->setOrientation(static_cast<SharedSignal::Orientation>(m_orientation), frameSize);
 }
 
 void AalVideoRendererControl::updateVideoTexture()
@@ -211,11 +252,19 @@ void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool e
     Q_UNUSED(empty);
     Q_ASSERT(m_surface != NULL);
 
-    if (!m_surface->isActive()) {
-        QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
+    // Wait until we have a height and width to start m_surface
+    if (!m_surface->isActive() || (m_height != 0 && m_width != 0)) {
+        if (!m_surfaceStarted) {
+            qDebug() << "Setting up surface with height: " << m_height << " width: " << m_width;
+            QVideoSurfaceFormat format(frame.size(), frame.pixelFormat(), frame.handleType());
 
-        if (!m_surface->start(format)) {
-            qWarning() << "Failed to start video surface with format:" << format;
+            if (!m_surface->start(format)) {
+                qWarning() << "Failed to start video surface with format:" << format;
+            }
+            // Make sure we don't create any more new QVideoSurfaceFormat instances
+            // after we have a proper height and width set
+            if (m_height != 0 && m_width != 0)
+                m_surfaceStarted = true;
         }
     }
 

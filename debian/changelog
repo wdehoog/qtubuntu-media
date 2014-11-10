@@ -1,3 +1,14 @@
+qtubuntu-media (0.7.1+15.04.20141107-0ubuntu1) vivid; urgency=low
+
+  [ Jim Hodapp ]
+  * Fix URI encoding issue related to playing remote URIs like from
+    7digital (LP: #1381930)
+
+  [ Ubuntu daily release ]
+  * New rebuild forced
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Fri, 07 Nov 2014 03:23:56 +0000
+
 qtubuntu-media (0.7.1+15.04.20141107~rtm-0ubuntu1) 14.09; urgency=low
 
   [ Jim Hodapp ]

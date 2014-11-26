@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1+15.04.20141126.1-0ubuntu1) vivid; urgency=low
+
+  [ Justin McPherson ]
+  * Changes to match new functionality in media-hub.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Wed, 26 Nov 2014 14:43:11 +0000
+
 qtubuntu-media (0.7.1+15.04.20141107-0ubuntu1) vivid; urgency=low
 
   [ Jim Hodapp ]

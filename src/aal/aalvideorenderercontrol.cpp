@@ -38,6 +38,8 @@
 
 #include <qgl.h>
 
+Q_DECLARE_METATYPE(std::shared_ptr<core::ubuntu::media::video::Sink>);
+
 namespace media = core::ubuntu::media;
 using namespace std::placeholders;
 
@@ -100,6 +102,9 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
+
+    // Make the video sink ptr known to qt.
+
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -160,11 +165,11 @@ void AalVideoRendererControl::setupSurface()
     updateVideoTexture();
 }
 
-void AalVideoRendererControl::onVideoDimensionChanged(uint64_t mask)
+void AalVideoRendererControl::onVideoDimensionChanged(const core::ubuntu::media::video::Dimensions& dimensions)
 {
     qDebug() << Q_FUNC_INFO;
-    const uint32_t width = static_cast<uint32_t>(mask & 0xFFFF);
-    const uint32_t height = static_cast<uint32_t>(mask >> 32);
+    const uint32_t width = std::get<1>(dimensions).as<uint32_t>();
+    const uint32_t height = std::get<0>(dimensions).as<uint32_t>();
 
     // Make sure that X & Y remain flipped between multiple playbacks in the
     // same session
@@ -215,7 +220,7 @@ void AalVideoRendererControl::updateVideoTexture()
         m_secondFrame = true;
     }
     else if (m_secondFrame) {
-        frame.setMetaData("GLConsumer", QVariant::fromValue((uint64_t)m_service->glConsumer()));
+        frame.setMetaData("GLVideoSink", QVariant::fromValue(m_videoSink));
         m_secondFrame = false;
     }
 
@@ -228,7 +233,19 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
         qDebug() << "Creating video sink";
-        m_service->createVideoSink(textureID);
+        m_videoSink = m_service->createVideoSink(textureID);
+
+        // This lambda gets called after every successfully decoded video frame
+        m_videoSink->frame_available().connect([this]()
+        {
+
+#ifdef MEASURE_PERFORMANCE
+            s->measurePerformance();
+#endif
+            QMetaObject::invokeMethod(this, "updateVideoTexture", Qt::QueuedConnection);
+        });
+        // This call will make sure the video sink gets set on qtvideo-node
+        updateVideoTexture();
     }
     else
         qDebug() << "Already have a texture id and video sink, not creating a new one";

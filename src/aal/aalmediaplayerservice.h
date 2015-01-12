@@ -34,9 +34,12 @@ class txt_MediaPlayerPlugin;
 class QTimerEvent;
 
 namespace core { namespace ubuntu { namespace media {
-    class Service;
-    class Player;
-    class TrackList;
+namespace video {
+    class Sink;
+}
+class Service;
+class Player;
+class TrackList;
 } } }
 
 class AalMediaPlayerService : public QMediaService
@@ -58,11 +61,9 @@ public:
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
-    GLConsumerWrapperHybris glConsumer() const;
-
     bool newMediaPlayer();
 
-    void createVideoSink(uint32_t texture_id);
+    std::shared_ptr<core::ubuntu::media::video::Sink> createVideoSink(uint32_t texture_id);
 
     QMediaPlayer::AudioRole audioRole() const;
     void setAudioRole(QMediaPlayer::AudioRole audioRole);

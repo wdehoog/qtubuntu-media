@@ -47,14 +47,6 @@ enum {
     BAD_VALUE   = -EINVAL,
 };
 
-core::ubuntu::media::Player::FrameAvailableCb empty_frame_available_cb = [](void*)
-{
-};
-
-core::ubuntu::media::Player::PlaybackCompleteCb empty_playback_complete_cb = [](void*)
-{
-};
-
 core::Signal<void> the_void;
 }
 
@@ -128,16 +120,6 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
         delete control;
 }
 
-AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Cannot return glConsumer without a valid media-hub player session";
-        return NULL;
-    }
-    return m_hubPlayerSession->gl_consumer();
-}
-
 bool AalMediaPlayerService::newMediaPlayer()
 {
     // Only one player session needed
@@ -161,45 +143,15 @@ bool AalMediaPlayerService::newMediaPlayer()
     return true;
 }
 
-void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
+std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    if (m_hubPlayerSession == NULL)
+    if (not m_hubPlayerSession) throw std::runtime_error
     {
-        qWarning() << "Cannot create a video sink without a valid media-hub player session";
-        return;
-    }
+        "Cannot create a video sink without a valid media-hub player session"
+    };
 
-    try {
-        m_hubPlayerSession->create_video_sink(texture_id);
-        // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
-        m_videoOutput->updateVideoTexture();
-
-        // This lambda gets called after every successfully decoded video frame
-        m_hubPlayerSession->set_frame_available_callback([](void *context)
-        {
-            if (context != NULL)
-            {
-                auto s = static_cast<AalMediaPlayerService*>(context);
-
-                // We might receive this callback after the control has been released.
-                // In that case, we return early.
-                if (not s->videoOutputControl())
-                    return;
-
-#ifdef MEASURE_PERFORMANCE
-                s->measurePerformance();
-#endif
-                QMetaObject::invokeMethod(s->videoOutputControl(), "updateVideoTexture", Qt::QueuedConnection);
-            }
-        },
-        static_cast<void*>(this));
-    }
-    catch (std::runtime_error &e) {
-        qWarning() << "Failed to create video sink: " << e.what();
-        return;
-    }
-
-    m_videoOutputReady = true;
+    auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
+    m_videoOutputReady = true; return sink;
 }
 
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
@@ -449,12 +401,11 @@ void AalMediaPlayerService::createMediaPlayerControl()
         return;
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
-    m_hubPlayerSession->set_playback_complete_callback([](void *context)
+    m_hubPlayerSession->end_of_stream().connect([this]()
     {
-        auto control = static_cast<AalMediaPlayerControl*>(context);
-        control->playbackComplete();
-    },
-    m_mediaPlayerControl);
+        if (m_mediaPlayerControl)
+            m_mediaPlayerControl->playbackComplete();
+    });
 }
 
 void AalMediaPlayerService::createVideoRendererControl()
@@ -470,10 +421,6 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
     if (m_hubPlayerSession == NULL)
         return;
 
-    m_hubPlayerSession->set_playback_complete_callback(
-                empty_playback_complete_cb,
-                nullptr);
-
     delete m_mediaPlayerControl;
     m_mediaPlayerControl = NULL;
 }
@@ -482,10 +429,6 @@ void AalMediaPlayerService::deleteVideoRendererControl()
 {
     if (m_hubPlayerSession == NULL)
         return;
-
-    m_hubPlayerSession->set_frame_available_callback(
-                empty_frame_available_cb,
-                nullptr);
 
     delete m_videoOutput;
     m_videoOutput = NULL;

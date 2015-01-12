@@ -21,6 +21,9 @@
 #include <core/media/player.h>
 #include <core/media/track_list.h>
 
+#include <core/media/video/dimensions.h>
+#include <core/media/video/sink.h>
+
 #include <cstdint>
 #include <memory>
 
@@ -41,17 +44,13 @@ public:
 
     virtual bool open_uri(const Track::UriType& uri);
     virtual bool open_uri(const Track::UriType&, const HeadersType&);
-    virtual void create_video_sink(uint32_t texture_id);
-    virtual GLConsumerWrapperHybris gl_consumer() const;
+    virtual std::shared_ptr<core::ubuntu::media::video::Sink> create_gl_texture_video_sink(uint32_t texture_id);
     virtual void next();
     virtual void previous();
     virtual void play();
     virtual void pause();
     virtual void seek_to(const std::chrono::microseconds& offset);
     virtual void stop();
-
-    virtual void set_frame_available_callback(FrameAvailableCb cb, void *context);
-    virtual void set_playback_complete_callback(PlaybackCompleteCb cb, void *context);
 
     virtual const core::Property<bool>& can_play() const;
     virtual const core::Property<bool>& can_pause() const;
@@ -85,7 +84,7 @@ public:
     virtual const core::Signal<void>& end_of_stream() const;
     virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
-    virtual const core::Signal<uint64_t>& video_dimension_changed() const;
+    virtual const core::Signal<core::ubuntu::media::video::Dimensions>& video_dimension_changed() const;
 
 private:
     core::Property<int64_t> m_position;

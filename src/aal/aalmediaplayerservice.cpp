@@ -62,6 +62,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     QMediaService(parent),
     m_hubPlayerSession(NULL),
     m_playbackStatusChangedConnection(the_void.connect([](){})),
+    m_errorConnection(the_void.connect([](){})),
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
     m_videoOutputReady(false),
@@ -87,10 +88,13 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
             std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+    m_errorConnection = m_hubPlayerSession->error().connect(
+            std::bind(&AalMediaPlayerService::onError, this, _1));
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
 {
+    m_errorConnection.disconnect();
     m_playbackStatusChangedConnection.disconnect();
 
     deleteMediaPlayerControl();
@@ -491,6 +495,40 @@ void AalMediaPlayerService::deleteVideoRendererControl()
     m_videoOutput = NULL;
 }
 
+void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &error)
+{
+    QMediaPlayer::Error outError = QMediaPlayer::NoError;
+    QString outErrorStr;
+    switch (error)
+    {
+        case media::Player::Error::resource_error:
+            outError = QMediaPlayer::ResourceError;
+            outErrorStr = "A media resource couldn't be resolved.";
+            break;
+        case media::Player::Error::format_error:
+            outError = QMediaPlayer::FormatError;
+            outErrorStr = "The media format type is not playable due to a missing codec.";
+            break;
+        case media::Player::Error::network_error:
+            outError = QMediaPlayer::NetworkError;
+            outErrorStr = "A network error occurred.";
+            break;
+        case media::Player::Error::access_denied_error:
+            outError = QMediaPlayer::AccessDeniedError;
+            outErrorStr = "Insufficient privileges to play that media.";
+            break;
+        case media::Player::Error::service_missing_error:
+            outError = QMediaPlayer::ServiceMissingError;
+            outErrorStr = "A valid playback service was not found, playback cannot proceed.";
+            break;
+        default:
+            break;
+    }
+
+    if (outError != QMediaPlayer::NoError)
+        m_mediaPlayerControl->error(outError, outErrorStr);
+}
+
 void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
 {
     // The media player control might have been released prior to this call. For that, we check for
@@ -517,6 +555,12 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
         default:
             qWarning() << "Unknown PlaybackStatus: " << status;
     }
+}
+
+void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)
+{
+    qWarning() << "** Media playback error: " << error;
+    signalQMediaPlayerError(error);
 }
 
 void AalMediaPlayerService::pushPlaylist()

@@ -296,6 +296,12 @@ const core::Signal<uint64_t>& TestPlayer::video_dimension_changed() const
     return ret;
 }
 
+const core::Signal<Player::Error>& TestPlayer::error() const
+{
+    static core::Signal<Player::Error> ret;
+    return ret;
+}
+
 const std::shared_ptr<Service> Service::Client::instance()
 {
     return NULL;

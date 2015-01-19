@@ -107,11 +107,16 @@ private:
     void deleteMediaPlayerControl();
     void deleteVideoRendererControl();
 
+    // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
+    void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
+
     void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
+    void onError(const core::ubuntu::media::Player::Error &error);
 
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     core::Connection m_playbackStatusChangedConnection;
+    core::Connection m_errorConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;

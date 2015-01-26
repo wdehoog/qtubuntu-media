@@ -1,3 +1,11 @@
+qtubuntu-media (0.7.1+15.04.20150120-0ubuntu1) vivid; urgency=low
+
+  [ Jim Hodapp ]
+  * Subscribe to Player::Error() signal from media-hub and translate and
+    push up to app layer.
+
+ -- Ubuntu daily release <ps-jenkins@lists.canonical.com>  Tue, 20 Jan 2015 02:11:25 +0000
+
 qtubuntu-media (0.7.1+15.04.20141126.1-0ubuntu1) vivid; urgency=low
 
   [ Justin McPherson ]

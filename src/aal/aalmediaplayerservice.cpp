@@ -16,6 +16,7 @@
 
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
+#include "aalmetadatareadercontrol.h"
 
 #include <core/media/service.h>
 #include <core/media/track_list.h>
@@ -65,6 +66,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_errorConnection(the_void.connect([](){})),
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
+    m_metaDataReaderControl(nullptr),
     m_videoOutputReady(false),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
@@ -83,6 +85,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     if (m_hubPlayerSession == NULL)
         return;
 
+    createMetaDataReaderControl();
     createMediaPlayerControl();
     createVideoRendererControl();
 
@@ -99,24 +102,37 @@ AalMediaPlayerService::~AalMediaPlayerService()
 
     deleteMediaPlayerControl();
     deleteVideoRendererControl();
+    deleteMetaDataReaderControl();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
+    qDebug() << Q_FUNC_INFO;
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
+        qDebug() << "Requested QMediaPlayerControl";
         if (not m_mediaPlayerControl)
             createMediaPlayerControl();
 
         return m_mediaPlayerControl;
     }
 
-    if (qstrcmp(name, QVideoRendererControl_iid) == 0)    
+    if (qstrcmp(name, QVideoRendererControl_iid) == 0)
     {
+        qDebug() << "Requested QVideoRendererControl";
         if (not m_videoOutput)
             createVideoRendererControl();
 
         return m_videoOutput;
+    }
+
+    if (qstrcmp(name, QMetaDataReaderControl_iid) == 0)
+    {
+        qDebug() << "Requested QMetaDataReaderControl";
+        if (not m_metaDataReaderControl)
+            createMetaDataReaderControl();
+
+        return m_metaDataReaderControl;
     }
 
     return NULL;
@@ -128,6 +144,8 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
         deleteMediaPlayerControl();
     else if (control == m_videoOutput)
         deleteVideoRendererControl();
+    else if (control == m_metaDataReaderControl)
+        deleteMetaDataReaderControl();
     else
         delete control;
 }
@@ -469,6 +487,19 @@ void AalMediaPlayerService::createVideoRendererControl()
     m_videoOutput = new AalVideoRendererControl(this);
 }
 
+void AalMediaPlayerService::createMetaDataReaderControl()
+{
+    if (m_hubPlayerSession == NULL)
+        return;
+
+    m_metaDataReaderControl = new AalMetaDataReaderControl(this);
+
+    connect(m_mediaPlayerControl, SIGNAL(mediaChanged(QMediaContent)),
+            m_metaDataReaderControl, SLOT(onMediaChanged(QMediaContent)));
+    connect(m_mediaPlayerControl, SIGNAL(metaDataUpdated()),
+            m_metaDataReaderControl, SLOT(onUpdateMetaData()));
+}
+
 void AalMediaPlayerService::deleteMediaPlayerControl()
 {
     if (m_hubPlayerSession == NULL)
@@ -484,7 +515,7 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
 void AalMediaPlayerService::deleteVideoRendererControl()
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
         return;
 
     m_hubPlayerSession->set_frame_available_callback(
@@ -492,7 +523,16 @@ void AalMediaPlayerService::deleteVideoRendererControl()
                 nullptr);
 
     delete m_videoOutput;
-    m_videoOutput = NULL;
+    m_videoOutput = nullptr;
+}
+
+void AalMediaPlayerService::deleteMetaDataReaderControl()
+{
+    if (m_hubPlayerSession == nullptr)
+        return;
+
+    delete m_metaDataReaderControl;
+    m_metaDataReaderControl = nullptr;
 }
 
 void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &error)

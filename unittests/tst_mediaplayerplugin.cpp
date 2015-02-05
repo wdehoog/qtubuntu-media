@@ -17,13 +17,11 @@
 #include "player.h"
 #include "service.h"
 #include "aalmediaplayerservice.h"
-
-#include <core/media/player.h>
+#include "tst_mediaplayerplugin.h"
+#include "tst_metadatareadercontrol.h"
 
 #include <memory>
 
-#include <QObject>
-#include <QMediaPlayerControl>
 #include <QVideoRendererControl>
 #include <QtTest/QtTest>
 
@@ -34,41 +32,11 @@
 using namespace std;
 using namespace core::ubuntu::media;
 
-class tst_MediaPlayerPlugin : public QObject
-{
-    Q_OBJECT
-
-    AalMediaPlayerService *m_service;
-    AalMediaPlayerControl *m_mediaPlayerControl;
-    QMediaControl *m_playerControl;
-    QMediaControl *m_rendererControl;
-    shared_ptr<Player> m_player;
-    shared_ptr<Service> m_hubService;
-
-private Q_SLOTS:
-    // We want the setup to be run prior to every test case to
-    // ensure correct test isolation, see http://qt-project.org/doc/qt-5/qtest-overview.html.
-    void init();
-
-    void tst_requestRelease();
-    void tst_newMediaPlayer();
-    void tst_setMedia();
-    void tst_unescape();
-    void tst_play();
-    void tst_pause();
-    void tst_stop();
-    void tst_position();
-    void tst_duration();
-    void tst_isAudioSource();
-    void tst_isVideoSource();
-    void tst_volume();
-};
-
 void tst_MediaPlayerPlugin::init()
 {
     m_hubService.reset(new TestService());
     m_service = new AalMediaPlayerService(this);
-    m_service->setService(m_hubService);    
+    m_service->setService(m_hubService);
     m_player.reset(new TestPlayer());
     m_service->setPlayer(m_player);
     m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
@@ -169,6 +137,11 @@ void tst_MediaPlayerPlugin::tst_volume()
     QVERIFY(m_mediaPlayerControl->volume() == 1);
 }
 
-QTEST_GUILESS_MAIN(tst_MediaPlayerPlugin)
-
-#include "tst_mediaplayerplugin.moc"
+int main(int argc, char **argv)
+{
+    // Create a GUI-less unit test standalone app
+    QCoreApplication app(argc, argv);
+    tst_MediaPlayerPlugin mpp;
+    tst_MetaDataReaderControl mdrc;
+    return QTest::qExec(&mpp, argc, argv) & QTest::qExec(&mdrc, argc, argv);
+}

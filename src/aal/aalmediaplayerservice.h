@@ -29,6 +29,7 @@
 
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
+class QMetaDataReaderControl;
 class AalVideoRendererControl;
 class txt_MediaPlayerPlugin;
 class QTimerEvent;
@@ -103,9 +104,11 @@ protected:
 private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
+    void createMetaDataReaderControl();
 
     void deleteMediaPlayerControl();
     void deleteVideoRendererControl();
+    void deleteMetaDataReaderControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -120,6 +123,7 @@ private:
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
+    QMetaDataReaderControl *m_metaDataReaderControl;
     bool m_videoOutputReady;
 
     int64_t m_cachedDuration;

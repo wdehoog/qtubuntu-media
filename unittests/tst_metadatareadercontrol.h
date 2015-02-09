@@ -17,11 +17,27 @@
 #ifndef TST_METADATAREADERCONTROL_H
 #define TST_METADATAREADERCONTROL_H
 
+#include <core/media/player.h>
+
+#include <memory>
+
 #include <QObject>
+
+class AalMediaPlayerService;
+class AalMediaPlayerControl;
+class QMediaControl;
+class QMediaPlayer;
 
 class tst_MetaDataReaderControl : public QObject
 {
     Q_OBJECT
+
+    AalMediaPlayerService *m_service;
+    AalMediaPlayerControl *m_mediaPlayerControl;
+    QMediaControl *m_playerControl;
+    std::shared_ptr<core::ubuntu::media::Player> m_hubPlayer;
+    std::shared_ptr<core::ubuntu::media::Service> m_hubService;
+    QMediaPlayer *m_qMediaPlayer;
 
 private Q_SLOTS:
     // We want the setup to be run prior to every test case to

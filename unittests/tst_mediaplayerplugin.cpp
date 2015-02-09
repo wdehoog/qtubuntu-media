@@ -26,7 +26,6 @@
 #include <QtTest/QtTest>
 
 #define private public
-
 #include "aalmediaplayercontrol.h"
 
 using namespace std;

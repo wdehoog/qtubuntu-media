@@ -51,6 +51,8 @@ public:
     typedef void *GLConsumerWrapperHybris;
 
     AalMediaPlayerService(QObject *parent = 0);
+    AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
+            const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent = 0);
     ~AalMediaPlayerService();
 
     QMediaControl* requestControl(const char *name);

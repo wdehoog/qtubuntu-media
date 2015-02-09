@@ -15,30 +15,56 @@
  */
 
 #include "tst_metadatareadercontrol.h"
+#include "player.h"
+#include "service.h"
+#include "aalmediaplayerservice.h"
 #include "aalmetadatareadercontrol.h"
 
 #include <QMediaContent>
+#include <QMediaControl>
 #include <QMediaPlayer>
 #include <QMediaResource>
 #include <QMediaMetaData>
 #include <QObject>
 #include <QtTest/QtTest>
 
+#define private public
+#include "aalmediaplayercontrol.h"
+
+using namespace core::ubuntu::media;
+
 void tst_MetaDataReaderControl::initTestCase()
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_hubService.reset(new TestService());
+    m_hubPlayer.reset(new TestPlayer());
+    qDebug() << "Creating new AalMediaPlayerService(this)";
+    m_service = new AalMediaPlayerService(m_hubService, m_hubPlayer, this);
+    //qDebug() << "Calling setService with m_hubService";
+    //m_service->setService(m_hubService);
+    //m_service->setPlayer(m_player);
+    m_qMediaPlayer = new QMediaPlayer(this);
+
+    //m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
+    m_mediaPlayerControl = m_service->mediaPlayerControl();
+    //QVERIFY(m_playerControl != NULL);
 }
 
 void tst_MetaDataReaderControl::getResolution()
 {
-    QMediaPlayer p;
-    QMediaResource mediaResource(QUrl("file://home/phablet/Videos/h264.avi"));
+    bool ret = m_service->newMediaPlayer();
+    QVERIFY(ret == true);
+    //QMediaResource mediaResource(QUrl("/home/phablet/Videos/h264.avi"));
+    QMediaResource mediaResource(QUrl("/home/phablet/Videos/com.ubuntu.camera/video20150113_161726582.mp4"));
     QMediaContent media(mediaResource);
     qDebug() << "Setting media source file on QMediaPlayer instance";
-    p.setMedia(media);
+    m_qMediaPlayer->setMedia(media);
+    m_mediaPlayerControl->setMedia(media, nullptr);
 
     qDebug() << "Requesting QMediaMetaData";
-    QSize resolutionSize = p.metaData(QMediaMetaData::Resolution).value<QSize>();
+    QSize resolutionSize = m_qMediaPlayer->metaData(QMediaMetaData::Resolution).value<QSize>();
     qDebug() << "Requested QMediaMetaData";
+    qDebug() << "m_qMediaPlayer->isMetaDataAvailable(): " << m_qMediaPlayer->isMetaDataAvailable();
     qDebug() << "resolutionSize: " << resolutionSize;
 }

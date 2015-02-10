@@ -14,7 +14,6 @@ INCLUDEPATH += ../src/aal \
     /usr/include/mediascanner-2.0
 LIBS += \
     -lqtubuntu-media-signals \
-    -lmedia-hub-client \
     -lmediascanner-2.0
 
 HEADERS += \

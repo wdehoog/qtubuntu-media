@@ -21,8 +21,11 @@
 
 #include <memory>
 
+#include <QMediaContent>
+#include <QMediaResource>
 #include <QObject>
 
+class AalMetaDataReaderControl;
 class AalMediaPlayerService;
 class AalMediaPlayerControl;
 class QMediaControl;
@@ -32,19 +35,38 @@ class tst_MetaDataReaderControl : public QObject
 {
     Q_OBJECT
 
-    AalMediaPlayerService *m_service;
-    AalMediaPlayerControl *m_mediaPlayerControl;
-    QMediaControl *m_playerControl;
-    std::shared_ptr<core::ubuntu::media::Player> m_hubPlayer;
-    std::shared_ptr<core::ubuntu::media::Service> m_hubService;
-    QMediaPlayer *m_qMediaPlayer;
+    AalMetaDataReaderControl *m_mdControlVideo;
+    AalMetaDataReaderControl *m_mdControlAudio;
+    AalMetaDataReaderControl *m_mdControlImage;
+    QMediaResource m_mediaResource;
+    QMediaContent m_media;
+
+Q_SIGNALS:
+    void onMediaChanged(const QMediaContent &media);
 
 private Q_SLOTS:
     // We want the setup to be run prior to every test case to
     // ensure correct test isolation, see http://qt-project.org/doc/qt-5/qtest-overview.html.
     void initTestCase();
+    void cleanupTestCase();
 
-    void getResolution();
+    void verifyResolution();
+    void verifyDuration();
+    void verifyTitle();
+    void verifyAuthor();
+    void verifyGenre();
+
+    void verifyDate();
+    void verifyAlbumTitle();
+    void verifyAlbumArtist();
+
+    void verifyLatitude();
+    void verifyLongitude();
+
+private:
+    void setVideoMediaResource();
+    void setAudioMediaResource();
+    void setImageMediaResource();
 };
 
 #endif // TST_METADATAREADERCONTROL_H

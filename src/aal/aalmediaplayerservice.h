@@ -31,7 +31,7 @@ class AalMediaPlayerControl;
 class QMediaPlayerControl;
 class QMetaDataReaderControl;
 class AalVideoRendererControl;
-class txt_MediaPlayerPlugin;
+class tst_MediaPlayerPlugin;
 class QTimerEvent;
 
 namespace core { namespace ubuntu { namespace media {

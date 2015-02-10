@@ -20,11 +20,17 @@
 #include <QMetaDataReaderControl>
 #include <qmediacontent.h>
 
+class tst_MetaDataReaderControl;
+
 QT_BEGIN_NAMESPACE
 
 class AalMetaDataReaderControl : public QMetaDataReaderControl
 {
     Q_OBJECT
+
+    // For unit testing purposes
+    friend class tst_MetaDataReaderControl;
+
 public:
     explicit AalMetaDataReaderControl(QObject *parent = 0);
 

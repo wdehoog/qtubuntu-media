@@ -15,69 +15,154 @@
  */
 
 #include "tst_metadatareadercontrol.h"
-#include "player.h"
-#include "service.h"
-#include "aalmediaplayerservice.h"
 #include "aalmetadatareadercontrol.h"
 
-#include <QMediaContent>
-#include <QMediaControl>
-#include <QMediaPlayer>
-#include <QMediaResource>
 #include <QMediaMetaData>
 #include <QObject>
 #include <QtTest/QtTest>
-
-#define private public
-#include "aalmediaplayercontrol.h"
 
 using namespace core::ubuntu::media;
 
 void tst_MetaDataReaderControl::initTestCase()
 {
-    qDebug() << Q_FUNC_INFO;
+    m_mdControlVideo = new AalMetaDataReaderControl(this);
+    m_mdControlAudio = new AalMetaDataReaderControl(this);
+    m_mdControlImage = new AalMetaDataReaderControl(this);
 
-#if 0
-    m_hubService.reset(new TestService());
-    m_hubPlayer.reset(new TestPlayer());
-    qDebug() << "Creating new AalMediaPlayerService(this)";
-    m_service = new AalMediaPlayerService(m_hubService, m_hubPlayer, this);
-#endif
-    //qDebug() << "Calling setService with m_hubService";
-    //m_service->setService(m_hubService);
-    //m_service->setPlayer(m_player);
-    m_qMediaPlayer = new QMediaPlayer(this);
+    QVERIFY(m_mdControlVideo != nullptr);
+    QVERIFY(m_mdControlAudio != nullptr);
+    QVERIFY(m_mdControlImage != nullptr);
 
-    //m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
-#if 0
-    m_mediaPlayerControl = m_service->mediaPlayerControl();
-#endif
-    //QVERIFY(m_playerControl != NULL);
+    connect(this, SIGNAL(onMediaChanged(const QMediaContent&)), m_mdControlVideo, SLOT(onMediaChanged(const QMediaContent&)));
+    connect(this, SIGNAL(onMediaChanged(const QMediaContent&)), m_mdControlAudio, SLOT(onMediaChanged(const QMediaContent&)));
+    connect(this, SIGNAL(onMediaChanged(const QMediaContent&)), m_mdControlImage, SLOT(onMediaChanged(const QMediaContent&)));
 }
 
-void tst_MetaDataReaderControl::getResolution()
+void tst_MetaDataReaderControl::cleanupTestCase()
 {
-#if 0
-    bool ret = m_service->newMediaPlayer();
-    QVERIFY(ret == true);
-#endif
-    //QMediaResource mediaResource(QUrl("/home/phablet/Videos/h264.avi"));
-    QMediaResource mediaResource(QUrl("/home/phablet/Videos/com.ubuntu.camera/video20150113_161726582.mp4"));
-    QMediaContent media(mediaResource);
-    if (!m_qMediaPlayer->isAvailable())
-    {
-        qWarning() << "QMediaService is not available.";
-        Q_ASSERT(false);
-    }
-    qDebug() << "Setting media source file on QMediaPlayer instance";
-    m_qMediaPlayer->setMedia(media);
-#if 0
-    m_mediaPlayerControl->setMedia(media, nullptr);
-#endif
+    delete m_mdControlImage;
+    delete m_mdControlAudio;
+    delete m_mdControlVideo;
+}
 
-    qDebug() << "Requesting QMediaMetaData";
-    QSize resolutionSize = m_qMediaPlayer->metaData(QMediaMetaData::Resolution).value<QSize>();
-    qDebug() << "Requested QMediaMetaData";
-    qDebug() << "m_qMediaPlayer->isMetaDataAvailable(): " << m_qMediaPlayer->isMetaDataAvailable();
-    qDebug() << "resolutionSize: " << resolutionSize;
+// Adapted to have custom delta from qFuzzyCompare
+static inline bool fuzzyCompare(double p1, double p2)
+{
+    return (qAbs(p1 - p2) <= 0.00001 * qMin(qAbs(p1), qAbs(p2)));
+}
+
+void tst_MetaDataReaderControl::setVideoMediaResource()
+{
+    m_mediaResource = QMediaResource(QUrl("/home/phablet/Videos/h264.mp4"));
+    m_media = QMediaContent(m_mediaResource);
+    // Signal to the AalMetaDataReaderControl instance that we are setting example media to extract metadata from
+    Q_EMIT onMediaChanged(m_media);
+}
+
+void tst_MetaDataReaderControl::setAudioMediaResource()
+{
+    m_mediaResource = QMediaResource(QUrl("/home/phablet/Music/testfile.ogg"));
+    m_media = QMediaContent(m_mediaResource);
+    // Signal to the AalMetaDataReaderControl instance that we are setting example media to extract metadata from
+    Q_EMIT onMediaChanged(m_media);
+}
+
+void tst_MetaDataReaderControl::setImageMediaResource()
+{
+    m_mediaResource = QMediaResource(QUrl("/home/phablet/Pictures/testfile.jpg"));
+    m_media = QMediaContent(m_mediaResource);
+    // Signal to the AalMetaDataReaderControl instance that we are setting example media to extract metadata from
+    Q_EMIT onMediaChanged(m_media);
+}
+
+void tst_MetaDataReaderControl::verifyResolution()
+{
+    setVideoMediaResource();
+    QSize resolutionSize = m_mdControlVideo->metaData(QMediaMetaData::Resolution).value<QSize>();
+    QCOMPARE(resolutionSize, QSize(320, 240));
+
+    setImageMediaResource();
+    resolutionSize = m_mdControlVideo->metaData(QMediaMetaData::Resolution).value<QSize>();
+    QCOMPARE(resolutionSize, QSize(2448, 3264));
+}
+
+void tst_MetaDataReaderControl::verifyDuration()
+{
+    setVideoMediaResource();
+    qint64 duration = m_mdControlVideo->metaData(QMediaMetaData::Duration).value<qint64>();
+    QCOMPARE(duration, 34);
+
+    setAudioMediaResource();
+    duration = m_mdControlVideo->metaData(QMediaMetaData::Duration).value<qint64>();
+    QCOMPARE(duration, 5);
+}
+
+void tst_MetaDataReaderControl::verifyTitle()
+{
+    setVideoMediaResource();
+    QString title = m_mdControlVideo->metaData(QMediaMetaData::Title).value<QString>();
+    QCOMPARE(title, QString("h264 title"));
+
+    setAudioMediaResource();
+    title = m_mdControlVideo->metaData(QMediaMetaData::Title).value<QString>();
+    QCOMPARE(title, QString("track1"));
+}
+
+void tst_MetaDataReaderControl::verifyAuthor()
+{
+    setVideoMediaResource();
+    QString author = m_mdControlVideo->metaData(QMediaMetaData::Author).value<QString>();
+    QCOMPARE(author, QString("Canonical"));
+}
+
+void tst_MetaDataReaderControl::verifyGenre()
+{
+    setVideoMediaResource();
+    QString genre = m_mdControlVideo->metaData(QMediaMetaData::Genre).value<QString>();
+    QCOMPARE(genre, QString("Trailer"));
+
+    setAudioMediaResource();
+    genre = m_mdControlAudio->metaData(QMediaMetaData::Genre).value<QString>();
+    QCOMPARE(genre, QString("Progressive Rock"));
+}
+
+void tst_MetaDataReaderControl::verifyDate()
+{
+    setAudioMediaResource();
+    QDate date = m_mdControlAudio->metaData(QMediaMetaData::Date).value<QDate>();
+    QCOMPARE(date, QDate(2013, 0, 0));
+
+    setImageMediaResource();
+    date = m_mdControlAudio->metaData(QMediaMetaData::Date).value<QDate>();
+    QCOMPARE(date, QDate(2015, 2, 10));
+}
+
+void tst_MetaDataReaderControl::verifyAlbumTitle()
+{
+    setAudioMediaResource();
+    QString title = m_mdControlAudio->metaData(QMediaMetaData::AlbumTitle).value<QString>();
+    QCOMPARE(title, QString("album1"));
+}
+
+void tst_MetaDataReaderControl::verifyAlbumArtist()
+{
+    setAudioMediaResource();
+    QString artist = m_mdControlAudio->metaData(QMediaMetaData::AlbumArtist).value<QString>();
+    QCOMPARE(artist, QString("artist1"));
+}
+
+void tst_MetaDataReaderControl::verifyLatitude()
+{
+    setImageMediaResource();
+    double latitude = m_mdControlImage->metaData(QMediaMetaData::GPSLatitude).value<double>();
+    qDebug() << "latitude: " << latitude;
+    QVERIFY(fuzzyCompare(latitude, 39.8566));
+}
+
+void tst_MetaDataReaderControl::verifyLongitude()
+{
+    setImageMediaResource();
+    double longitude = m_mdControlImage->metaData(QMediaMetaData::GPSLongitude).value<double>();
+    qDebug() << "longitude: " << longitude;
+    QVERIFY(fuzzyCompare(longitude, -86.1242));
 }

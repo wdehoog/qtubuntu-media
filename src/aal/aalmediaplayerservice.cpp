@@ -79,7 +79,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 {
     qDebug() << "Here1";
     m_hubService = media::Service::Client::instance();
-    qDebug() << "m_hubService: " << (m_hubService == nullptr);
+    qDebug() << "m_hubService (nullptr?): " << (m_hubService == nullptr);
     qDebug() << "Construct (this: " << this << ")";
     qDebug() << "Here2";
 
@@ -96,7 +96,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     qDebug() << "Creating new QMediaPlayerControl instance";
     createMediaPlayerControl();
+    qDebug() << "Creating new QVideoRendererControl instance";
     createVideoRendererControl();
+    qDebug() << "Creating new QMetaDataReaderControl instance";
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
@@ -126,7 +128,7 @@ AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu:
 #endif
 {
     qDebug() << "Here0";
-    qDebug() << "m_hubService: " << (m_hubService == nullptr);
+    qDebug() << "m_hubService (nullptr?): " << (m_hubService == nullptr);
     qDebug() << "Construct (this: " << this << ")";
     qDebug() << "Here1";
 
@@ -138,7 +140,9 @@ AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu:
 
     qDebug() << "Creating new QMediaPlayerControl instance";
     createMediaPlayerControl();
+    qDebug() << "Creating new QVideoRendererControl instance";
     createVideoRendererControl();
+    qDebug() << "Creating new QMetaDataReaderControl instance";
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(

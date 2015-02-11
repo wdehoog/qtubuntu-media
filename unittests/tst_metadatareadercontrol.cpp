@@ -53,7 +53,7 @@ static inline bool fuzzyCompare(double p1, double p2)
 
 void tst_MetaDataReaderControl::setVideoMediaResource()
 {
-    m_mediaResource = QMediaResource(QUrl("/home/phablet/Videos/h264.mp4"));
+    m_mediaResource = QMediaResource(QUrl("/home/phablet/Videos/testfile.mp4"));
     m_media = QMediaContent(m_mediaResource);
     // Signal to the AalMetaDataReaderControl instance that we are setting example media to extract metadata from
     Q_EMIT onMediaChanged(m_media);

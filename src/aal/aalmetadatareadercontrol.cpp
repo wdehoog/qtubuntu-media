@@ -122,6 +122,7 @@ void AalMetaDataReaderControl::updateMetaData()
             m_metadata.insert(QMediaMetaData::GPSLongitude, mf.getLongitude());
         }
 
+        qDebug() << "-----------------------------------------------------";
         qDebug() << "Media type: " << ((isVideo) ? "video" : "audio");
         qDebug() << "Media title: " << mf.getTitle().c_str();
         qDebug() << "Media author: " << mf.getAuthor().c_str();
@@ -132,9 +133,9 @@ void AalMetaDataReaderControl::updateMetaData()
         qDebug() << "Media width: " << mf.getWidth();
         qDebug() << "Latitude: " << mf.getLatitude();
         qDebug() << "Longitude: " << mf.getLongitude();
-        //qDebug() << "m_metadata: " << m_metadata;
+        qDebug() << "-----------------------------------------------------";
     } catch (std::runtime_error &e) {
-        qWarning() << "Caught runtime exception.";
+        qWarning() << "Caught runtime exception: " << e.what();
     }
 
     bool previousAvailable = m_available;

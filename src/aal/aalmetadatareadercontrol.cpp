@@ -135,7 +135,7 @@ void AalMetaDataReaderControl::updateMetaData()
         qDebug() << "Longitude: " << mf.getLongitude();
         qDebug() << "-----------------------------------------------------";
     } catch (std::runtime_error &e) {
-        qWarning() << "Caught runtime exception: " << e.what();
+        qWarning() << "Caught runtime exception from mediascanner: " << e.what();
     }
 
     bool previousAvailable = m_available;

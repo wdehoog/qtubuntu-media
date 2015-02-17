@@ -140,8 +140,9 @@ int main(int argc, char **argv)
 {
     // Create a GUI-less unit test standalone app
     QCoreApplication app(argc, argv);
-    //tst_MediaPlayerPlugin mpp;
-    tst_MetaDataReaderControl mdrc;
+    tst_MediaPlayerPlugin mpp;
+    //tst_MetaDataReaderControl mdrc;
     //return QTest::qExec(&mpp, argc, argv) & QTest::qExec(&mdrc, argc, argv);
-    return QTest::qExec(&mdrc, argc, argv);
+    return QTest::qExec(&mpp, argc, argv);
+    //return QTest::qExec(&mdrc, argc, argv);
 }

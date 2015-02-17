@@ -26,6 +26,7 @@ Standards-Version: 3.9.4
 # up the code again.
 Vcs-Bzr: lp:qtubuntu-media
 Vcs-Browser: https://code.launchpad.net/qtubuntu-media
+XS-Testsuite: autopkgtest
 
 Package: qtubuntu-media
 Section: libs

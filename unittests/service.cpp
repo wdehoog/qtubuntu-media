@@ -22,9 +22,7 @@ namespace media {
 
 const std::shared_ptr<media::Service> TestService::Client::instance()
 {
-    std::cout << "Creating a new static Service instance" << std::endl;
-    static std::shared_ptr<media::Service> instance{new media::ServiceStub()};
-    return instance;
+    return NULL;
 }
 
 std::shared_ptr<Player> TestService::create_session(const Player::Configuration&)

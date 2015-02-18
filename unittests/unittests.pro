@@ -38,17 +38,5 @@ SOURCES += \
     ../src/aal/aalmediaplayerserviceplugin.cpp \
     ../src/aal/aalvideorenderercontrol.cpp
 
-unix {
-  videos.path = /home/phablet/Videos
-  music.path = /home/phablet/Music
-  pictures.path = /home/phablet/Pictures
-
-  videos.files = videos/*
-  music.files = audio/*
-  pictures.files = images/*
-
-  INSTALLS += videos music pictures
-  # Prevent qmake from trying to strip everything
-  QMAKE_STRIP = echo
-  QMAKE_INSTALL_FILE = install -m 644 -p -o phablet -g phablet
-}
+# Installs required test media into place where the mediascanner will scan them
+system(cd $$PWD; echo $$PWD; ./setup_mediascanner.sh)

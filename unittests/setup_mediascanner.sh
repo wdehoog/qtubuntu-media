@@ -6,12 +6,6 @@ set -e
 TESTFILE="testfile"
 DEST_PREFIX="/home/phablet"
 
-status mediascanner-2.0
-if [ $? -ne 0 ]; then
-    echo "mediascanner-2.0 not running, starting"
-    `start mediascanner-2.0`
-fi
-
 if [ ! -f "/home/phablet/Videos/$TESTFILE.mp4" ]; then
     echo "Copying video/$TESTFILE.mp4 to $DEST_PREFIX/Videos/$TESTFILE.mp4"
     cp videos/$TESTFILE.mp4 $DEST_PREFIX/Videos/$TESTFILE.mp4
@@ -25,4 +19,13 @@ fi
 if [ ! -f "/home/phablet/Pictures/$TESTFILE.jpg" ]; then
     echo "Copying images/$TESTFILE.jpg to $DEST_PREFIX/Pictures/$TESTFILE.jpg"
     cp images/$TESTFILE.jpg $DEST_PREFIX/Pictures/$TESTFILE.jpg
+fi
+
+status mediascanner-2.0
+if [ $? -ne 0 ]; then
+    echo "mediascanner-2.0 not running, starting"
+    `start mediascanner-2.0`
+else
+    echo "restarting mediascanner-2.0"
+    `restart mediascanner-2.0`
 fi

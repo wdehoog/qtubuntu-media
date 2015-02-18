@@ -31,26 +31,21 @@ AalMetaDataReaderControl::AalMetaDataReaderControl(QObject *parent)
     : QMetaDataReaderControl(parent),
       m_available(false)
 {
-    qDebug() << Q_FUNC_INFO;
 }
 
 bool AalMetaDataReaderControl::isMetaDataAvailable() const
 {
-    qDebug() << Q_FUNC_INFO;
     return m_available;
 }
 
 QVariant AalMetaDataReaderControl::metaData(const QString &key) const
 {
     qDebug() << Q_FUNC_INFO;
-    qDebug() << "key: " << key << ", value: " << m_metadata.value(key);
-    qDebug() << "m_metadata: " << m_metadata;
     return m_metadata.value(key);
 }
 
 QStringList AalMetaDataReaderControl::availableMetaData() const
 {
-    qDebug() << Q_FUNC_INFO;
     return m_metadata.keys();
 }
 
@@ -86,9 +81,11 @@ void AalMetaDataReaderControl::updateMetaData()
         MediaStore store(MS_READ_ONLY);
         qDebug() << "Doing a mediascanner lookup of file: " << m_mediaContent.canonicalUrl().toString(QUrl::RemoveScheme);
         MediaFile mf = store.lookup(m_mediaContent.canonicalUrl().toString(QUrl::RemoveScheme).toStdString());
+
         isVideo = (mf.getType() == VideoMedia);
         isAudio = (mf.getType() == AudioMedia);
         isImage = (mf.getType() == ImageMedia);
+
         m_metadata.insert(QMediaMetaData::Title, QString(mf.getTitle().c_str()));
         m_metadata.insert(QMediaMetaData::Author, QStringList(QString(mf.getAuthor().c_str())));
         {
@@ -99,11 +96,13 @@ void AalMetaDataReaderControl::updateMetaData()
         m_metadata.insert(QMediaMetaData::Genre, QStringList(QString(mf.getGenre().c_str())));
         m_metadata.insert(QMediaMetaData::Duration, static_cast<qint64>(mf.getDuration()));
 
+        // Metadata specific to video goes here:
         if (isVideo)
         {
             m_metadata.insert(QMediaMetaData::Resolution, QSize(mf.getWidth(), mf.getHeight()));
         }
 
+        // Metadata specific to audio/music goes here:
         if (isAudio)
         {
             m_metadata.insert(QMediaMetaData::AlbumTitle, QString(mf.getAlbum().c_str()));
@@ -113,6 +112,7 @@ void AalMetaDataReaderControl::updateMetaData()
             m_metadata.insert(QMediaMetaData::TrackNumber, mf.getTrackNumber());
         }
 
+        // Metadata specific to images goes here:
         if (isImage)
         {
             if (m_metadata.value(QMediaMetaData::Resolution).value<QSize>().isEmpty())

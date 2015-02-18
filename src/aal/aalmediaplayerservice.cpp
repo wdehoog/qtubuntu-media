@@ -77,16 +77,10 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
      , m_frameDecodeAvg(0)
 #endif
 {
-    qDebug() << "Here1";
     m_hubService = media::Service::Client::instance();
-    qDebug() << "m_hubService (nullptr?): " << (m_hubService == nullptr);
-    qDebug() << "Construct (this: " << this << ")";
-    qDebug() << "Here2";
 
     if (!newMediaPlayer())
         qWarning() << "Failed to create a new media player backend. Video playback will not function." << endl;
-    qDebug() << "Here3";
-    qDebug() << "m_hubService (after newMediaPlayer): " << (m_hubService == nullptr);
 
     if (m_hubPlayerSession == NULL)
     {
@@ -94,11 +88,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
         return;
     }
 
-    qDebug() << "Creating new QMediaPlayerControl instance";
     createMediaPlayerControl();
-    qDebug() << "Creating new QVideoRendererControl instance";
     createVideoRendererControl();
-    qDebug() << "Creating new QMetaDataReaderControl instance";
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
@@ -127,22 +118,14 @@ AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu:
      , m_frameDecodeAvg(0)
 #endif
 {
-    qDebug() << "Here0";
-    qDebug() << "m_hubService (nullptr?): " << (m_hubService == nullptr);
-    qDebug() << "Construct (this: " << this << ")";
-    qDebug() << "Here1";
-
     if (m_hubPlayerSession == NULL)
     {
         qWarning() << "Could not finish contructing new AalMediaPlayerService instance since m_hubPlayerSession is NULL";
         return;
     }
 
-    qDebug() << "Creating new QMediaPlayerControl instance";
     createMediaPlayerControl();
-    qDebug() << "Creating new QVideoRendererControl instance";
     createVideoRendererControl();
-    qDebug() << "Creating new QMetaDataReaderControl instance";
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
@@ -163,10 +146,8 @@ AalMediaPlayerService::~AalMediaPlayerService()
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
-    qDebug() << Q_FUNC_INFO;
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
-        qDebug() << "Requested QMediaPlayerControl";
         if (not m_mediaPlayerControl)
             createMediaPlayerControl();
 
@@ -175,7 +156,6 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)
     {
-        qDebug() << "Requested QVideoRendererControl";
         if (not m_videoOutput)
             createVideoRendererControl();
 
@@ -184,8 +164,6 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
     if (qstrcmp(name, QMetaDataReaderControl_iid) == 0)
     {
-        qDebug() << "Requested QMetaDataReaderControl: '" << name << "'";
-        qDebug() << "Request (this: " << this << ")";
         if (not m_metaDataReaderControl)
             createMetaDataReaderControl();
 
@@ -547,21 +525,14 @@ void AalMediaPlayerService::createVideoRendererControl()
 void AalMediaPlayerService::createMetaDataReaderControl()
 {
     qDebug() << Q_FUNC_INFO;
-//    if (m_hubPlayerSession == NULL)
-//        return;
 
-    qDebug() << "Creating QMetaDataReaderControl";
     m_metaDataReaderControl = new AalMetaDataReaderControl(this);
 
     if (m_mediaPlayerControl == nullptr)
-        qDebug() << "m_mediaPlayerControl is NULL";
+        qDebug() << "m_mediaPlayerControl is NULL, can't connect mediaChanged signal";
 
     connect(m_mediaPlayerControl, SIGNAL(mediaChanged(QMediaContent)),
             m_metaDataReaderControl, SLOT(onMediaChanged(QMediaContent)));
-#if 0
-    connect(m_mediaPlayerControl, SIGNAL(metaDataUpdated()),
-            m_metaDataReaderControl, SLOT(onUpdateMetaData()));
-#endif
 }
 
 void AalMediaPlayerService::deleteMediaPlayerControl()

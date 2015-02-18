@@ -34,13 +34,27 @@ class AalMetaDataReaderControl : public QMetaDataReaderControl
 public:
     explicit AalMetaDataReaderControl(QObject *parent = 0);
 
+    /**
+     * @brief Returns whether there is any metadata available to read for the given media source.
+     */
     bool isMetaDataAvailable() const Q_DECL_OVERRIDE;
 
+    /**
+     * @brief Returns a metadata value given a metadata key name. See QMediaMetaData for a list of keys.
+     * @return Returns a QVariant with the metadata value.
+     */
     QVariant metaData(const QString &key) const Q_DECL_OVERRIDE;
+    /**
+     * @brief Returns a list of key names for which metadata values are available.
+     * @return Returns a QStringList of key names.
+     */
     QStringList availableMetaData() const Q_DECL_OVERRIDE;
 
 public Q_SLOTS:
     void onMediaChanged(const QMediaContent &media);
+    /**
+     * @brief Updates the internal metadata metadata store from the mediascanner for the given media source.
+     **/
     void onUpdateMetaData();
 
 private:

@@ -37,8 +37,7 @@ Provides: mediaplayerplugin-aal
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          qtvideonode-plugin,
-         libmediascanner-2.0-3,
-         mediascanner2.0,
+         libmediascanner-2.0-3
 Description: QtMultimedia plugin for AAL+
  Video and audio playback plugin that interfaces Qt with
  the hybris media backend on Android.

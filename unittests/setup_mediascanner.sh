@@ -4,7 +4,7 @@
 set -e
 
 TESTFILE="testfile"
-DEST_PREFIX="/home/phablet"
+DEST_PREFIX=$HOME
 
 if [ ! -d "$DEST_PREFIX/Videos" ]; then
     echo "Creating directory $DEST_PREFIX/Videos"

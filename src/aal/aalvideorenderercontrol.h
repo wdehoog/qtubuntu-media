@@ -54,6 +54,8 @@ public:
     uint32_t height() const;
     uint32_t width() const;
 
+    void playbackComplete();
+
     // Callbacks
     static void updateVideoTextureCb(void *context);
 
@@ -84,6 +86,7 @@ private:
     uint32_t m_width;
     bool m_surfaceStarted;
     bool m_flipped;
+    bool m_doRendering;
 
     bool m_firstFrame;
     bool m_secondFrame;

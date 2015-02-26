@@ -122,6 +122,7 @@ private:
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     bool m_videoOutputReady;
+    bool m_firstPlayback;
 
     int64_t m_cachedDuration;
 

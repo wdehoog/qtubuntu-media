@@ -38,6 +38,7 @@
 
 #include <qgl.h>
 
+// Make the video sink ptr known to qt.
 Q_DECLARE_METATYPE(std::shared_ptr<core::ubuntu::media::video::Sink>);
 
 namespace media = core::ubuntu::media;
@@ -90,6 +91,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_width(0),
      m_surfaceStarted(false),
      m_flipped(false),
+     m_doRendering(false),
      m_firstFrame(true),
      m_secondFrame(false)
 #ifdef MEASURE_PERFORMANCE
@@ -102,9 +104,6 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
-
-    // Make the video sink ptr known to qt.
-
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()
@@ -146,10 +145,21 @@ uint32_t AalVideoRendererControl::width() const
     return m_width;
 }
 
-void AalVideoRendererControl::setupSurface()
+void AalVideoRendererControl::playbackComplete()
 {
     qDebug() << Q_FUNC_INFO;
+    // Make updateVideoTexture basically a no-op while this is set to false
+    m_doRendering = false;
 
+    // Reset key member variables so that we can start playback of the same video
+    // another time if the user presses play again
+    m_firstFrame = true;
+    m_secondFrame = false;
+    m_textureId = 0;
+}
+
+void AalVideoRendererControl::setupSurface()
+{
     m_service->getPlayer()->video_dimension_changed().connect(
             std::bind(&AalVideoRendererControl::onVideoDimensionChanged, this, _1));
 
@@ -161,6 +171,9 @@ void AalVideoRendererControl::setupSurface()
 
     if (!m_textureBuffer)
         m_textureBuffer = new AalGLTextureBuffer(m_textureId);
+
+    // Enable rendering by enabling the logic in updateVideoTexture
+    m_doRendering = true;
 
     updateVideoTexture();
 }
@@ -189,6 +202,13 @@ void AalVideoRendererControl::onVideoDimensionChanged(const core::ubuntu::media:
 
 void AalVideoRendererControl::updateVideoTexture()
 {
+    // Only render frames when explicitly desired
+    if (!m_doRendering)
+    {
+        qWarning() << "Rendering not enabled, returning without presenting frame";
+        return;
+    }
+
     if (!m_surface) {
         qWarning() << "m_surface is NULL, can't update video texture" << endl;
         return;
@@ -229,10 +249,8 @@ void AalVideoRendererControl::updateVideoTexture()
 
 void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
-    qDebug() << __PRETTY_FUNCTION__ << ": textureId: " << textureID;
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
-        qDebug() << "Creating video sink";
         m_videoSink = m_service->createVideoSink(textureID);
 
         // This lambda gets called after every successfully decoded video frame
@@ -242,6 +260,7 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 #ifdef MEASURE_PERFORMANCE
             s->measurePerformance();
 #endif
+            //qDebug() << "Frame available";
             QMetaObject::invokeMethod(this, "updateVideoTexture", Qt::QueuedConnection);
         });
         // This call will make sure the video sink gets set on qtvideo-node

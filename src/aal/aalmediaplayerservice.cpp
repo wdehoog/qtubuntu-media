@@ -58,6 +58,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
     m_videoOutputReady(false),
+    m_firstPlayback(true),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
 #ifdef MEASURE_PERFORMANCE
@@ -103,7 +104,7 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
         return m_mediaPlayerControl;
     }
 
-    if (qstrcmp(name, QVideoRendererControl_iid) == 0)    
+    if (qstrcmp(name, QVideoRendererControl_iid) == 0)
     {
         if (not m_videoOutput)
             createVideoRendererControl();
@@ -155,7 +156,10 @@ std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createV
     };
 
     auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
-    m_videoOutputReady = true; return sink;
+
+    m_videoOutputReady = true;
+
+    return sink;
 }
 
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
@@ -225,10 +229,15 @@ void AalMediaPlayerService::play()
         return;
     }
 
+    if (!m_firstPlayback && m_videoOutput != NULL)
+        m_videoOutput->setupSurface();
+
     // If we previously played and hit the end-of-stream, stop will be called which
     // tears down the video sink. We need a new video sink in order to render video again
     if (!m_videoOutputReady && m_videoOutput->textureId() > 0)
+    {
         createVideoSink(m_videoOutput->textureId());
+    }
 
     if ((m_videoOutputReady && isVideoSource())
             || isAudioSource())
@@ -407,8 +416,12 @@ void AalMediaPlayerService::createMediaPlayerControl()
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
     m_hubPlayerSession->end_of_stream().connect([this]()
     {
-        if (m_mediaPlayerControl)
+        m_firstPlayback = false;
+
+        if (m_mediaPlayerControl != NULL)
             m_mediaPlayerControl->playbackComplete();
+        if (m_videoOutput != NULL)
+            m_videoOutput->playbackComplete();
     });
 }
 

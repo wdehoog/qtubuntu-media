@@ -21,6 +21,10 @@
 #include <core/media/video/dimensions.h>
 #include <core/media/video/sink.h>
 
+#include <core/connection.h>
+
+#include <memory>
+
 #include <QImage>
 #include <QVideoFrame>
 #include <QVideoRendererControl>
@@ -73,6 +77,7 @@ private Q_SLOTS:
 
 private:
     void onVideoDimensionChanged(const core::ubuntu::media::video::Dimensions& dimensions);
+    void onFrameAvailable();
     void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
 
     QAbstractVideoSurface *m_surface;
@@ -90,6 +95,8 @@ private:
 
     bool m_firstFrame;
     bool m_secondFrame;
+
+    std::unique_ptr<core::Connection> m_frameAvailableConnection;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameRenderStart;

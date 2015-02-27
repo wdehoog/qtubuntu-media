@@ -21,6 +21,8 @@
 
 #include <core/media/player.h>
 
+#include <core/connection.h>
+
 #include <qmediaplayer.h>
 #include <QMediaPlaylist>
 #include <QMediaService>

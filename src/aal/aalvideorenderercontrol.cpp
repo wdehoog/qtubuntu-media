@@ -108,6 +108,10 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
 
 AalVideoRendererControl::~AalVideoRendererControl()
 {
+    // This is important so that we don't receive anymore frame_available callbacks from
+    // the PlayerStub once this instance is destroyed
+    m_frameAvailableConnection->disconnect();
+
     if (m_textureBuffer) {
         GLuint textureId = m_textureBuffer->handle().toUInt();
         if (textureId > 0)
@@ -200,6 +204,14 @@ void AalVideoRendererControl::onVideoDimensionChanged(const core::ubuntu::media:
     Q_EMIT SharedSignal::instance()->setOrientation(static_cast<SharedSignal::Orientation>(m_orientation), frameSize);
 }
 
+void AalVideoRendererControl::onFrameAvailable()
+{
+#ifdef MEASURE_PERFORMANCE
+    s->measurePerformance();
+#endif
+    QMetaObject::invokeMethod(this, "updateVideoTexture", Qt::QueuedConnection);
+}
+
 void AalVideoRendererControl::updateVideoTexture()
 {
     // Only render frames when explicitly desired
@@ -253,16 +265,10 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
         m_textureId = static_cast<GLuint>(textureID);
         m_videoSink = m_service->createVideoSink(textureID);
 
-        // This lambda gets called after every successfully decoded video frame
-        m_videoSink->frame_available().connect([this]()
-        {
+        // Connect callback so that frames are rendered after decoding
+        m_frameAvailableConnection.reset(new core::Connection(m_videoSink->frame_available().connect(
+                std::bind(&AalVideoRendererControl::onFrameAvailable, this))));
 
-#ifdef MEASURE_PERFORMANCE
-            s->measurePerformance();
-#endif
-            //qDebug() << "Frame available";
-            QMetaObject::invokeMethod(this, "updateVideoTexture", Qt::QueuedConnection);
-        });
         // This call will make sure the video sink gets set on qtvideo-node
         updateVideoTexture();
     }

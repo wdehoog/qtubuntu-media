@@ -108,9 +108,12 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
 
 AalVideoRendererControl::~AalVideoRendererControl()
 {
-    // This is important so that we don't receive anymore frame_available callbacks from
-    // the PlayerStub once this instance is destroyed
-    m_frameAvailableConnection->disconnect();
+    if (m_frameAvailableConnection && m_frameAvailableConnection->is_connected())
+    {
+        // This is important so that we don't receive anymore frame_available callbacks from
+        // the PlayerStub once this instance is destroyed
+        m_frameAvailableConnection->disconnect();
+    }
 
     if (m_textureBuffer) {
         GLuint textureId = m_textureBuffer->handle().toUInt();

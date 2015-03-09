@@ -162,6 +162,14 @@ std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createV
     return sink;
 }
 
+void AalMediaPlayerService::resetVideoSink()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_firstPlayback = false;
+    if (m_videoOutput != NULL)
+        m_videoOutput->playbackComplete();
+}
+
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
 {
     if (m_hubPlayerSession == NULL)
@@ -420,15 +428,19 @@ void AalMediaPlayerService::createMediaPlayerControl()
 
         if (m_mediaPlayerControl != NULL)
             m_mediaPlayerControl->playbackComplete();
+#if 0
         if (m_videoOutput != NULL)
             m_videoOutput->playbackComplete();
+#endif
     });
 
+#if 0
     m_hubPlayerSession->about_to_finish().connect([this]()
     {
         if (m_mediaPlayerControl != NULL)
             m_mediaPlayerControl->aboutToFinish();
     });
+#endif
 }
 
 void AalMediaPlayerService::createVideoRendererControl()

@@ -66,6 +66,8 @@ public:
     bool newMediaPlayer();
 
     std::shared_ptr<core::ubuntu::media::video::Sink> createVideoSink(uint32_t texture_id);
+    // Call this before attempting to play the same video a second time (after EOS)
+    void resetVideoSink();
 
     QMediaPlayer::AudioRole audioRole() const;
     void setAudioRole(QMediaPlayer::AudioRole audioRole);

@@ -298,8 +298,8 @@ void AalMediaPlayerControl::playbackComplete()
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
     qDebug() << "Setting media status to EndOfMedia";
     setMediaStatus(QMediaPlayer::EndOfMedia);
-    qDebug() << "Stopping";
-    stop();
+    //qDebug() << "Stopping";
+    //stop();
     qDebug() << "Seeking to 0";
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());

@@ -30,6 +30,7 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_service(service),
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia),
+    m_cachedDuration(0),
     m_applicationActive(true),
     m_allowSeek(true)
 {
@@ -84,7 +85,9 @@ void AalMediaPlayerControl::setAudioRole(QMediaPlayer::AudioRole audioRole)
 
 qint64 AalMediaPlayerControl::duration() const
 {
-    return m_service->duration();
+    const qint64 d = m_service->duration();
+    m_cachedDuration = d;
+    return d;
 }
 
 qint64 AalMediaPlayerControl::position() const
@@ -103,10 +106,21 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
     if (!m_allowSeek)
         return;
 
+    // Make sure we have a non-zero duration
+    if (m_cachedDuration == 0)
+        updateCachedDuration(duration());
+
     // Debounce seek requests with this single shot timer every 250 ms period
     QTimer::singleShot(250, this, SLOT(debounceSeek()));
 
-    m_service->setPosition(msec);
+    // Seeking directly to EOS is problematic, so step it back on millisecond
+    if (msec == m_cachedDuration)
+    {
+        qDebug() << "** Backing things up to try to get a clean EOS";
+        m_service->setPosition(msec - 500);
+    }
+    else
+        m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);
 
     // Protect from another setPosition until the timer expires
@@ -263,14 +277,22 @@ void AalMediaPlayerControl::stop()
     setState(QMediaPlayer::StoppedState);
 }
 
+void AalMediaPlayerControl::aboutToFinish()
+{
+    qDebug() << __PRETTY_FUNCTION__;
+}
+
 void AalMediaPlayerControl::playbackComplete()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
     // The order of these lines is very important to keep music-app,
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
+    qDebug() << "Seeking to 0";
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());
+    qDebug() << "Stopping";
     stop();
+    qDebug() << "Setting media status to EndOfMedia";
     setMediaStatus(QMediaPlayer::EndOfMedia);
 }
 
@@ -284,6 +306,11 @@ void AalMediaPlayerControl::mediaPrepared()
 void AalMediaPlayerControl::emitDurationChanged(qint64 duration)
 {
     Q_EMIT durationChanged(duration);
+}
+
+void AalMediaPlayerControl::updateCachedDuration(qint64 duration)
+{
+    m_cachedDuration = duration;
 }
 
 QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const

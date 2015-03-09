@@ -59,6 +59,7 @@ public:
 
     void mediaPrepared();
     void emitDurationChanged(qint64 duration);
+    void aboutToFinish();
     void playbackComplete();
 
 public Q_SLOTS:
@@ -70,9 +71,13 @@ private:
     QMediaPlayer::MediaStatus m_status;
     QMediaContent m_mediaContent;
     int m_cachedVolume;
+    // For efficiency so that a lookup over the bus isn't required
+    // every time the user does a seek
+    mutable qint64 m_cachedDuration;
     bool m_applicationActive;
     bool m_allowSeek;
 
+    void updateCachedDuration(qint64 duration);
     QUrl unescape(const QMediaContent &media) const;
     void setMediaStatus(QMediaPlayer::MediaStatus status);
     void setState(QMediaPlayer::State state);

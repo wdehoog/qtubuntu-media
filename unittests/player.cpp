@@ -267,6 +267,12 @@ const core::Signal<int64_t>& TestPlayer::seeked_to() const
     return ret;
 }
 
+const core::Signal<void>& TestPlayer::about_to_finish() const
+{
+    static core::Signal<void> ret;
+    return ret;
+}
+
 const core::Signal<void>& TestPlayer::end_of_stream() const
 {
     static core::Signal<void> ret;

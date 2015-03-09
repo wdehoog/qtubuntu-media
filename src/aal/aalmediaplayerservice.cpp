@@ -423,6 +423,12 @@ void AalMediaPlayerService::createMediaPlayerControl()
         if (m_videoOutput != NULL)
             m_videoOutput->playbackComplete();
     });
+
+    m_hubPlayerSession->about_to_finish().connect([this]()
+    {
+        if (m_mediaPlayerControl != NULL)
+            m_mediaPlayerControl->aboutToFinish();
+    });
 }
 
 void AalMediaPlayerService::createVideoRendererControl()

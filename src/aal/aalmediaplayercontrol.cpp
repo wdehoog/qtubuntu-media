@@ -92,6 +92,7 @@ qint64 AalMediaPlayerControl::duration() const
 
 qint64 AalMediaPlayerControl::position() const
 {
+    const qint64 p = m_service->position();
     return m_service->position();
 }
 
@@ -116,19 +117,6 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
     if (msec == m_cachedDuration)
         playbackComplete();
 
-#if 0
-    // Seeking directly to EOS is problematic, so step it back on millisecond
-    if (msec >= (m_cachedDuration - 500))
-    {
-        qDebug() << "** Backing things up to try to get a clean EOS";
-        m_service->setPosition(msec - 500);
-    }
-    else
-    {
-        qDebug() << "** Setting position to: " << msec;
-        m_service->setPosition(msec);
-    }
-#endif
     m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);
 
@@ -286,21 +274,13 @@ void AalMediaPlayerControl::stop()
     setState(QMediaPlayer::StoppedState);
 }
 
-void AalMediaPlayerControl::aboutToFinish()
-{
-    qDebug() << __PRETTY_FUNCTION__;
-}
-
 void AalMediaPlayerControl::playbackComplete()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
     // The order of these lines is very important to keep music-app,
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
-    qDebug() << "Setting media status to EndOfMedia";
     setMediaStatus(QMediaPlayer::EndOfMedia);
-    qDebug() << "Stopping";
     stop();
-    qDebug() << "Seeking to 0";
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());
     m_service->resetVideoSink();

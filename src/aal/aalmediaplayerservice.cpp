@@ -91,7 +91,8 @@ AalMediaPlayerService::~AalMediaPlayerService()
     m_playbackStatusChangedConnection.disconnect();
 
     deleteMediaPlayerControl();
-    deleteVideoRendererControl();
+    if (isVideoSource())
+        deleteVideoRendererControl();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -226,7 +227,8 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         return;
     }
 
-    m_videoOutput->setupSurface();
+    if (isVideoSource())
+        m_videoOutput->setupSurface();
 }
 
 void AalMediaPlayerService::play()
@@ -237,12 +239,14 @@ void AalMediaPlayerService::play()
         return;
     }
 
-    if (!m_firstPlayback && m_videoOutput != NULL)
+    if (isVideoSource()
+            && !m_firstPlayback && m_videoOutput != NULL)
         m_videoOutput->setupSurface();
 
     // If we previously played and hit the end-of-stream, stop will be called which
     // tears down the video sink. We need a new video sink in order to render video again
-    if (!m_videoOutputReady && m_videoOutput->textureId() > 0)
+    if (isVideoSource()
+            && !m_videoOutputReady && m_videoOutput->textureId() > 0)
     {
         createVideoSink(m_videoOutput->textureId());
     }
@@ -358,7 +362,7 @@ bool AalMediaPlayerService::isVideoSource() const
 {
     if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        qWarning() << "Cannot check if video source without a valid media-hub player session";
         return false;
     }
 
@@ -375,7 +379,7 @@ bool AalMediaPlayerService::isAudioSource() const
 {
     if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        qWarning() << "Cannot if audio source without a valid media-hub player session";
         return false;
     }
 

@@ -92,7 +92,6 @@ qint64 AalMediaPlayerControl::duration() const
 
 qint64 AalMediaPlayerControl::position() const
 {
-    const qint64 p = m_service->position();
     return m_service->position();
 }
 
@@ -283,7 +282,8 @@ void AalMediaPlayerControl::playbackComplete()
     stop();
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());
-    m_service->resetVideoSink();
+    if (isVideoAvailable())
+        m_service->resetVideoSink();
 }
 
 void AalMediaPlayerControl::mediaPrepared()

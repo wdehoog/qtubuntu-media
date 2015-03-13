@@ -31,8 +31,9 @@
 
 class AalMediaPlayerControl;
 class QMediaPlayerControl;
+class QMetaDataReaderControl;
 class AalVideoRendererControl;
-class txt_MediaPlayerPlugin;
+class tst_MediaPlayerPlugin;
 class QTimerEvent;
 
 namespace core { namespace ubuntu { namespace media {
@@ -55,6 +56,8 @@ public:
     typedef void *GLConsumerWrapperHybris;
 
     AalMediaPlayerService(QObject *parent = 0);
+    AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
+            const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent = 0);
     ~AalMediaPlayerService();
 
     QMediaControl* requestControl(const char *name);
@@ -108,9 +111,11 @@ protected:
 private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
+    void createMetaDataReaderControl();
 
     void deleteMediaPlayerControl();
     void deleteVideoRendererControl();
+    void deleteMetaDataReaderControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -125,6 +130,7 @@ private:
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
+    QMetaDataReaderControl *m_metaDataReaderControl;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 

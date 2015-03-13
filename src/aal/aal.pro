@@ -9,10 +9,12 @@ PLUGIN_TYPE = mediaservice
 target.path += $$[QT_INSTALL_PLUGINS]/$${PLUGIN_TYPE}
 INSTALLS = target
 
-INCLUDEPATH += /usr/include/hybris /usr/include/libqtubuntu-media-signals
+INCLUDEPATH += /usr/include/hybris /usr/include/libqtubuntu-media-signals \
+               /usr/include/mediascanner-2.0
 LIBS += \
     -lhybris-common -lubuntu_application_api -lmedia -lqtubuntu-media-signals \
-    -lmedia-hub-client
+    -lmedia-hub-client \
+    -lmediascanner-2.0
 
 OTHER_FILES += aalmediaplayer.json
 
@@ -20,10 +22,12 @@ HEADERS += \
     aalmediaplayercontrol.h \
     aalmediaplayerservice.h \
     aalmediaplayerserviceplugin.h \
+    aalmetadatareadercontrol.h \
     aalvideorenderercontrol.h
 
 SOURCES += \
     aalmediaplayercontrol.cpp \
+    aalmetadatareadercontrol.cpp \
     aalmediaplayerservice.cpp \
     aalmediaplayerserviceplugin.cpp \
     aalvideorenderercontrol.cpp

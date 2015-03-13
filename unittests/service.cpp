@@ -20,6 +20,11 @@ namespace core {
 namespace ubuntu {
 namespace media {
 
+const std::shared_ptr<media::Service> TestService::Client::instance()
+{
+    return NULL;
+}
+
 std::shared_ptr<Player> TestService::create_session(const Player::Configuration&)
 {
     return NULL;
@@ -27,12 +32,13 @@ std::shared_ptr<Player> TestService::create_session(const Player::Configuration&
 
 std::shared_ptr<Player> TestService::create_fixed_session(const std::string& name, const Player::Configuration&)
 {
-  return 0;
+    (void) name;
+    return 0;
 }
 
 std::shared_ptr<Player> TestService::resume_session(Player::PlayerKey)
 {
-  return 0;
+    return 0;
 }
 
 void TestService::pause_other_sessions(Player::PlayerKey)

@@ -209,7 +209,6 @@ std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createV
     };
 
     auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
-
     m_videoOutputReady = true;
 
     return sink;

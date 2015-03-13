@@ -278,10 +278,10 @@ void AalMediaPlayerControl::playbackComplete()
     qDebug() << __PRETTY_FUNCTION__ << endl;
     // The order of these lines is very important to keep music-app,
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
-    setMediaStatus(QMediaPlayer::EndOfMedia);
     stop();
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());
+    setMediaStatus(QMediaPlayer::EndOfMedia);
     if (isVideoAvailable())
         m_service->resetVideoSink();
 }

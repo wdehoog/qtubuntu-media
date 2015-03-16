@@ -37,6 +37,8 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_cachedVolume = volume();
 
     QApplication::instance()->installEventFilter(this);
+
+    connect(m_service, SIGNAL(playbackComplete()), this, SLOT(playbackComplete()));
 }
 
 AalMediaPlayerControl::~AalMediaPlayerControl()

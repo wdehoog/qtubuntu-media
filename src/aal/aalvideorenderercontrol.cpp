@@ -104,6 +104,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
     // Get notified when qtvideo-node creates a GL texture
     connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
+    connect(m_service, SIGNAL(playbackComplete()), this, SLOT(playbackComplete()));
 }
 
 AalVideoRendererControl::~AalVideoRendererControl()

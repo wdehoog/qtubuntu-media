@@ -102,6 +102,11 @@ public:
 
 Q_SIGNALS:
     void serviceReady();
+    void playbackComplete();
+    void playbackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
+
+public Q_SLOTS:
+    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
 protected:
 #ifdef MEASURE_PERFORMANCE
@@ -120,7 +125,6 @@ private:
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
 
-    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
     void onError(const core::ubuntu::media::Player::Error &error);
 
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;

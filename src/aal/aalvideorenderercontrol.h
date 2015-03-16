@@ -58,13 +58,12 @@ public:
     uint32_t height() const;
     uint32_t width() const;
 
-    void playbackComplete();
-
     // Callbacks
     static void updateVideoTextureCb(void *context);
 
 public Q_SLOTS:
     void setupSurface();
+    void playbackComplete();
 
 Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);

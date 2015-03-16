@@ -86,9 +86,14 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+        [this](const media::Player::PlaybackStatus &status) {
+            Q_EMIT playbackStatusChanged(status);
+        });
+
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
+
+    connect(this, SIGNAL(playbackStatusChanged(const media::Player::PlaybackStatus&)), this, SLOT(onPlaybackStatusChanged(const media::Player::PlaybackStatus&)));
 }
 
 AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
@@ -482,11 +487,7 @@ void AalMediaPlayerService::createMediaPlayerControl()
     m_hubPlayerSession->end_of_stream().connect([this]()
     {
         m_firstPlayback = false;
-
-        if (m_mediaPlayerControl != NULL)
-            m_mediaPlayerControl->playbackComplete();
-        if (m_videoOutput != NULL)
-            m_videoOutput->playbackComplete();
+        Q_EMIT playbackComplete();
     });
 }
 

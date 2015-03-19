@@ -87,47 +87,10 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
         [this](const media::Player::PlaybackStatus &status) {
-            Q_EMIT playbackStatusChanged(status);
+            m_newStatus = status;
+            QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
         });
-
-    m_errorConnection = m_hubPlayerSession->error().connect(
-            std::bind(&AalMediaPlayerService::onError, this, _1));
-
-    connect(this, SIGNAL(playbackStatusChanged(const media::Player::PlaybackStatus&)), this, SLOT(onPlaybackStatusChanged(const media::Player::PlaybackStatus&)));
-}
-
-AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
-                                             const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent)
-   : QMediaService(parent),
-    m_hubService(service),
-    m_hubPlayerSession(player),
-    m_playbackStatusChangedConnection(the_void.connect([](){})),
-    m_errorConnection(the_void.connect([](){})),
-    m_mediaPlayerControl(nullptr),
-    m_videoOutput(nullptr),
-    m_metaDataReaderControl(nullptr),
-    m_videoOutputReady(false),
-    m_cachedDuration(0),
-    m_mediaPlaylist(NULL)
-#ifdef MEASURE_PERFORMANCE
-     , m_lastFrameDecodeStart(0)
-     , m_currentFrameDecodeStart(0)
-     , m_avgCount(0)
-     , m_frameDecodeAvg(0)
-#endif
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Could not finish contructing new AalMediaPlayerService instance since m_hubPlayerSession is NULL";
-        return;
-    }
-
-    createMediaPlayerControl();
-    createVideoRendererControl();
-    createMetaDataReaderControl();
-
-    m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+ 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
 }
@@ -573,7 +536,7 @@ void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &
         m_mediaPlayerControl->error(outError, outErrorStr);
 }
 
-void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
+void AalMediaPlayerService::onPlaybackStatusChanged()
 {
     // The media player control might have been released prior to this call. For that, we check for
     // null and return early in that case.
@@ -582,7 +545,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
 
     // If the playback status changes from underneath (e.g. GStreamer or media-hub), make sure
     // the app is notified about this so it can change it's status
-    switch (status)
+    switch (m_newStatus)
     {
         case media::Player::PlaybackStatus::ready:
             break;
@@ -597,7 +560,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
             m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
             break;
         default:
-            qWarning() << "Unknown PlaybackStatus: " << status;
+            qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
     }
 }
 
@@ -634,7 +597,10 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
     createMetaDataReaderControl();
 
     m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+        [this](const media::Player::PlaybackStatus &status) {
+            m_newStatus = status;
+            QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
+        });
 }
 
 void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)

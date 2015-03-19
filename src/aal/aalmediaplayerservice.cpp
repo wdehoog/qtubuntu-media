@@ -90,7 +90,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
             m_newStatus = status;
             QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
         });
- 
+
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
 }

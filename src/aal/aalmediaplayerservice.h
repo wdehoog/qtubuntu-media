@@ -106,7 +106,7 @@ Q_SIGNALS:
     void playbackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
 
 public Q_SLOTS:
-    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
+    void onPlaybackStatusChanged();
 
 protected:
 #ifdef MEASURE_PERFORMANCE
@@ -141,6 +141,8 @@ private:
     int64_t m_cachedDuration;
 
     const QMediaPlaylist* m_mediaPlaylist;
+
+    core::ubuntu::media::Player::PlaybackStatus m_newStatus;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;

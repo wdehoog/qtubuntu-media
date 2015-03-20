@@ -18,6 +18,12 @@
 #define AALVIDEORENDERERCONTROL_H
 
 #include <core/media/player.h>
+#include <core/media/video/dimensions.h>
+#include <core/media/video/sink.h>
+
+#include <core/connection.h>
+
+#include <memory>
 
 #include <QImage>
 #include <QVideoFrame>
@@ -57,6 +63,7 @@ public:
 
 public Q_SLOTS:
     void setupSurface();
+    void playbackComplete();
 
 Q_SIGNALS:
     void surfaceChanged(QAbstractVideoSurface *surface);
@@ -68,11 +75,13 @@ private Q_SLOTS:
     void onGLConsumerSet();
 
 private:
-    void onVideoDimensionChanged(uint64_t mask);
+    void onVideoDimensionChanged(const core::ubuntu::media::video::Dimensions& dimensions);
+    void onFrameAvailable();
     void presentVideoFrame(const QVideoFrame &frame, bool empty = false);
 
     QAbstractVideoSurface *m_surface;
     AalMediaPlayerService *m_service;
+    std::shared_ptr<core::ubuntu::media::video::Sink> m_videoSink;
     AalGLTextureBuffer *m_textureBuffer;
     GLuint m_textureId;
 
@@ -81,9 +90,12 @@ private:
     uint32_t m_width;
     bool m_surfaceStarted;
     bool m_flipped;
+    bool m_doRendering;
 
     bool m_firstFrame;
     bool m_secondFrame;
+
+    std::unique_ptr<core::Connection> m_frameAvailableConnection;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameRenderStart;

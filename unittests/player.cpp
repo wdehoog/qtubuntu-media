@@ -76,14 +76,9 @@ bool TestPlayer::open_uri(const Track::UriType& uri, const HeadersType&)
     return true;
 }
 
-void TestPlayer::create_video_sink(uint32_t texture_id)
+std::shared_ptr<core::ubuntu::media::video::Sink> TestPlayer::create_gl_texture_video_sink(uint32_t texture_id)
 {
-    Q_UNUSED(texture_id);
-}
-
-GLConsumerWrapperHybris TestPlayer::gl_consumer() const
-{
-    return NULL;
+    Q_UNUSED(texture_id); throw std::runtime_error{"Not implemented"};
 }
 
 void TestPlayer::next()
@@ -272,6 +267,12 @@ const core::Signal<int64_t>& TestPlayer::seeked_to() const
     return ret;
 }
 
+const core::Signal<void>& TestPlayer::about_to_finish() const
+{
+    static core::Signal<void> ret;
+    return ret;
+}
+
 const core::Signal<void>& TestPlayer::end_of_stream() const
 {
     static core::Signal<void> ret;
@@ -290,9 +291,9 @@ core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
     return ret;
 }
 
-const core::Signal<uint64_t>& TestPlayer::video_dimension_changed() const
+const core::Signal<core::ubuntu::media::video::Dimensions>& TestPlayer::video_dimension_changed() const
 {
-    static core::Signal<uint64_t> ret;
+    static core::Signal<core::ubuntu::media::video::Dimensions> ret;
     return ret;
 }
 
@@ -312,21 +313,6 @@ const Track::Id& TrackList::after_empty_track()
     static const Track::Id track_id;
     return track_id;
 }
-
-// FIXME: For some reason these functions need to be at the end of the file
-// or else all core::Property members become unstable and prone to corruption.
-void TestPlayer::set_frame_available_callback(FrameAvailableCb cb, void *context)
-{
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
-}
-
-void TestPlayer::set_playback_complete_callback(PlaybackCompleteCb cb, void *context)
-{
-    Q_UNUSED(cb);
-    Q_UNUSED(context);
-}
-
 }
 }
 }

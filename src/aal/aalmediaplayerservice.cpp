@@ -48,14 +48,6 @@ enum {
     BAD_VALUE   = -EINVAL,
 };
 
-core::ubuntu::media::Player::FrameAvailableCb empty_frame_available_cb = [](void*)
-{
-};
-
-core::ubuntu::media::Player::PlaybackCompleteCb empty_playback_complete_cb = [](void*)
-{
-};
-
 core::Signal<void> the_void;
 }
 
@@ -68,6 +60,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_videoOutput(nullptr),
     m_metaDataReaderControl(nullptr),
     m_videoOutputReady(false),
+    m_firstPlayback(true),
     m_cachedDuration(0),
     m_mediaPlaylist(NULL)
 #ifdef MEASURE_PERFORMANCE
@@ -93,43 +86,11 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
-    m_errorConnection = m_hubPlayerSession->error().connect(
-            std::bind(&AalMediaPlayerService::onError, this, _1));
-}
+        [this](const media::Player::PlaybackStatus &status) {
+            m_newStatus = status;
+            QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
+        });
 
-AalMediaPlayerService::AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
-                                             const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent)
-   : QMediaService(parent),
-    m_hubService(service),
-    m_hubPlayerSession(player),
-    m_playbackStatusChangedConnection(the_void.connect([](){})),
-    m_errorConnection(the_void.connect([](){})),
-    m_mediaPlayerControl(nullptr),
-    m_videoOutput(nullptr),
-    m_metaDataReaderControl(nullptr),
-    m_videoOutputReady(false),
-    m_cachedDuration(0),
-    m_mediaPlaylist(NULL)
-#ifdef MEASURE_PERFORMANCE
-     , m_lastFrameDecodeStart(0)
-     , m_currentFrameDecodeStart(0)
-     , m_avgCount(0)
-     , m_frameDecodeAvg(0)
-#endif
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Could not finish contructing new AalMediaPlayerService instance since m_hubPlayerSession is NULL";
-        return;
-    }
-
-    createMediaPlayerControl();
-    createVideoRendererControl();
-    createMetaDataReaderControl();
-
-    m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
 }
@@ -140,7 +101,9 @@ AalMediaPlayerService::~AalMediaPlayerService()
     m_playbackStatusChangedConnection.disconnect();
 
     deleteMediaPlayerControl();
-    deleteVideoRendererControl();
+    if (isVideoSource())
+        deleteVideoRendererControl();
+
     deleteMetaDataReaderControl();
 }
 
@@ -185,16 +148,6 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
         delete control;
 }
 
-AalMediaPlayerService::GLConsumerWrapperHybris AalMediaPlayerService::glConsumer() const
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Cannot return glConsumer without a valid media-hub player session";
-        return NULL;
-    }
-    return m_hubPlayerSession->gl_consumer();
-}
-
 bool AalMediaPlayerService::newMediaPlayer()
 {
     // Only one player session needed
@@ -218,45 +171,25 @@ bool AalMediaPlayerService::newMediaPlayer()
     return true;
 }
 
-void AalMediaPlayerService::createVideoSink(uint32_t texture_id)
+std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    if (m_hubPlayerSession == NULL)
+    if (not m_hubPlayerSession) throw std::runtime_error
     {
-        qWarning() << "Cannot create a video sink without a valid media-hub player session";
-        return;
-    }
+        "Cannot create a video sink without a valid media-hub player session"
+    };
 
-    try {
-        m_hubPlayerSession->create_video_sink(texture_id);
-        // This call will make sure the GLConsumerWrapperHybris gets set on qtvideo-node
-        m_videoOutput->updateVideoTexture();
-
-        // This lambda gets called after every successfully decoded video frame
-        m_hubPlayerSession->set_frame_available_callback([](void *context)
-        {
-            if (context != NULL)
-            {
-                auto s = static_cast<AalMediaPlayerService*>(context);
-
-                // We might receive this callback after the control has been released.
-                // In that case, we return early.
-                if (not s->videoOutputControl())
-                    return;
-
-#ifdef MEASURE_PERFORMANCE
-                s->measurePerformance();
-#endif
-                QMetaObject::invokeMethod(s->videoOutputControl(), "updateVideoTexture", Qt::QueuedConnection);
-            }
-        },
-        static_cast<void*>(this));
-    }
-    catch (std::runtime_error &e) {
-        qWarning() << "Failed to create video sink: " << e.what();
-        return;
-    }
-
+    auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
     m_videoOutputReady = true;
+
+    return sink;
+}
+
+void AalMediaPlayerService::resetVideoSink()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_firstPlayback = false;
+    if (m_videoOutput != NULL)
+        m_videoOutput->playbackComplete();
 }
 
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
@@ -315,7 +248,8 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         return;
     }
 
-    m_videoOutput->setupSurface();
+    if (isVideoSource())
+        m_videoOutput->setupSurface();
 }
 
 void AalMediaPlayerService::play()
@@ -326,10 +260,17 @@ void AalMediaPlayerService::play()
         return;
     }
 
+    if (isVideoSource()
+            && !m_firstPlayback && m_videoOutput != NULL)
+        m_videoOutput->setupSurface();
+
     // If we previously played and hit the end-of-stream, stop will be called which
     // tears down the video sink. We need a new video sink in order to render video again
-    if (!m_videoOutputReady && m_videoOutput->textureId() > 0)
+    if (isVideoSource()
+            && !m_videoOutputReady && m_videoOutput->textureId() > 0)
+    {
         createVideoSink(m_videoOutput->textureId());
+    }
 
     if ((m_videoOutputReady && isVideoSource())
             || isAudioSource())
@@ -442,7 +383,7 @@ bool AalMediaPlayerService::isVideoSource() const
 {
     if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        qWarning() << "Cannot check if video source without a valid media-hub player session";
         return false;
     }
 
@@ -459,7 +400,7 @@ bool AalMediaPlayerService::isAudioSource() const
 {
     if (m_hubPlayerSession == NULL)
     {
-        qWarning() << "Cannot set current playback position without a valid media-hub player session";
+        qWarning() << "Cannot if audio source without a valid media-hub player session";
         return false;
     }
 
@@ -506,12 +447,11 @@ void AalMediaPlayerService::createMediaPlayerControl()
         return;
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
-    m_hubPlayerSession->set_playback_complete_callback([](void *context)
+    m_hubPlayerSession->end_of_stream().connect([this]()
     {
-        auto control = static_cast<AalMediaPlayerControl*>(context);
-        control->playbackComplete();
-    },
-    m_mediaPlayerControl);
+        m_firstPlayback = false;
+        Q_EMIT playbackComplete();
+    });
 }
 
 void AalMediaPlayerService::createVideoRendererControl()
@@ -540,10 +480,6 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
     if (m_hubPlayerSession == NULL)
         return;
 
-    m_hubPlayerSession->set_playback_complete_callback(
-                empty_playback_complete_cb,
-                nullptr);
-
     delete m_mediaPlayerControl;
     m_mediaPlayerControl = NULL;
 }
@@ -552,10 +488,6 @@ void AalMediaPlayerService::deleteVideoRendererControl()
 {
     if (m_hubPlayerSession == nullptr)
         return;
-
-    m_hubPlayerSession->set_frame_available_callback(
-                empty_frame_available_cb,
-                nullptr);
 
     delete m_videoOutput;
     m_videoOutput = nullptr;
@@ -604,7 +536,7 @@ void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &
         m_mediaPlayerControl->error(outError, outErrorStr);
 }
 
-void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::PlaybackStatus &status)
+void AalMediaPlayerService::onPlaybackStatusChanged()
 {
     // The media player control might have been released prior to this call. For that, we check for
     // null and return early in that case.
@@ -613,7 +545,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
 
     // If the playback status changes from underneath (e.g. GStreamer or media-hub), make sure
     // the app is notified about this so it can change it's status
-    switch (status)
+    switch (m_newStatus)
     {
         case media::Player::PlaybackStatus::ready:
             break;
@@ -628,7 +560,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged(const media::Player::Playbac
             m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
             break;
         default:
-            qWarning() << "Unknown PlaybackStatus: " << status;
+            qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
     }
 }
 
@@ -665,7 +597,10 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
     createMetaDataReaderControl();
 
     m_hubPlayerSession->playback_status_changed().connect(
-            std::bind(&AalMediaPlayerService::onPlaybackStatusChanged, this, _1));
+        [this](const media::Player::PlaybackStatus &status) {
+            m_newStatus = status;
+            QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
+        });
 }
 
 void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)

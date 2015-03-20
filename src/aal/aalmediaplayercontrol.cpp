@@ -30,12 +30,15 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
     m_service(service),
     m_state(QMediaPlayer::StoppedState),
     m_status(QMediaPlayer::NoMedia),
+    m_cachedDuration(0),
     m_applicationActive(true),
     m_allowSeek(true)
 {
     m_cachedVolume = volume();
 
     QApplication::instance()->installEventFilter(this);
+
+    connect(m_service, SIGNAL(playbackComplete()), this, SLOT(playbackComplete()));
 }
 
 AalMediaPlayerControl::~AalMediaPlayerControl()
@@ -84,7 +87,9 @@ void AalMediaPlayerControl::setAudioRole(QMediaPlayer::AudioRole audioRole)
 
 qint64 AalMediaPlayerControl::duration() const
 {
-    return m_service->duration();
+    const qint64 d = m_service->duration();
+    m_cachedDuration = d;
+    return d;
 }
 
 qint64 AalMediaPlayerControl::position() const
@@ -103,8 +108,15 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
     if (!m_allowSeek)
         return;
 
+    // Make sure we have a non-zero duration
+    if (m_cachedDuration == 0)
+        updateCachedDuration(duration());
+
     // Debounce seek requests with this single shot timer every 250 ms period
     QTimer::singleShot(250, this, SLOT(debounceSeek()));
+
+    if (msec == m_cachedDuration)
+        return playbackComplete();
 
     m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);
@@ -268,10 +280,12 @@ void AalMediaPlayerControl::playbackComplete()
     qDebug() << __PRETTY_FUNCTION__ << endl;
     // The order of these lines is very important to keep music-app,
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
-    m_service->setPosition(0);
-    Q_EMIT positionChanged(position());
     stop();
     setMediaStatus(QMediaPlayer::EndOfMedia);
+    m_service->setPosition(0);
+    Q_EMIT positionChanged(position());
+    if (isVideoAvailable())
+        m_service->resetVideoSink();
 }
 
 void AalMediaPlayerControl::mediaPrepared()
@@ -284,6 +298,11 @@ void AalMediaPlayerControl::mediaPrepared()
 void AalMediaPlayerControl::emitDurationChanged(qint64 duration)
 {
     Q_EMIT durationChanged(duration);
+}
+
+void AalMediaPlayerControl::updateCachedDuration(qint64 duration)
+{
+    m_cachedDuration = duration;
 }
 
 QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const

@@ -21,6 +21,8 @@
 
 #include <core/media/player.h>
 
+#include <core/connection.h>
+
 #include <qmediaplayer.h>
 #include <QMediaPlaylist>
 #include <QMediaService>
@@ -35,9 +37,12 @@ class tst_MediaPlayerPlugin;
 class QTimerEvent;
 
 namespace core { namespace ubuntu { namespace media {
-    class Service;
-    class Player;
-    class TrackList;
+namespace video {
+    class Sink;
+}
+class Service;
+class Player;
+class TrackList;
 } } }
 
 class AalMediaPlayerService : public QMediaService
@@ -61,11 +66,11 @@ public:
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
-    GLConsumerWrapperHybris glConsumer() const;
-
     bool newMediaPlayer();
 
-    void createVideoSink(uint32_t texture_id);
+    std::shared_ptr<core::ubuntu::media::video::Sink> createVideoSink(uint32_t texture_id);
+    // Call this before attempting to play the same video a second time (after EOS)
+    void resetVideoSink();
 
     QMediaPlayer::AudioRole audioRole() const;
     void setAudioRole(QMediaPlayer::AudioRole audioRole);
@@ -97,6 +102,11 @@ public:
 
 Q_SIGNALS:
     void serviceReady();
+    void playbackComplete();
+    void playbackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
+
+public Q_SLOTS:
+    void onPlaybackStatusChanged();
 
 protected:
 #ifdef MEASURE_PERFORMANCE
@@ -115,7 +125,6 @@ private:
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
 
-    void onPlaybackStatusChanged(const core::ubuntu::media::Player::PlaybackStatus &status);
     void onError(const core::ubuntu::media::Player::Error &error);
 
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
@@ -127,10 +136,13 @@ private:
     AalVideoRendererControl *m_videoOutput;
     QMetaDataReaderControl *m_metaDataReaderControl;
     bool m_videoOutputReady;
+    bool m_firstPlayback;
 
     int64_t m_cachedDuration;
 
     const QMediaPlaylist* m_mediaPlaylist;
+
+    core::ubuntu::media::Player::PlaybackStatus m_newStatus;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;

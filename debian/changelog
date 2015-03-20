@@ -1,3 +1,46 @@
+qtubuntu-media (0.7.1+15.04.20150320-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Make necessary adaptations for media-hub-3 interface changes. Make
+    sure video plays any number of times after hitting the end of
+    stream. Don't continue to receive frame_available callbacks after
+    the AalVideoRendererControl instance is destroyed. Don't crash in
+    the unit tests if m_frameAvailableConnection hasn't been
+    instantiated, also making sure it's connected to the signal before
+    disconnecting it. Fix the point srubbing EOS case (tap right at the
+    end of the stream on the timeline). Only reset the video sink if we
+    are playing video. Don't load anything related to the video renderer
+    control if we are playing audio only.
+
+  [ Ricardo Mendoza ]
+  * Make necessary adaptations for media-hub-3 interface changes. Make
+    sure video plays any number of times after hitting the end of
+    stream. Don't continue to receive frame_available callbacks after
+    the AalVideoRendererControl instance is destroyed. Don't crash in
+    the unit tests if m_frameAvailableConnection hasn't been
+    instantiated, also making sure it's connected to the signal before
+    disconnecting it. Fix the point srubbing EOS case (tap right at the
+    end of the stream on the timeline). Only reset the video sink if we
+    are playing video. Don't load anything related to the video renderer
+    control if we are playing audio only.
+
+  [ thomas-voss ]
+  * Make necessary adaptations for media-hub-3 interface changes. Make
+    sure video plays any number of times after hitting the end of
+    stream. Don't continue to receive frame_available callbacks after
+    the AalVideoRendererControl instance is destroyed. Don't crash in
+    the unit tests if m_frameAvailableConnection hasn't been
+    instantiated, also making sure it's connected to the signal before
+    disconnecting it. Fix the point srubbing EOS case (tap right at the
+    end of the stream on the timeline). Only reset the video sink if we
+    are playing video. Don't load anything related to the video renderer
+    control if we are playing audio only.
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 20 Mar 2015 13:17:19 +0000
+
 qtubuntu-media (0.7.1+15.04.20150224-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]

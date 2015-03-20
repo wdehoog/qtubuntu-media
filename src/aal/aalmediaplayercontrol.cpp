@@ -116,7 +116,7 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
     QTimer::singleShot(250, this, SLOT(debounceSeek()));
 
     if (msec == m_cachedDuration)
-        playbackComplete();
+        return playbackComplete();
 
     m_service->setPosition(msec);
     Q_EMIT positionChanged(msec);

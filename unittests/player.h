@@ -39,6 +39,8 @@ public:
     TestPlayer();
     virtual ~TestPlayer();
 
+    virtual void reconnect();
+
     virtual std::shared_ptr<TrackList> track_list();
     virtual PlayerKey key() const;
 

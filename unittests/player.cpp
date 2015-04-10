@@ -53,6 +53,10 @@ TestPlayer::~TestPlayer()
 {
 }
 
+void TestPlayer::reconnect()
+{
+}
+
 shared_ptr<TrackList> TestPlayer::track_list()
 {
     static shared_ptr<TrackList> ret(NULL);

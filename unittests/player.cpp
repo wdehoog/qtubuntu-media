@@ -53,7 +53,16 @@ TestPlayer::~TestPlayer()
 {
 }
 
+std::string TestPlayer::uuid()
+{
+    return std::string{};
+}
+
 void TestPlayer::reconnect()
+{
+}
+
+void TestPlayer::abandon()
 {
 }
 

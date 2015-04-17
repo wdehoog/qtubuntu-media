@@ -53,7 +53,7 @@ TestPlayer::~TestPlayer()
 {
 }
 
-std::string TestPlayer::uuid()
+std::string TestPlayer::uuid() const
 {
     return std::string{};
 }
@@ -185,7 +185,7 @@ const core::Property<Player::PlaybackRate>& TestPlayer::playback_rate() const
     return ret;
 }
 
-const core::Property<bool>& TestPlayer::is_shuffle() const
+const core::Property<bool>& TestPlayer::shuffle() const
 {
     static core::Property<bool> ret(true);
     return ret;
@@ -250,7 +250,7 @@ core::Property<Player::PlaybackRate>& TestPlayer::playback_rate()
     return ret;
 }
 
-core::Property<bool>& TestPlayer::is_shuffle()
+core::Property<bool>& TestPlayer::shuffle()
 {
     static core::Property<bool> ret(true);
     return ret;

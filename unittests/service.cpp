@@ -30,6 +30,19 @@ std::shared_ptr<Player> TestService::create_session(const Player::Configuration&
     return NULL;
 }
 
+void TestService::detach_session(const std::string&, const Player::Configuration&)
+{
+}
+
+std::shared_ptr<Player> TestService::reattach_session(const std::string&, const Player::Configuration&)
+{
+    return NULL;
+}
+
+void TestService::destroy_session(const std::string&, const Player::Configuration&)
+{
+}
+
 std::shared_ptr<Player> TestService::create_fixed_session(const std::string& name, const Player::Configuration&)
 {
     (void) name;

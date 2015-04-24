@@ -278,21 +278,25 @@ void AalMediaPlayerControl::stop()
 void AalMediaPlayerControl::playbackComplete()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
+
     // The order of these lines is very important to keep music-app,
     // mediaplayer-app and the QMediaPlaylist loop cases all happy
     // For all audio roles except ringtones:
     if (m_service->audioRole() != QMediaPlayer::PhoneRole)
     {
+        qDebug() << "!QMediaPlayer::PhoneRole, calling stop() and setting status to EndOfMedia" << endl;
         stop();
         setMediaStatus(QMediaPlayer::EndOfMedia);
     }
     m_service->setPosition(0);
     Q_EMIT positionChanged(position());
-    // For ringtones only, do not stop playback (see QMediaPlayer::stop()):
+    // For ringtones only, do not stop playback:
     if (m_service->audioRole() == QMediaPlayer::PhoneRole)
     {
+        qDebug() << "QMediaPlayer::PhoneRole, status to EndOfMedia" << endl;
         setMediaStatus(QMediaPlayer::EndOfMedia);
     }
+
     if (isVideoAvailable())
         m_service->resetVideoSink();
 }

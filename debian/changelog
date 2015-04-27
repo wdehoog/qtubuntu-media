@@ -1,3 +1,18 @@
+qtubuntu-media (0.7.1+15.04.20150427.2-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Fix ringtone not looping (QMediaPlaylist loop mode) regression. (LP:
+    #1447606)
+
+  [ Ricardo Mendoza ]
+  * Fix ringtone not looping (QMediaPlaylist loop mode) regression. (LP:
+    #1447606)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Mon, 27 Apr 2015 23:02:44 +0000
+
 qtubuntu-media (0.7.1+15.04.20150420.1-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]

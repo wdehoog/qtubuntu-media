@@ -280,8 +280,11 @@ void AalMediaPlayerService::play()
             // Pause all other music and video sessions
             m_hubService->pause_other_sessions(key);
 
+            m_mediaPlayerControl->setMediaStatus(QMediaPlayer::LoadedMedia);
+
             qDebug() << "Actually calling m_hubPlayerSession->play()";
             m_hubPlayerSession->play();
+
             m_mediaPlayerControl->mediaPrepared();
         }
         catch (std::runtime_error &e) {
@@ -558,6 +561,9 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
             break;
         case media::Player::PlaybackStatus::playing:
             m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
+            // This is necessary in case duration == 0 right after calling play(). At this point,
+            // the pipeline should be 100% prepared and playing.
+            Q_EMIT m_mediaPlayerControl->durationChanged(duration());
             break;
         default:
             qWarning() << "Unknown PlaybackStatus: " << m_newStatus;

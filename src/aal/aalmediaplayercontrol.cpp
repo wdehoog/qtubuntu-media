@@ -89,6 +89,7 @@ qint64 AalMediaPlayerControl::duration() const
 {
     const qint64 d = m_service->duration();
     m_cachedDuration = d;
+    qDebug() << "duration: " << d;
     return d;
 }
 
@@ -292,8 +293,7 @@ void AalMediaPlayerControl::playbackComplete()
 
 void AalMediaPlayerControl::mediaPrepared()
 {
-    setMediaStatus(QMediaPlayer::LoadedMedia);
-    Q_EMIT durationChanged(duration());
+    Q_EMIT durationChanged(0);
     Q_EMIT positionChanged(position());
 }
 

@@ -89,7 +89,6 @@ qint64 AalMediaPlayerControl::duration() const
 {
     const qint64 d = m_service->duration();
     m_cachedDuration = d;
-    qDebug() << "duration: " << d;
     return d;
 }
 

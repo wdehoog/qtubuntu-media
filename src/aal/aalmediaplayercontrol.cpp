@@ -333,7 +333,10 @@ void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)
 
 void AalMediaPlayerControl::setState(QMediaPlayer::State state)
 {
-    if (state != m_state)
+    // Because QMediaPlayer doesn't have a Ready state and GStreamer does, make sure the
+    // stateChanged() signal is emited when either Stopped or Ready is passed in.
+    bool do_state_changed = (state == QMediaPlayer::StoppedState && m_state == QMediaPlayer::StoppedState);
+    if (state != m_state || do_state_changed)
     {
         m_state = state;
         Q_EMIT stateChanged(m_state);

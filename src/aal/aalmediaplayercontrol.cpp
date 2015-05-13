@@ -292,7 +292,6 @@ void AalMediaPlayerControl::playbackComplete()
 
 void AalMediaPlayerControl::mediaPrepared()
 {
-    Q_EMIT durationChanged(0);
     Q_EMIT positionChanged(position());
 }
 
@@ -304,6 +303,8 @@ void AalMediaPlayerControl::emitDurationChanged(qint64 duration)
 void AalMediaPlayerControl::updateCachedDuration(qint64 duration)
 {
     m_cachedDuration = duration;
+    if (duration > 0)
+        emitDurationChanged(duration);
 }
 
 QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const

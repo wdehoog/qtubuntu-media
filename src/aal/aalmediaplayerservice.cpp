@@ -560,10 +560,10 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
             m_mediaPlayerControl->setState(QMediaPlayer::PausedState);
             break;
         case media::Player::PlaybackStatus::playing:
-            m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
             // This is necessary in case duration == 0 right after calling play(). At this point,
             // the pipeline should be 100% prepared and playing.
             Q_EMIT m_mediaPlayerControl->durationChanged(duration());
+            m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
             break;
         default:
             qWarning() << "Unknown PlaybackStatus: " << m_newStatus;

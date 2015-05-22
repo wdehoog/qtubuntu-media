@@ -30,6 +30,7 @@
 #include <memory>
 
 class AalMediaPlayerControl;
+class AalMediaPlaylistControl;
 class QMediaPlayerControl;
 class QMetaDataReaderControl;
 class AalVideoRendererControl;
@@ -64,6 +65,7 @@ public:
     void releaseControl(QMediaControl *control);
 
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
+    AalMediaPlaylistControl *mediaPlaylistControl() const { return m_mediaPlaylistControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
     bool newMediaPlayer();
@@ -117,10 +119,12 @@ private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
     void createMetaDataReaderControl();
+    void createPlaylistControl();
 
     void deleteMediaPlayerControl();
     void deleteVideoRendererControl();
     void deleteMetaDataReaderControl();
+    void deletePlaylistControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -135,6 +139,7 @@ private:
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
     QMetaDataReaderControl *m_metaDataReaderControl;
+    AalMediaPlaylistControl *m_mediaPlaylistControl;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 

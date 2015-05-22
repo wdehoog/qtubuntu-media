@@ -1,6 +1,6 @@
 include(../../coverage.pri)
 TARGET = aalmediaplayer
-QT += multimedia opengl
+QT += multimedia opengl multimedia-private
 TEMPLATE = lib
 CONFIG += plugin no_keywords
 QMAKE_CXXFLAGS += -std=c++11
@@ -23,11 +23,13 @@ HEADERS += \
     aalmediaplayerservice.h \
     aalmediaplayerserviceplugin.h \
     aalmetadatareadercontrol.h \
-    aalvideorenderercontrol.h
+    aalvideorenderercontrol.h \
+    aalmediaplaylistcontrol.h
 
 SOURCES += \
     aalmediaplayercontrol.cpp \
     aalmetadatareadercontrol.cpp \
     aalmediaplayerservice.cpp \
     aalmediaplayerserviceplugin.cpp \
-    aalvideorenderercontrol.cpp
+    aalvideorenderercontrol.cpp \
+    aalmediaplaylistcontrol.cpp

@@ -17,6 +17,10 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 #include "aalmetadatareadercontrol.h"
+#include "aalmediaplaylistcontrol.h"
+//#include "aalmediaplaylistprovider.h"
+
+#include "/usr/include/arm-linux-gnueabihf/qt5/QtMultimedia/5.4.1/QtMultimedia/private/qmediaplaylistcontrol_p.h"
 
 #include <core/media/service.h>
 #include <core/media/track_list.h>
@@ -59,6 +63,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
     m_metaDataReaderControl(nullptr),
+    m_mediaPlaylistControl(nullptr),
     m_videoOutputReady(false),
     m_firstPlayback(true),
     m_cachedDuration(0),
@@ -105,10 +110,12 @@ AalMediaPlayerService::~AalMediaPlayerService()
         deleteVideoRendererControl();
 
     deleteMetaDataReaderControl();
+    deletePlaylistControl();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
+    qDebug() << "requestControl name: " << name;
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
         if (not m_mediaPlayerControl)
@@ -133,6 +140,15 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
         return m_metaDataReaderControl;
     }
 
+    if (qstrcmp(name, QMediaPlaylistControl_iid) == 0)
+    {
+        qDebug() << "Client requested QMediaPlaylistControl_iid";
+        if (not m_mediaPlaylistControl)
+            createPlaylistControl();
+
+        return m_mediaPlaylistControl;
+    }
+
     return NULL;
 }
 
@@ -144,6 +160,8 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
         deleteVideoRendererControl();
     else if (control == m_metaDataReaderControl)
         deleteMetaDataReaderControl();
+    else if (control == m_mediaPlaylistControl)
+        deletePlaylistControl();
     else
         delete control;
 }
@@ -478,6 +496,12 @@ void AalMediaPlayerService::createMetaDataReaderControl()
             m_metaDataReaderControl, SLOT(onMediaChanged(QMediaContent)));
 }
 
+void AalMediaPlayerService::createPlaylistControl()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_mediaPlaylistControl = new AalMediaPlaylistControl(this);
+}
+
 void AalMediaPlayerService::deleteMediaPlayerControl()
 {
     if (m_hubPlayerSession == NULL)
@@ -503,6 +527,15 @@ void AalMediaPlayerService::deleteMetaDataReaderControl()
 
     delete m_metaDataReaderControl;
     m_metaDataReaderControl = nullptr;
+}
+
+void AalMediaPlayerService::deletePlaylistControl()
+{
+    if (m_hubPlayerSession == nullptr)
+        return;
+
+    delete m_mediaPlaylistControl;
+    m_mediaPlaylistControl = nullptr;
 }
 
 void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &error)

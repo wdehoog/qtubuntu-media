@@ -5,7 +5,7 @@ QMAKE_CXXFLAGS += -std=c++11
 DEFINES += QT_NO_KEYWORDS
 TARGET = tst_mediaplayerplugin
 
-QT += multimedia opengl quick testlib
+QT += multimedia opengl multimedia-private quick testlib
 
 INCLUDEPATH += ../src/aal \
     /usr/include/qt5/QtMultimedia \
@@ -22,18 +22,22 @@ HEADERS += \
     ../src/aal/aalmediaplayerserviceplugin.h \
     ../src/aal/aalvideorenderercontrol.h \
     ../src/aal/aalmetadatareadercontrol.h \
+    ../src/aal/aalmediaplaylistcontrol.h \
     tst_mediaplayerplugin.h \
     tst_metadatareadercontrol.h \
+    tst_mediaplaylistcontrol.h \
     player.h \
     service.h
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \
     tst_metadatareadercontrol.cpp \
+    tst_mediaplaylistcontrol.cpp \
     player.cpp \
     service.cpp \
     ../src/aal/aalmediaplayercontrol.cpp \
     ../src/aal/aalmetadatareadercontrol.cpp \
+    ../src/aal/aalmediaplaylistcontrol.cpp \
     ../src/aal/aalmediaplayerservice.cpp \
     ../src/aal/aalmediaplayerserviceplugin.cpp \
     ../src/aal/aalvideorenderercontrol.cpp

@@ -19,6 +19,7 @@
 #include "aalmediaplayerservice.h"
 #include "tst_mediaplayerplugin.h"
 #include "tst_metadatareadercontrol.h"
+#include "tst_mediaplaylistcontrol.h"
 
 #include <memory>
 
@@ -141,10 +142,15 @@ int main(int argc, char **argv)
     // Create a GUI-less unit test standalone app
     QCoreApplication app(argc, argv);
     tst_MediaPlayerPlugin mpp;
+    tst_MediaPlaylistControl mpc;
     // FIXME: Disabled for now until we can get metadata from mediascanner without a file
     // first needing to be indexed. This is required so that the metadata tests will work
     // in the CI infrastructure.
     //tst_MetaDataReaderControl mdrc;
     //return (QTest::qExec(&mpp, argc, argv) && QTest::qExec(&mdrc, argc, argv));
+#if 1
+    return QTest::qExec(&mpc, argc, argv);
+#else
     return QTest::qExec(&mpp, argc, argv);
+#endif
 }

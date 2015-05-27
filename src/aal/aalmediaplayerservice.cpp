@@ -163,7 +163,7 @@ bool AalMediaPlayerService::newMediaPlayer()
     try {
         m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
         return false;
     }
@@ -197,7 +197,13 @@ QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
     if (m_hubPlayerSession == NULL)
         return QMediaPlayer::MultimediaRole;
 
-    return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
+    try {
+        return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to get audio stream role: " << e.what();
+        return QMediaPlayer::MultimediaRole;
+    }
 }
 
 void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
@@ -205,8 +211,12 @@ void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
     if (m_hubPlayerSession == NULL)
         return;
 
-    qDebug() << __PRETTY_FUNCTION__;
-    m_hubPlayerSession->audio_stream_role().set(static_cast<media::Player::AudioStreamRole>(audioRole));
+    try {
+        m_hubPlayerSession->audio_stream_role().set(static_cast<media::Player::AudioStreamRole>(audioRole));
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to set audio stream role: " << e.what();
+    }
 }
 
 void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
@@ -243,7 +253,7 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     try {
         m_hubPlayerSession->open_uri(uri);
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to open media " << url << ": " << e.what();
         return;
     }
@@ -287,7 +297,7 @@ void AalMediaPlayerService::play()
 
             m_mediaPlayerControl->mediaPrepared();
         }
-        catch (std::runtime_error &e) {
+        catch (const std::runtime_error &e) {
             qWarning() << "Failed to start playback: " << e.what();
             return;
         }
@@ -307,7 +317,7 @@ void AalMediaPlayerService::pause()
     try {
         m_hubPlayerSession->pause();
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to pause playback: " << e.what();
         return;
     }
@@ -325,7 +335,7 @@ void AalMediaPlayerService::stop()
         m_hubPlayerSession->stop();
         m_videoOutputReady = false;
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to stop playback: " << e.what();
         return;
     }
@@ -342,7 +352,7 @@ int64_t AalMediaPlayerService::position() const
     try {
         return m_hubPlayerSession->position() / 1e6;
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to get current playback position: " << e.what();
         return 0;
     }
@@ -355,7 +365,12 @@ void AalMediaPlayerService::setPosition(int64_t msec)
         qWarning() << "Cannot set current playback position without a valid media-hub player session";
         return;
     }
-    m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
+    try {
+        m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to set position to " << msec << ": " << e.what();
+    }
 }
 
 int64_t AalMediaPlayerService::duration()
@@ -376,7 +391,7 @@ int64_t AalMediaPlayerService::duration()
         }
         return d / 1e6;
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to get current playback duration: " << e.what();
         return 0;
     }
@@ -393,7 +408,7 @@ bool AalMediaPlayerService::isVideoSource() const
     try {
         return m_hubPlayerSession->is_video_source();
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to check if source is video: " << e.what();
         return false;
     }
@@ -410,7 +425,7 @@ bool AalMediaPlayerService::isAudioSource() const
     try {
         return m_hubPlayerSession->is_audio_source();
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to check if source is video: " << e.what();
         return false;
     }
@@ -427,7 +442,7 @@ int AalMediaPlayerService::getVolume() const
     try {
         return m_hubPlayerSession->volume();
     }
-    catch (std::runtime_error &e) {
+    catch (const std::runtime_error &e) {
         qWarning() << "Failed to get current volume level: " << e.what();
         return 0;
     }

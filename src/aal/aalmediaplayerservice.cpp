@@ -260,6 +260,8 @@ void AalMediaPlayerService::play()
         return;
     }
 
+    m_videoOutput->autoPlay(true);
+
     if (isVideoSource()
             && !m_firstPlayback && m_videoOutput != NULL)
         m_videoOutput->setupSurface();

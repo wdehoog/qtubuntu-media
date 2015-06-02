@@ -58,6 +58,9 @@ public:
     uint32_t height() const;
     uint32_t width() const;
 
+    // Whether QMediaPlayerService::play() will be called from onGLConsumerSet or not
+    void autoPlay(bool doAutoPlay = true);
+
     // Callbacks
     static void updateVideoTextureCb(void *context);
 
@@ -88,6 +91,7 @@ private:
     core::ubuntu::media::Player::Orientation m_orientation;
     uint32_t m_height;
     uint32_t m_width;
+    bool m_autoPlay;
     bool m_surfaceStarted;
     bool m_flipped;
     bool m_doRendering;

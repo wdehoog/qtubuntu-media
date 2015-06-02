@@ -270,9 +270,13 @@ void AalMediaPlayerService::play()
         return;
     }
 
-    if (isVideoSource()
-            && !m_firstPlayback && m_videoOutput != NULL)
-        m_videoOutput->setupSurface();
+    if (isVideoSource() && m_videoOutput != NULL)
+    {
+    	m_videoOutput->autoPlay(true);
+        
+        if (!m_firstPlayback)
+            m_videoOutput->setupSurface();
+    }
 
     // If we previously played and hit the end-of-stream, stop will be called which
     // tears down the video sink. We need a new video sink in order to render video again

@@ -1,3 +1,13 @@
+qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Get rid of the gcc-4.9 build dependency. (LP: #1452340)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 16:55:53 +0000
+
 qtubuntu-media (0.7.1+15.10.20150527.2-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]

@@ -1,3 +1,14 @@
+qtubuntu-media (0.7.1+15.10.20150602.3-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Don't auto play when playing a video unless
+    QMediaPlayerControl::play() was actually called. (LP: #1457972)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 19:37:22 +0000
+
 qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]

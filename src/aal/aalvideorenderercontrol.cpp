@@ -89,6 +89,7 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
      m_orientation(media::Player::Orientation::rotate0),
      m_height(0),
      m_width(0),
+     m_autoPlay(false),
      m_surfaceStarted(false),
      m_flipped(false),
      m_doRendering(false),
@@ -151,6 +152,11 @@ uint32_t AalVideoRendererControl::height() const
 uint32_t AalVideoRendererControl::width() const
 {
     return m_width;
+}
+
+void AalVideoRendererControl::autoPlay(bool doAutoPlay)
+{
+    m_autoPlay = doAutoPlay;
 }
 
 void AalVideoRendererControl::playbackComplete()
@@ -290,7 +296,10 @@ void AalVideoRendererControl::onServiceReady()
 void AalVideoRendererControl::onGLConsumerSet()
 {
     qDebug() << Q_FUNC_INFO;
-    m_service->play();
+    // Only cause playback to start if QMediaPlayerControl::play() was already called.
+    // See AalMediaPlayerService::play()
+    if (m_autoPlay)
+        m_service->play();
 }
 
 void AalVideoRendererControl::presentVideoFrame(const QVideoFrame &frame, bool empty)

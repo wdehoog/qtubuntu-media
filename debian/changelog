@@ -1,3 +1,44 @@
+qtubuntu-media (0.7.1+15.10.20150602.3-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Don't auto play when playing a video unless
+    QMediaPlayerControl::play() was actually called. (LP: #1457972)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 19:37:22 +0000
+
+qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Get rid of the gcc-4.9 build dependency. (LP: #1452340)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 16:55:53 +0000
+
+qtubuntu-media (0.7.1+15.10.20150527.2-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Wrap seek_to() in a try/catch block so that an exception from
+    libmedia-hub-client is not pushed up to the QML level. Do the same
+    for get/set audio role. (LP: #1457129)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 27 May 2015 18:38:32 +0000
+
+qtubuntu-media (0.7.1+15.10.20150522-0ubuntu1) wily; urgency=medium
+
+  [ Jim Hodapp ]
+  * Make sure that stopped and ready (same state for QMediaPlayer) are
+    reported to the client app. (LP: #1435088)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 22 May 2015 17:36:57 +0000
+
 qtubuntu-media (0.7.1+15.04.20150513.1-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]

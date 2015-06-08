@@ -18,7 +18,7 @@
 #include "aalmediaplayerservice.h"
 #include "aalmetadatareadercontrol.h"
 #include "aalmediaplaylistcontrol.h"
-//#include "aalmediaplaylistprovider.h"
+#include "aalmediaplaylistprovider.h"
 
 #include "/usr/include/arm-linux-gnueabihf/qt5/QtMultimedia/5.4.1/QtMultimedia/private/qmediaplaylistcontrol_p.h"
 
@@ -145,6 +145,10 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
         qDebug() << "Client requested QMediaPlaylistControl_iid";
         if (not m_mediaPlaylistControl)
             createPlaylistControl();
+
+        // Pass on the media-hub Player object to the playlist control
+        if (m_hubPlayerSession)
+            m_mediaPlaylistControl->setPlayerSession(m_hubPlayerSession);
 
         return m_mediaPlaylistControl;
     }
@@ -518,7 +522,9 @@ void AalMediaPlayerService::createMetaDataReaderControl()
 void AalMediaPlayerService::createPlaylistControl()
 {
     qDebug() << Q_FUNC_INFO;
+    AalMediaPlaylistProvider *p = new AalMediaPlaylistProvider(this);
     m_mediaPlaylistControl = new AalMediaPlaylistControl(this);
+    m_mediaPlaylistControl->setPlaylistProvider(p);
 }
 
 void AalMediaPlayerService::deleteMediaPlayerControl()

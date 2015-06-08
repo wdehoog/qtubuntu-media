@@ -24,6 +24,7 @@ HEADERS += \
     aalmediaplayerserviceplugin.h \
     aalmetadatareadercontrol.h \
     aalvideorenderercontrol.h \
+    aalmediaplaylistprovider.h \
     aalmediaplaylistcontrol.h
 
 SOURCES += \
@@ -32,4 +33,5 @@ SOURCES += \
     aalmediaplayerservice.cpp \
     aalmediaplayerserviceplugin.cpp \
     aalvideorenderercontrol.cpp \
-    aalmediaplaylistcontrol.cpp
+    aalmediaplaylistprovider.cpp \
+    aalmediaplaylistcontrol.cpp 

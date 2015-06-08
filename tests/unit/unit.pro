@@ -1,4 +1,4 @@
-include(../coverage.pri)
+include(../../coverage.pri)
 
 CONFIG += testcase
 QMAKE_CXXFLAGS += -std=c++11
@@ -7,7 +7,7 @@ TARGET = tst_mediaplayerplugin
 
 QT += multimedia opengl multimedia-private quick testlib
 
-INCLUDEPATH += ../src/aal \
+INCLUDEPATH += ../../src/aal \
     /usr/include/qt5/QtMultimedia \
     /usr/include/hybris \
     /usr/include/libqtubuntu-media-signals \
@@ -17,17 +17,19 @@ LIBS += \
     -lmediascanner-2.0
 
 HEADERS += \
-    ../src/aal/aalmediaplayercontrol.h \
-    ../src/aal/aalmediaplayerservice.h \
-    ../src/aal/aalmediaplayerserviceplugin.h \
-    ../src/aal/aalvideorenderercontrol.h \
-    ../src/aal/aalmetadatareadercontrol.h \
-    ../src/aal/aalmediaplaylistcontrol.h \
+    ../../src/aal/aalmediaplayercontrol.h \
+    ../../src/aal/aalmediaplayerservice.h \
+    ../../src/aal/aalmediaplayerserviceplugin.h \
+    ../../src/aal/aalvideorenderercontrol.h \
+    ../../src/aal/aalmetadatareadercontrol.h \
+    ../../src/aal/aalmediaplaylistprovider.h \
+    ../../src/aal/aalmediaplaylistcontrol.h \
     tst_mediaplayerplugin.h \
     tst_metadatareadercontrol.h \
     tst_mediaplaylistcontrol.h \
     player.h \
-    service.h
+    service.h \
+    player_mock.h
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \
@@ -35,12 +37,14 @@ SOURCES += \
     tst_mediaplaylistcontrol.cpp \
     player.cpp \
     service.cpp \
-    ../src/aal/aalmediaplayercontrol.cpp \
-    ../src/aal/aalmetadatareadercontrol.cpp \
-    ../src/aal/aalmediaplaylistcontrol.cpp \
-    ../src/aal/aalmediaplayerservice.cpp \
-    ../src/aal/aalmediaplayerserviceplugin.cpp \
-    ../src/aal/aalvideorenderercontrol.cpp
+    player_mock.cpp \
+    ../../src/aal/aalmediaplayercontrol.cpp \
+    ../../src/aal/aalmetadatareadercontrol.cpp \
+    ../../src/aal/aalmediaplaylistprovider.cpp \
+    ../../src/aal/aalmediaplaylistcontrol.cpp \
+    ../../src/aal/aalmediaplayerservice.cpp \
+    ../../src/aal/aalmediaplayerserviceplugin.cpp \
+    ../../src/aal/aalvideorenderercontrol.cpp
 
 # Installs required test media into place where the mediascanner will scan them
 system(cd $$PWD; echo $$PWD; ./setup_mediascanner.sh)

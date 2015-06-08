@@ -30,6 +30,8 @@ public:
 
     int mediaCount() const;
     QMediaContent media(int index) const;
+
+    bool addMedia(const QMediaContent &content);
 };
 
 QT_END_NAMESPACE

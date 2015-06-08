@@ -32,6 +32,7 @@ AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 
 int AalMediaPlaylistProvider::mediaCount() const
 {
+    qDebug() << Q_FUNC_INFO;
     return 0;
 }
 
@@ -39,6 +40,11 @@ QMediaContent AalMediaPlaylistProvider::media(int index) const
 {
     (void) index;
     return QMediaContent();
+}
+
+bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
+{
+    qDebug() << Q_FUNC_INFO;
 }
 
 QT_END_NAMESPACE

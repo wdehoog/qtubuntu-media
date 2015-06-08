@@ -34,4 +34,4 @@ SOURCES += \
     aalmediaplayerserviceplugin.cpp \
     aalvideorenderercontrol.cpp \
     aalmediaplaylistprovider.cpp \
-    aalmediaplaylistcontrol.cpp 
+    aalmediaplaylistcontrol.cpp

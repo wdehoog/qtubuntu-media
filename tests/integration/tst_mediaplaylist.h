@@ -42,6 +42,8 @@ private Q_SLOTS:
     void initTestCase();
     void cleanupTestCase();
 
+    void addTwoTracksAndVerify();
+
 private:
 };
 

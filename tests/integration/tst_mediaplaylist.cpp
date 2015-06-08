@@ -16,7 +16,9 @@
 
 #include "tst_mediaplaylist.h"
 
-#include <QObject>
+#include <QMediaPlayer>
+#include <QMediaPlaylist>
+
 #include <QtTest/QtTest>
 
 void tst_MediaPlaylist::initTestCase()
@@ -25,6 +27,19 @@ void tst_MediaPlaylist::initTestCase()
 
 void tst_MediaPlaylist::cleanupTestCase()
 {
+}
+
+void tst_MediaPlaylist::addTwoTracksAndVerify()
+{
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    playlist->addMedia(QUrl("media/testfile.ogg"));
+    playlist->addMedia(QUrl("media/testfile.mp4"));
+
+    QVERIFY(playlist->mediaCount() == 2);
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

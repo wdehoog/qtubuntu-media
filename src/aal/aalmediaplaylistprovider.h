@@ -19,6 +19,11 @@
 
 #include <private/qmediaplaylistprovider_p.h>
 
+#include <core/media/player.h>
+#include <core/media/track_list.h>
+
+#include <memory>
+
 QT_BEGIN_NAMESPACE
 
 class AalMediaPlaylistProvider : public QMediaPlaylistProvider
@@ -31,7 +36,15 @@ public:
     int mediaCount() const;
     QMediaContent media(int index) const;
 
+    bool isReadOnly() const;
+
     bool addMedia(const QMediaContent &content);
+
+    void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
+
+private:
+    std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
+    std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
 };
 
 QT_END_NAMESPACE

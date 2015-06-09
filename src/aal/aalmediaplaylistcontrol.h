@@ -20,6 +20,7 @@
 #include <private/qmediaplaylistcontrol_p.h>
 
 #include <core/media/player.h>
+#include <core/media/track_list.h>
 
 #include <memory>
 
@@ -55,6 +56,7 @@ private Q_SLOTS:
 
 private:
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
+    std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
     QMediaPlaylistProvider *m_playlistProvider;
 
     int m_currentIndex;

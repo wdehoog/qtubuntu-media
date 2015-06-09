@@ -93,6 +93,14 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
 {
     m_hubPlayerSession = playerSession;
+    static_cast<AalMediaPlaylistProvider*>(m_playlistProvider)->setPlayerSession(playerSession);
+
+    try {
+        m_hubTrackList = m_hubPlayerSession->track_list();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "FATAL: Failed to retrieve the current player session TrackList: " << e.what();
+    }
 }
 
 void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState state)

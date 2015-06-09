@@ -17,6 +17,7 @@
 #include "player.h"
 #include "service.h"
 #include "aalmediaplayerservice.h"
+#include "aalutility.h"
 #include "tst_mediaplayerplugin.h"
 #include "tst_metadatareadercontrol.h"
 #include "tst_mediaplaylistcontrol.h"
@@ -85,11 +86,11 @@ void tst_MediaPlayerPlugin::tst_unescape()
 {
     QString uri_str("file:///home/phablet/Videos/sintel[REC].mp4");
     QUrl uri("file:///home/phablet/Videos/sintel%5BREC%5D.mp4");
-    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
+    QVERIFY(AalUtility::unescape(QMediaContent(uri)).toString() == uri_str);
 
     uri_str = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
     uri = "https://www.youtube.com/watch?v=ESua4zGyo2Y&webm=1";
-    QVERIFY(m_mediaPlayerControl->unescape(QMediaContent(uri)).toString() == uri_str);
+    QVERIFY(AalUtility::unescape(QMediaContent(uri)).toString() == uri_str);
 }
 
 void tst_MediaPlayerPlugin::tst_play()

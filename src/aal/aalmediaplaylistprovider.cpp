@@ -15,8 +15,11 @@
  */
 
 #include "aalmediaplaylistprovider.h"
+#include "aalutility.h"
 
 #include <QDebug>
+
+namespace media = core::ubuntu::media;
 
 QT_BEGIN_NAMESPACE
 
@@ -42,9 +45,30 @@ QMediaContent AalMediaPlaylistProvider::media(int index) const
     return QMediaContent();
 }
 
+bool AalMediaPlaylistProvider::isReadOnly() const
+{
+    return m_hubTrackList->can_edit_tracks();
+}
+
 bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
     qDebug() << Q_FUNC_INFO;
+
+    static const bool make_current = false;
+    m_hubTrackList->add_track_with_uri_at(AalUtility::unescape_str(content), media::TrackList::after_empty_track(), make_current);
+
+    return true;
+}
+
+void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
+{
+    m_hubPlayerSession = playerSession;
+    try {
+        m_hubTrackList = m_hubPlayerSession->track_list();
+    }
+    catch (std::runtime_error &e) {
+        qWarning() << "FATAL: Failed to retrieve the current player session TrackList: " << e.what();
+    }
 }
 
 QT_END_NAMESPACE

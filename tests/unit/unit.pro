@@ -24,6 +24,7 @@ HEADERS += \
     ../../src/aal/aalmetadatareadercontrol.h \
     ../../src/aal/aalmediaplaylistprovider.h \
     ../../src/aal/aalmediaplaylistcontrol.h \
+    ../../src/aal/aalutility.h \
     tst_mediaplayerplugin.h \
     tst_metadatareadercontrol.h \
     tst_mediaplaylistcontrol.h \
@@ -44,7 +45,8 @@ SOURCES += \
     ../../src/aal/aalmediaplaylistcontrol.cpp \
     ../../src/aal/aalmediaplayerservice.cpp \
     ../../src/aal/aalmediaplayerserviceplugin.cpp \
-    ../../src/aal/aalvideorenderercontrol.cpp
+    ../../src/aal/aalvideorenderercontrol.cpp \
+    ../../src/aal/aalutility.cpp
 
 # Installs required test media into place where the mediascanner will scan them
 system(cd $$PWD; echo $$PWD; ./setup_mediascanner.sh)

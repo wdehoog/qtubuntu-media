@@ -522,9 +522,8 @@ void AalMediaPlayerService::createMetaDataReaderControl()
 void AalMediaPlayerService::createPlaylistControl()
 {
     qDebug() << Q_FUNC_INFO;
-    AalMediaPlaylistProvider *p = new AalMediaPlaylistProvider(this);
     m_mediaPlaylistControl = new AalMediaPlaylistControl(this);
-    m_mediaPlaylistControl->setPlaylistProvider(p);
+    m_mediaPlaylistControl->setPlaylistProvider(new AalMediaPlaylistProvider(this));
 }
 
 void AalMediaPlayerService::deleteMediaPlayerControl()

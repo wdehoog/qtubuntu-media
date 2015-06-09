@@ -17,6 +17,7 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 #include "aalvideorenderercontrol.h"
+#include "aalutility.h"
 
 #include <media/media_compatibility_layer.h>
 
@@ -240,7 +241,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
         {
             QMediaPlayer::MediaStatus priorStatus = mediaStatus();
             setMediaStatus(QMediaPlayer::LoadingMedia);
-            m_service->setMedia(unescape(media));
+            m_service->setMedia(AalUtility::unescape(media));
             // This is important to do for QMediaPlaylist instances that
             // are set to loop. Without this, such a playlist will only
             // play once
@@ -305,21 +306,6 @@ void AalMediaPlayerControl::updateCachedDuration(qint64 duration)
     m_cachedDuration = duration;
     if (duration > 0)
         emitDurationChanged(duration);
-}
-
-QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const
-{
-    if (media.isNull())
-        return QUrl();
-
-    if (media.canonicalUrl().isLocalFile()) {
-        qDebug() << "Local file URI: " << QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
-        return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
-    }
-    else {
-        qDebug() << "Remote stream URI: " << QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
-        return QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
-    }
 }
 
 void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)

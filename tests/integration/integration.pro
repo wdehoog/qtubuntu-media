@@ -7,6 +7,8 @@ TARGET = tst_integration
 
 QT += multimedia opengl multimedia-private quick testlib
 
+QT_TESTCASE_BUILDDIR = .
+
 INCLUDEPATH += ../../src/aal \
     /usr/include/qt5/QtMultimedia \
 

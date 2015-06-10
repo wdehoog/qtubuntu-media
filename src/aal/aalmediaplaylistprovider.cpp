@@ -36,7 +36,14 @@ AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 int AalMediaPlaylistProvider::mediaCount() const
 {
     qDebug() << Q_FUNC_INFO;
-    return 0;
+
+    try {
+        return m_hubTrackList->tracks()->size();
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to get playlist media count: " << e.what();
+        return 0;
+    }
 }
 
 QMediaContent AalMediaPlaylistProvider::media(int index) const
@@ -56,7 +63,14 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 
     try {
         static const bool make_current = false;
-        m_hubTrackList->add_track_with_uri_at(AalUtility::unescape_str(content), media::TrackList::after_empty_track(), make_current);
+        const QUrl url = content.canonicalUrl();
+        std::string urlStr = AalUtility::unescape_str(content);
+        qDebug() << "scheme: " << url.scheme();
+        qDebug() << "Contains file://?" << url.toString().contains("file://", Qt::CaseInsensitive);
+        if (url.scheme().isEmpty() and url.scheme() != "file")
+            urlStr = "file://" + AalUtility::unescape_str(content);
+
+        m_hubTrackList->add_track_with_uri_at(urlStr, media::TrackList::after_empty_track(), make_current);
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
@@ -118,7 +132,15 @@ bool AalMediaPlaylistProvider::removeMedia(int start, int end)
 
 bool AalMediaPlaylistProvider::clear()
 {
-    return false;
+    try {
+        m_hubTrackList->reset();
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to clear the playlist: " << e.what();
+        return false;
+    }
+
+    return true;
 }
 
 void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)

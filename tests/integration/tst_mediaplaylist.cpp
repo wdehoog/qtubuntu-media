@@ -36,8 +36,8 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
-    playlist->addMedia(QUrl("media/testfile.ogg"));
-    playlist->addMedia(QUrl("media/testfile.mp4"));
+    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
 
     QCOMPARE(playlist->mediaCount(), 2);
 }
@@ -50,8 +50,8 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
     player->setPlaylist(playlist);
 
     QList<QMediaContent> content;
-    content.push_back(QUrl("media/testfile.ogg"));
-    content.push_back(QUrl("media/testfile.mp4"));
+    content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
 
     playlist->addMedia(content);
 

@@ -39,6 +39,12 @@ public:
     bool isReadOnly() const;
 
     bool addMedia(const QMediaContent &content);
+    bool addMedia(const QList<QMediaContent> &contentList);
+    bool insertMedia(int index, const QMediaContent &content);
+    bool insertMedia(int index, const QList<QMediaContent> &content);
+    bool removeMedia(int pos);
+    bool removeMedia(int start, int end);
+    bool clear();
 
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
 

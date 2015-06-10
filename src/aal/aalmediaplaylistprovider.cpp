@@ -54,10 +54,71 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
     qDebug() << Q_FUNC_INFO;
 
-    static const bool make_current = false;
-    m_hubTrackList->add_track_with_uri_at(AalUtility::unescape_str(content), media::TrackList::after_empty_track(), make_current);
+    try {
+        static const bool make_current = false;
+        m_hubTrackList->add_track_with_uri_at(AalUtility::unescape_str(content), media::TrackList::after_empty_track(), make_current);
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
+    }
 
     return true;
+}
+
+bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    if (contentList.empty())
+        return false;
+
+    for (int i=0; i<contentList.count(); i++)
+    {
+        if (!addMedia(contentList.at(i)))
+        {
+            qWarning() << "Not all tracks were added to the playlist";
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &content)
+{
+    (void) index;
+    (void) content;
+
+    return false;
+}
+
+bool AalMediaPlaylistProvider::insertMedia(int index, const QList<QMediaContent> &content)
+{
+    (void) index;
+    (void) content;
+
+    return false;
+}
+
+bool AalMediaPlaylistProvider::removeMedia(int pos)
+{
+    (void) pos;
+
+    return false;
+}
+
+bool AalMediaPlaylistProvider::removeMedia(int start, int end)
+{
+    (void) start;
+    (void) end;
+
+    return false;
+}
+
+bool AalMediaPlaylistProvider::clear()
+{
+    return false;
 }
 
 void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)

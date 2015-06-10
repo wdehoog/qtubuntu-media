@@ -43,6 +43,7 @@ private Q_SLOTS:
     void cleanupTestCase();
 
     void addTwoTracksAndVerify();
+    void addListOfTracksAndVerify();
 
 private:
 };

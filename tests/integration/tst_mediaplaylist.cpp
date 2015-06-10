@@ -39,7 +39,23 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
     playlist->addMedia(QUrl("media/testfile.ogg"));
     playlist->addMedia(QUrl("media/testfile.mp4"));
 
-    QVERIFY(playlist->mediaCount() == 2);
+    QCOMPARE(playlist->mediaCount(), 2);
+}
+
+void tst_MediaPlaylist::addListOfTracksAndVerify()
+{
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("media/testfile.ogg"));
+    content.push_back(QUrl("media/testfile.mp4"));
+
+    playlist->addMedia(content);
+
+    QCOMPARE(playlist->mediaCount(), 2);
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

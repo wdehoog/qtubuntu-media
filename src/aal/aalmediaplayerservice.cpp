@@ -248,6 +248,11 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         return;
     }
 
+    // This is critical to allowing a different video source to be able to play correctly
+    // if another video is already playing in the same AalMediaPlayerService instance
+    if (m_videoOutput->textureId() > 0)
+        resetVideoSink();
+
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
     try {

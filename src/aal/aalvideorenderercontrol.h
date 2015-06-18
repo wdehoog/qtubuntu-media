@@ -74,7 +74,6 @@ Q_SIGNALS:
 private Q_SLOTS:
     void updateVideoTexture();
     void onTextureCreated(unsigned int textureID);
-    void onServiceReady();
     void onGLConsumerSet();
 
 private:

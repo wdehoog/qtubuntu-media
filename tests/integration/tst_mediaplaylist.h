@@ -45,6 +45,12 @@ private Q_SLOTS:
     void addTwoTracksAndVerify();
     void addListOfTracksAndVerify();
 
+    void goToNextTrack();
+    void goToPreviousTrack();
+    void verifyMedia();
+
+    void removeTrackAndVerify();
+
 private:
 };
 

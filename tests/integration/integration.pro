@@ -16,4 +16,5 @@ HEADERS += \
     tst_mediaplaylist.h
 
 SOURCES += \
-    tst_mediaplaylist.cpp
+    tst_mediaplaylist.cpp \
+    ../../src/aal/aalutility.cpp

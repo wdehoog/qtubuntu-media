@@ -20,9 +20,13 @@
 #include <private/qmediaplaylistprovider_p.h>
 
 #include <core/media/player.h>
+#include <core/media/track.h>
 #include <core/media/track_list.h>
 
+#include <core/connection.h>
+
 #include <memory>
+#include <vector>
 
 QT_BEGIN_NAMESPACE
 
@@ -49,8 +53,21 @@ public:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
 
 private:
+    void connect_signals();
+    void disconnect_signals();
+    int indexOfTrack(const core::ubuntu::media::Track::Id &id) const;
+    const core::ubuntu::media::Track::Id trackOfIndex(int index) const;
+
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
+
+    core::Connection m_trackChangedConnection;
+    core::Connection m_trackAddedConnection;
+
+    // Simple table that holds a list (order is significant and explicit) of
+    // Track::Id's for a lookup. track_index_lut.at[x] gives the corresponding
+    // Track::Id for index x, and vice-versa.
+    std::vector<core::ubuntu::media::Track::Id> track_index_lut;
 };
 
 QT_END_NAMESPACE

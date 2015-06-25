@@ -22,6 +22,8 @@
 #include <core/media/player.h>
 #include <core/media/track_list.h>
 
+#include <core/connection.h>
+
 #include <memory>
 
 QT_BEGIN_NAMESPACE
@@ -55,11 +57,15 @@ private Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
 
 private:
+    void connect_signals();
+    void disconnect_signals();
+
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
     QMediaPlaylistProvider *m_playlistProvider;
 
     int m_currentIndex;
+
 };
 
 QT_END_NAMESPACE

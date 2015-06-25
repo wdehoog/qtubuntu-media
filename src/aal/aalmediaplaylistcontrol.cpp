@@ -17,10 +17,14 @@
 #include "aalmediaplaylistcontrol.h"
 #include "aalmediaplaylistprovider.h"
 
+#include <core/signal.h>
+
 #include <QGuiApplication>
 #include <QMediaPlaylist>
 
 #include <QDebug>
+
+namespace media = core::ubuntu::media;
 
 QT_BEGIN_NAMESPACE
 
@@ -35,6 +39,7 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
 
 AalMediaPlaylistControl::~AalMediaPlaylistControl()
 {
+    disconnect_signals();
 }
 
 QMediaPlaylistProvider* AalMediaPlaylistControl::playlistProvider() const
@@ -73,11 +78,25 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
 void AalMediaPlaylistControl::next()
 {
     qDebug() << Q_FUNC_INFO;
+
+    try {
+        m_hubPlayerSession->next();
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to go to next track: " << e.what();
+    }
 }
 
 void AalMediaPlaylistControl::previous()
 {
     qDebug() << Q_FUNC_INFO;
+
+    try {
+        m_hubPlayerSession->previous();
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to go to previous track: " << e.what();
+    }
 }
 
 QMediaPlaylist::PlaybackMode AalMediaPlaylistControl::playbackMode() const
@@ -101,6 +120,8 @@ void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubunt
     catch (std::runtime_error &e) {
         qWarning() << "FATAL: Failed to retrieve the current player session TrackList: " << e.what();
     }
+
+    connect_signals();
 }
 
 void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState state)
@@ -119,6 +140,16 @@ void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState sta
         qDebug() << "Unknown ApplicationState or purposefully not reacting to current state change";
         break;
     }
+}
+
+void AalMediaPlaylistControl::connect_signals()
+{
+    qDebug() << Q_FUNC_INFO;
+}
+
+void AalMediaPlaylistControl::disconnect_signals()
+{
+    qDebug() << Q_FUNC_INFO;
 }
 
 QT_END_NAMESPACE

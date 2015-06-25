@@ -15,6 +15,7 @@
  */
 
 #include "tst_mediaplaylist.h"
+#include "aalutility.h"
 
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
@@ -40,6 +41,9 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
     playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
 
     QCOMPARE(playlist->mediaCount(), 2);
+
+    delete playlist;
+    delete player;
 }
 
 void tst_MediaPlaylist::addListOfTracksAndVerify()
@@ -56,6 +60,104 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
     playlist->addMedia(content);
 
     QCOMPARE(playlist->mediaCount(), 2);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::goToNextTrack()
+{
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    const QUrl audio(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl video(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    qDebug() << "audio URL: " << audio.toString();
+    qDebug() << "video URL: " << video.toString();
+    playlist->addMedia(audio);
+    playlist->addMedia(video);
+
+    QCOMPARE(playlist->mediaCount(), 2);
+    qDebug() << "URI (1): " << AalUtility::unescape_str(playlist->media(1)).c_str();
+
+    player->play();
+    playlist->next();
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::goToPreviousTrack()
+{
+#if 0
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+
+    QCOMPARE(playlist->mediaCount(), 2);
+
+    player->play();
+    playlist->previous();
+
+    delete playlist;
+    delete player;
+#endif
+}
+
+void tst_MediaPlaylist::verifyMedia()
+{
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    const QUrl audio(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    qDebug() << "audio URL: " << audio.toString();
+    qDebug() << "video URL: " << video.toString();
+    playlist->addMedia(audio);
+    playlist->addMedia(video);
+
+    QCOMPARE(playlist->mediaCount(), 2);
+
+    const QUrl audioToVerify(playlist->media(0).canonicalUrl());
+    QCOMPARE(audioToVerify, audio);
+
+    const QUrl videoToVerify(playlist->media(1).canonicalUrl());
+    QCOMPARE(videoToVerify, video);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::removeTrackAndVerify()
+{
+    qDebug() << Q_FUNC_INFO;
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    playlist->addMedia(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(video);
+
+    QCOMPARE(playlist->mediaCount(), 2);
+
+    playlist->removeMedia(0);
+
+    QCOMPARE(playlist->mediaCount(), 1);
+
+    const QUrl videoToVerify(playlist->media(0).canonicalUrl());
+    QCOMPARE(videoToVerify, video);
+
+    delete playlist;
+    delete player;
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

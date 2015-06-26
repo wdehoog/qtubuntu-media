@@ -29,6 +29,7 @@
 QT_BEGIN_NAMESPACE
 
 class QMediaPlaylistProvider;
+class AalMediaPlaylistProvider;
 
 class AalMediaPlaylistControl : public QMediaPlaylistControl
 {
@@ -59,6 +60,7 @@ private Q_SLOTS:
 private:
     void connect_signals();
     void disconnect_signals();
+    inline AalMediaPlaylistProvider* aalMediaPlaylistProvider();
 
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
@@ -66,6 +68,7 @@ private:
 
     int m_currentIndex;
 
+    core::Connection m_trackChangedConnection;
 };
 
 QT_END_NAMESPACE

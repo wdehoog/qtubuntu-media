@@ -26,7 +26,9 @@ namespace media = core::ubuntu::media;
 
 QT_BEGIN_NAMESPACE
 
+namespace {
 core::Signal<void> the_void;
+}
 
 AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
     : QMediaPlaylistProvider(parent),

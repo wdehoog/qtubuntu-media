@@ -28,10 +28,15 @@ namespace media = core::ubuntu::media;
 
 QT_BEGIN_NAMESPACE
 
+namespace {
+core::Signal<void> the_void;
+}
+
 AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
-      m_currentIndex(-1)
+      m_currentIndex(-1),
+      m_trackChangedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
     connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlaylistControl::onApplicationStateChanged);
@@ -65,8 +70,8 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
 
 int AalMediaPlaylistControl::nextIndex(int steps) const
 {
-    (void) steps;
-    return 0;
+    // algo: |(currentIndex + steps) - tracklist_size|
+    return std::abs((m_currentIndex + steps) - m_playlistProvider->mediaCount());
 }
 
 int AalMediaPlaylistControl::previousIndex(int steps) const
@@ -112,7 +117,7 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
 {
     m_hubPlayerSession = playerSession;
-    static_cast<AalMediaPlaylistProvider*>(m_playlistProvider)->setPlayerSession(playerSession);
+    aalMediaPlaylistProvider()->setPlayerSession(playerSession);
 
     try {
         m_hubTrackList = m_hubPlayerSession->track_list();
@@ -145,11 +150,29 @@ void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState sta
 void AalMediaPlaylistControl::connect_signals()
 {
     qDebug() << Q_FUNC_INFO;
+
+    m_trackChangedConnection = m_hubTrackList->on_track_changed().connect([this](const media::Track::Id& id)
+    {
+        qDebug() << "onTrackChanged, id: " << id.c_str();
+        if (!id.empty())
+        {
+            m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
+            qDebug() << "m_currentIndex updated to: " << m_currentIndex;
+        }
+    });
 }
 
 void AalMediaPlaylistControl::disconnect_signals()
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (m_trackChangedConnection.is_connected())
+        m_trackChangedConnection.disconnect();
+}
+
+AalMediaPlaylistProvider* AalMediaPlaylistControl::aalMediaPlaylistProvider()
+{
+    return static_cast<AalMediaPlaylistProvider*>(m_playlistProvider);
 }
 
 QT_END_NAMESPACE

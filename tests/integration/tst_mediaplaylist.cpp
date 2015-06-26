@@ -72,18 +72,24 @@ void tst_MediaPlaylist::goToNextTrack()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
-    const QUrl audio(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
-    const QUrl video(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    const QUrl audio(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
     qDebug() << "audio URL: " << audio.toString();
     qDebug() << "video URL: " << video.toString();
     playlist->addMedia(audio);
     playlist->addMedia(video);
 
     QCOMPARE(playlist->mediaCount(), 2);
-    qDebug() << "URI (1): " << AalUtility::unescape_str(playlist->media(1)).c_str();
 
     player->play();
+
+    const QUrl audioToVerify(playlist->currentMedia().canonicalUrl());
+    QCOMPARE(audioToVerify, audio);
+
     playlist->next();
+
+    const QUrl videoToVerify(playlist->currentMedia().canonicalUrl());
+    QCOMPARE(videoToVerify, video);
 
     delete playlist;
     delete player;

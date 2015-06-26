@@ -30,10 +30,14 @@
 
 QT_BEGIN_NAMESPACE
 
+class AalMediaPlaylistControl;
+
 class AalMediaPlaylistProvider : public QMediaPlaylistProvider
 {
 Q_OBJECT
 public:
+    friend class AalMediaPlaylistControl;
+
     AalMediaPlaylistProvider(QObject *parent=0);
     ~AalMediaPlaylistProvider();
 
@@ -50,9 +54,8 @@ public:
     bool removeMedia(int start, int end);
     bool clear();
 
-    void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
-
 private:
+    void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();
     void disconnect_signals();
     int indexOfTrack(const core::ubuntu::media::Track::Id &id) const;

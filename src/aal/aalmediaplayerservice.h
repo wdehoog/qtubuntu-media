@@ -31,6 +31,7 @@
 
 class AalMediaPlayerControl;
 class AalMediaPlaylistControl;
+class AalMediaPlaylistProvider;
 class QMediaPlayerControl;
 class QMetaDataReaderControl;
 class AalVideoRendererControl;
@@ -140,6 +141,7 @@ private:
     AalVideoRendererControl *m_videoOutput;
     QMetaDataReaderControl *m_metaDataReaderControl;
     AalMediaPlaylistControl *m_mediaPlaylistControl;
+    AalMediaPlaylistProvider *m_mediaPlaylistProvider;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 

@@ -35,7 +35,7 @@ core::Signal<void> the_void;
 AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
-      m_currentIndex(-1),
+      m_currentIndex(0),
       m_trackChangedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
@@ -44,6 +44,7 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
 
 AalMediaPlaylistControl::~AalMediaPlaylistControl()
 {
+    qDebug() << Q_FUNC_INFO;
     disconnect_signals();
 }
 
@@ -65,13 +66,35 @@ int AalMediaPlaylistControl::currentIndex() const
 
 void AalMediaPlaylistControl::setCurrentIndex(int position)
 {
-    m_currentIndex = position;
+    if (position >= m_playlistProvider->mediaCount())
+        return;
+
+    //m_currentIndex = position;
+
+    try {
+        const std::string id = aalMediaPlaylistProvider()->trackOfIndex(position);
+        static const bool togglePlayerState = false;
+        m_hubTrackList->go_to(id, togglePlayerState);
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to go to specified tracklist position: " << e.what();
+    }
 }
 
 int AalMediaPlaylistControl::nextIndex(int steps) const
 {
-    // algo: |(currentIndex + steps) - tracklist_size|
-    return std::abs((m_currentIndex + steps) - m_playlistProvider->mediaCount());
+    const int distance = m_currentIndex + steps;
+    const int tracklistSize = m_playlistProvider->mediaCount();
+#if 1
+    qDebug() << "m_currentIndex: " << m_currentIndex;
+    qDebug() << "steps: " << steps;
+    qDebug() << "tracklistSize: " << tracklistSize;
+#endif
+    if (distance < tracklistSize)
+        return distance;
+    else
+        // algo: |(currentIndex + steps) - tracklist_size|
+        return std::abs((distance) - tracklistSize);
 }
 
 int AalMediaPlaylistControl::previousIndex(int steps) const
@@ -106,12 +129,51 @@ void AalMediaPlaylistControl::previous()
 
 QMediaPlaylist::PlaybackMode AalMediaPlaylistControl::playbackMode() const
 {
+    const auto loopStatus = m_hubPlayerSession->loop_status();
+    switch (loopStatus)
+    {
+        case media::Player::LoopStatus::none:
+            return QMediaPlaylist::Sequential;
+        case media::Player::LoopStatus::track:
+            return QMediaPlaylist::CurrentItemInLoop;
+        case media::Player::LoopStatus::playlist:
+            return QMediaPlaylist::Loop;
+        default:
+            qWarning() << "Unknown loop status: " << loopStatus;
+    }
+
+    if (m_hubPlayerSession->shuffle())
+        return QMediaPlaylist::Random;
+
     return QMediaPlaylist::Sequential;
 }
 
 void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
 {
-    (void) mode;
+    switch (mode)
+    {
+        case QMediaPlaylist::CurrentItemOnce:
+            m_hubPlayerSession->shuffle() = false;
+            qWarning() << "No media-hub equivalent for QMediaPlaylist::CurrentItemOnce";
+            break;
+        case QMediaPlaylist::CurrentItemInLoop:
+            m_hubPlayerSession->shuffle() = false;
+            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::track;
+            break;
+        case QMediaPlaylist::Sequential:
+            m_hubPlayerSession->shuffle() = false;
+            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::none;
+            break;
+        case QMediaPlaylist::Loop:
+            m_hubPlayerSession->shuffle() = false;
+            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
+            break;
+        case QMediaPlaylist::Random:
+            m_hubPlayerSession->shuffle() = true;
+            break;
+        default:
+            qWarning() << "Unknown playback mode: " << mode;
+    }
 }
 
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)

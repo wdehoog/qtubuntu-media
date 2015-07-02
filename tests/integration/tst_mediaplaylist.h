@@ -51,6 +51,11 @@ private Q_SLOTS:
 
     void removeTrackAndVerify();
 
+    void verifyCurrentIndex();
+    void verifyNextIndex();
+
+    void verifyPlaybackMode();
+
 private:
 };
 

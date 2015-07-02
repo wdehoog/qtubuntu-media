@@ -22,6 +22,8 @@
 
 #include <QtTest/QtTest>
 
+//#define DISABLE_TEST
+
 void tst_MediaPlaylist::initTestCase()
 {
 }
@@ -32,6 +34,7 @@ void tst_MediaPlaylist::cleanupTestCase()
 
 void tst_MediaPlaylist::addTwoTracksAndVerify()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -44,10 +47,12 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::addListOfTracksAndVerify()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -63,10 +68,12 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::goToNextTrack()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -93,6 +100,7 @@ void tst_MediaPlaylist::goToNextTrack()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::goToPreviousTrack()
@@ -118,6 +126,7 @@ void tst_MediaPlaylist::goToPreviousTrack()
 
 void tst_MediaPlaylist::verifyMedia()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -140,10 +149,12 @@ void tst_MediaPlaylist::verifyMedia()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::removeTrackAndVerify()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -164,6 +175,63 @@ void tst_MediaPlaylist::removeTrackAndVerify()
 
     delete playlist;
     delete player;
+#endif
+}
+
+void tst_MediaPlaylist::verifyCurrentIndex()
+{
+#ifndef DISABLE_TEST
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(content);
+
+    QCOMPARE(playlist->mediaCount(), 3);
+
+    playlist->setCurrentIndex(1);
+    QCOMPARE(playlist->currentIndex(), 1);
+
+    delete playlist;
+    delete player;
+#endif
+}
+
+void tst_MediaPlaylist::verifyNextIndex()
+{
+#ifndef DISABLE_TEST
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(content);
+
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    QCOMPARE(playlist->nextIndex(1), 1);
+    QCOMPARE(playlist->nextIndex(4), 4);
+    QCOMPARE(playlist->nextIndex(6), 0);
+    QCOMPARE(playlist->nextIndex(7), 1);
+    QCOMPARE(playlist->nextIndex(11), 5);
+
+    delete playlist;
+    delete player;
+#endif
+}
+
+void tst_MediaPlaylist::verifyPlaybackMode()
+{
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

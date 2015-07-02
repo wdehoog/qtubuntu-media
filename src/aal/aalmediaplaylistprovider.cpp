@@ -40,6 +40,8 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 {
+    qDebug() << Q_FUNC_INFO;
+    clear();
     disconnect_signals();
 }
 
@@ -58,7 +60,7 @@ int AalMediaPlaylistProvider::mediaCount() const
 
 QMediaContent AalMediaPlaylistProvider::media(int index) const
 {
-    if (!m_hubTrackList)
+    if (!m_hubTrackList || mediaCount() == 0)
         return QMediaContent();
 
     const media::Track::Id id = trackOfIndex(index);
@@ -242,7 +244,14 @@ int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const
     if (id.empty() || track_index_lut.size() == 0)
         return 0;
 
-    return std::distance(track_index_lut.begin(), track_index_lut.end()) - 1;
+    const auto trackPos = std::find(track_index_lut.begin(), track_index_lut.end(), id);
+    if (trackPos == track_index_lut.end())
+    {
+        qWarning() << "Failed to look up index for non-existent track id: " << id.c_str();
+        return 0;
+    }
+
+    return std::distance(track_index_lut.begin(), trackPos);
 }
 
 const media::Track::Id AalMediaPlaylistProvider::trackOfIndex(int index) const
@@ -254,7 +263,8 @@ const media::Track::Id AalMediaPlaylistProvider::trackOfIndex(int index) const
         return track_index_lut.at(index);
     }
     catch (const std::out_of_range &e) {
-        qWarning() << "Failed to look up track for index " << index << "- track_index_lut.size() is 0";
+        qWarning() << "Failed to look up track for index " << index <<
+            "- out of range: track_index_lut.size() is " << track_index_lut.size();
         return media::TrackList::after_empty_track();
     }
 }

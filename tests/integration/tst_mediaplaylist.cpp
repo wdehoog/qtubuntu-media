@@ -25,7 +25,7 @@
 
 #include <QtTest/QtTest>
 
-#define DISABLE_TEST
+//#define DISABLE_TEST
 
 void tst_MediaPlaylist::initTestCase()
 {
@@ -108,6 +108,7 @@ void tst_MediaPlaylist::goToNextTrack()
 
 void tst_MediaPlaylist::goToPreviousTrack()
 {
+#ifndef DISABLE_TEST
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
@@ -134,6 +135,7 @@ void tst_MediaPlaylist::goToPreviousTrack()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::verifyMedia()

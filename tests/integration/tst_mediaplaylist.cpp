@@ -25,7 +25,7 @@
 
 #include <QtTest/QtTest>
 
-//#define DISABLE_TEST
+#define DISABLE_TEST
 
 void tst_MediaPlaylist::initTestCase()
 {
@@ -108,23 +108,32 @@ void tst_MediaPlaylist::goToNextTrack()
 
 void tst_MediaPlaylist::goToPreviousTrack()
 {
-#if 0
     qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
-    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
-    playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    const QUrl audio1(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl audio2(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(audio1);
+    playlist->addMedia(audio2);
 
     QCOMPARE(playlist->mediaCount(), 2);
+    playlist->setCurrentIndex(1);
 
     player->play();
+
+    const QUrl audio2ToVerify(playlist->currentMedia().canonicalUrl());
+    QCOMPARE(audio2ToVerify, audio2);
+
     playlist->previous();
+
+    const QUrl audio1ToVerify(playlist->currentMedia().canonicalUrl());
+    QCOMPARE(audio2ToVerify, audio1);
+    QCOMPARE(playlist->currentIndex(), 0);
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyMedia()
@@ -235,6 +244,7 @@ void tst_MediaPlaylist::verifyNextIndex()
 
 void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 {
+#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -274,6 +284,7 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 
     delete playlist;
     delete player;
+#endif
 }
 
 void tst_MediaPlaylist::verifyPlaybackModeSequential()

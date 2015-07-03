@@ -67,7 +67,6 @@ private:
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
 
-    core::Connection m_trackChangedConnection;
     core::Connection m_trackAddedConnection;
 
     // Simple table that holds a list (order is significant and explicit) of

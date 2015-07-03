@@ -34,7 +34,6 @@ core::Signal<void> the_void;
 
 AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
     : QMediaPlaylistProvider(parent),
-      m_trackChangedConnection(the_void.connect([](){})),
       m_trackAddedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
@@ -224,13 +223,6 @@ void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id
 
 void AalMediaPlaylistProvider::connect_signals()
 {
-#if 0
-    m_trackChangedConnection = m_hubTrackList->on_track_changed().connect([this](const media::Track::Id& id)
-    {
-        qDebug() << "onTrackChanged, id: " << id.c_str();
-    });
-#endif
-
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
         track_index_lut.push_back(id);
@@ -243,9 +235,7 @@ void AalMediaPlaylistProvider::disconnect_signals()
     qDebug() << Q_FUNC_INFO;
 
     if (m_trackAddedConnection.is_connected())
-        m_trackChangedConnection.disconnect();
-    if (m_trackChangedConnection.is_connected())
-        m_trackChangedConnection.disconnect();
+        m_trackAddedConnection.disconnect();
 }
 
 int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const

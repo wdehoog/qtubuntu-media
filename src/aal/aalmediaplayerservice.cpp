@@ -287,6 +287,7 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
 
 void AalMediaPlayerService::play()
 {
+    qDebug() << Q_FUNC_INFO;
     if (m_hubPlayerSession == NULL)
     {
         qWarning() << "Cannot start playback without a valid media-hub player session";

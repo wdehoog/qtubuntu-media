@@ -54,6 +54,9 @@ public:
     bool removeMedia(int start, int end);
     bool clear();
 
+private Q_SLOTS:
+    void onTrackAdded(const core::ubuntu::media::Track::Id& id);
+
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();

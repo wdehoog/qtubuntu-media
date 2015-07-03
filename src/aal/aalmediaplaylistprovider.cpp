@@ -24,6 +24,8 @@
 
 namespace media = core::ubuntu::media;
 
+Q_DECLARE_METATYPE(core::ubuntu::media::Track::Id)
+
 QT_BEGIN_NAMESPACE
 
 namespace {
@@ -36,6 +38,7 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackAddedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
+    qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
@@ -208,22 +211,30 @@ void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubun
     connect_signals();
 }
 
+void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id& id)
+{
+    qDebug() << "onTrackAdded id: " << id.c_str();
+    if (!id.empty())
+    {
+        const int index = indexOfTrack(id);
+        // Added one track, so start and end are the same index values
+        Q_EMIT mediaInserted(index, index);
+    }
+}
+
 void AalMediaPlaylistProvider::connect_signals()
 {
-    qDebug() << Q_FUNC_INFO;
-
+#if 0
     m_trackChangedConnection = m_hubTrackList->on_track_changed().connect([this](const media::Track::Id& id)
     {
         qDebug() << "onTrackChanged, id: " << id.c_str();
     });
+#endif
 
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
         track_index_lut.push_back(id);
-        const int index = indexOfTrack(id);
-        // Added one track, so start and end are the same index values
-        Q_EMIT mediaInserted(index, index);
-        qDebug() << "onTrackAdded, index: " << index << " id: " << id.c_str();
+        QMetaObject::invokeMethod(this, "onTrackAdded", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
     });
 }
 

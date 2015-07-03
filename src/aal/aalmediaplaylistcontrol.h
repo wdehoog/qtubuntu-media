@@ -54,8 +54,15 @@ public:
 
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
 
+Q_SIGNALS:
+    void playlistProviderChanged();
+    void currentIndexChanged(int position);
+    void currentMediaChanged(const QMediaContent&);
+    void playbackModeChanged(QMediaPlaylist::PlaybackMode mode);
+
 private Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
+    void onTrackChanged(const core::ubuntu::media::Track::Id& id);
 
 private:
     void connect_signals();

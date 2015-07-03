@@ -19,12 +19,15 @@
 
 #include <core/signal.h>
 
+#include <QEventLoop>
 #include <QGuiApplication>
 #include <QMediaPlaylist>
 
 #include <QDebug>
 
 namespace media = core::ubuntu::media;
+
+Q_DECLARE_METATYPE(core::ubuntu::media::Track::Id)
 
 QT_BEGIN_NAMESPACE
 
@@ -39,6 +42,8 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
       m_trackChangedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
+    qRegisterMetaType<core::ubuntu::media::Track::Id>();
+
     connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlaylistControl::onApplicationStateChanged);
 }
 
@@ -56,6 +61,7 @@ QMediaPlaylistProvider* AalMediaPlaylistControl::playlistProvider() const
 bool AalMediaPlaylistControl::setPlaylistProvider(QMediaPlaylistProvider *playlist)
 {
     m_playlistProvider = playlist;
+    Q_EMIT playlistProviderChanged();
     return true;
 }
 
@@ -209,18 +215,24 @@ void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState sta
     }
 }
 
+void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::Id& id)
+{
+    qDebug() << "onTrackChanged, id: " << id.c_str();
+    if (!id.empty())
+    {
+        m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
+        qDebug() << "m_currentIndex updated to: " << m_currentIndex;
+        const QMediaContent content = playlistProvider()->media(m_currentIndex);
+        Q_EMIT currentMediaChanged(content);
+        Q_EMIT currentIndexChanged(m_currentIndex);
+    }
+}
+
 void AalMediaPlaylistControl::connect_signals()
 {
-    qDebug() << Q_FUNC_INFO;
-
     m_trackChangedConnection = m_hubTrackList->on_track_changed().connect([this](const media::Track::Id& id)
     {
-        qDebug() << "onTrackChanged, id: " << id.c_str();
-        if (!id.empty())
-        {
-            m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
-            qDebug() << "m_currentIndex updated to: " << m_currentIndex;
-        }
+        QMetaObject::invokeMethod(this, "onTrackChanged", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
     });
 }
 

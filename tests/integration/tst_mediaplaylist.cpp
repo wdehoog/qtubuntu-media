@@ -17,6 +17,9 @@
 #include "tst_mediaplaylist.h"
 #include "aalutility.h"
 
+#include <thread>
+#include <unistd.h>
+
 #include <QMediaPlayer>
 #include <QMediaPlaylist>
 
@@ -230,8 +233,93 @@ void tst_MediaPlaylist::verifyNextIndex()
 #endif
 }
 
-void tst_MediaPlaylist::verifyPlaybackMode()
+void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 {
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(content);
+
+    QCOMPARE(playlist->mediaCount(), 2);
+
+    QMediaContent current_media;
+    std::promise<QMediaContent> promise;
+    std::future<QMediaContent> future{promise.get_future()};
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
+    {
+            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
+            current_media = content;
+            promise.set_value(current_media);
+    });
+
+    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+
+    player->play();
+
+    while (!is_ready<QMediaContent>(future))
+    {
+        // Make sure we don't block the main QEventLoop, which
+        // would hinder receiving the currentMediaChanged event above
+        QCoreApplication::processEvents();
+        std::this_thread::yield();
+    }
+
+    QCOMPARE(playlist->currentIndex(), 0);
+
+    QObject::disconnect(c);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::verifyPlaybackModeSequential()
+{
+#ifndef DISABLE_TEST
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QMediaContent current_media;
+    std::promise<QMediaContent> promise;
+    std::future<QMediaContent> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
+    {
+            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
+            current_media = content;
+            promise.set_value(current_media);
+    });
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(content);
+
+    QCOMPARE(playlist->mediaCount(), 2);
+
+    playlist->setPlaybackMode(QMediaPlaylist::Sequential);
+
+    player->play();
+
+    while (!is_ready<QMediaContent>(future))
+    {
+        // Make sure we don't block the main QEventLoop, which
+        // would hinder receiving the currentMediaChanged event above
+        QCoreApplication::processEvents();
+        std::this_thread::yield();
+    }
+
+    QCOMPARE(playlist->currentIndex(), 1);
+
+    QObject::disconnect(c);
+
+    delete playlist;
+    delete player;
+#endif
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

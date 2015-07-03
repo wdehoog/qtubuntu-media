@@ -51,6 +51,11 @@ int AalMediaPlaylistProvider::mediaCount() const
 {
     qDebug() << Q_FUNC_INFO;
 
+    if (!m_hubTrackList) {
+        qWarning() << "Tracklist doesn't exist";
+        return 0;
+    }
+
     try {
         return m_hubTrackList->tracks()->size();
     }
@@ -84,6 +89,11 @@ QMediaContent AalMediaPlaylistProvider::media(int index) const
 
 bool AalMediaPlaylistProvider::isReadOnly() const
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist!";
+        return false;
+    }
+
     try {
         return m_hubTrackList->can_edit_tracks();
     }
@@ -96,6 +106,11 @@ bool AalMediaPlaylistProvider::isReadOnly() const
 bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't add a new track!";
+        return false;
+    }
 
     try {
         const QUrl url = content.canonicalUrl();
@@ -153,6 +168,11 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QList<QMediaContent>
 
 bool AalMediaPlaylistProvider::removeMedia(int pos)
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't remove track!";
+        return false;
+    }
+
     const media::Track::Id id = trackOfIndex(pos);
     if (id.empty())
         return false;
@@ -186,6 +206,11 @@ bool AalMediaPlaylistProvider::removeMedia(int start, int end)
 
 bool AalMediaPlaylistProvider::clear()
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Track list doesn't exist so can't clear it!";
+        return false;
+    }
+
     try {
         m_hubTrackList->reset();
     }
@@ -200,6 +225,7 @@ bool AalMediaPlaylistProvider::clear()
 void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
 {
     m_hubPlayerSession = playerSession;
+
     try {
         m_hubTrackList = m_hubPlayerSession->track_list();
     }
@@ -223,6 +249,11 @@ void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id
 
 void AalMediaPlaylistProvider::connect_signals()
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Can't connect to track list signals as it doesn't exist";
+        return;
+    }
+
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
         track_index_lut.push_back(id);

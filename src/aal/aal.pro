@@ -1,6 +1,6 @@
 include(../../coverage.pri)
 TARGET = aalmediaplayer
-QT += multimedia opengl multimedia-private
+QT += multimedia opengl
 TEMPLATE = lib
 CONFIG += plugin no_keywords
 QMAKE_CXXFLAGS += -std=c++11

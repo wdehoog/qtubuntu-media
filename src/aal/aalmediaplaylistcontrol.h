@@ -17,7 +17,7 @@
 #ifndef AALMEDIAPLAYLISTCONTROL_H
 #define AALMEDIAPLAYLISTCONTROL_H
 
-#include <private/qmediaplaylistcontrol_p.h>
+#include <qmediaplaylistcontrol_p.h>
 
 #include <core/media/player.h>
 #include <core/media/track_list.h>

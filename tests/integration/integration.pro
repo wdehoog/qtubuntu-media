@@ -5,7 +5,7 @@ QMAKE_CXXFLAGS += -std=c++11
 DEFINES += QT_NO_KEYWORDS
 TARGET = tst_integration
 
-QT += multimedia opengl multimedia-private quick testlib
+QT += multimedia opengl quick testlib
 
 QT_TESTCASE_BUILDDIR = .
 

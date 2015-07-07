@@ -20,7 +20,7 @@
 #include "aalmediaplaylistcontrol.h"
 #include "aalmediaplaylistprovider.h"
 
-#include "/usr/include/arm-linux-gnueabihf/qt5/QtMultimedia/5.4.1/QtMultimedia/private/qmediaplaylistcontrol_p.h"
+#include <qmediaplaylistcontrol_p.h>
 
 #include <core/media/service.h>
 #include <core/media/track_list.h>

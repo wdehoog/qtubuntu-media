@@ -287,10 +287,13 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
             qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
             current_media = content;
             promise.set_value(current_media);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
     });
 
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
+    qDebug() << "Call player->play()";
     player->play();
 
     while (!is_ready<QMediaContent>(future))
@@ -326,6 +329,8 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
             qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
             current_media = content;
             promise.set_value(current_media);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
     });
 
     QList<QMediaContent> content;

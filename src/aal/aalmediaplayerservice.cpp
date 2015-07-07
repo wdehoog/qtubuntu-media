@@ -62,7 +62,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_errorConnection(the_void.connect([](){})),
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
-    m_metaDataReaderControl(nullptr),
     m_mediaPlaylistControl(nullptr),
     m_videoOutputReady(false),
     m_firstPlayback(true),
@@ -88,7 +87,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     createMediaPlayerControl();
     createVideoRendererControl();
-    createMetaDataReaderControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
         [this](const media::Player::PlaybackStatus &status) {
@@ -108,7 +106,6 @@ AalMediaPlayerService::~AalMediaPlayerService()
     if (isVideoSource())
         deleteVideoRendererControl();
 
-    deleteMetaDataReaderControl();
     deletePlaylistControl();
 
     deleteMediaPlayerControl();
@@ -133,14 +130,6 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
         return m_videoOutput;
     }
 
-    if (qstrcmp(name, QMetaDataReaderControl_iid) == 0)
-    {
-        if (not m_metaDataReaderControl)
-            createMetaDataReaderControl();
-
-        return m_metaDataReaderControl;
-    }
-
     if (qstrcmp(name, QMediaPlaylistControl_iid) == 0)
     {
         qDebug() << "Client requested QMediaPlaylistControl_iid";
@@ -163,8 +152,6 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
         deleteMediaPlayerControl();
     else if (control == m_videoOutput)
         deleteVideoRendererControl();
-    else if (control == m_metaDataReaderControl)
-        deleteMetaDataReaderControl();
     else if (control == m_mediaPlaylistControl)
         deletePlaylistControl();
     else
@@ -510,19 +497,6 @@ void AalMediaPlayerService::createVideoRendererControl()
     m_videoOutput = new AalVideoRendererControl(this);
 }
 
-void AalMediaPlayerService::createMetaDataReaderControl()
-{
-    qDebug() << Q_FUNC_INFO;
-
-    m_metaDataReaderControl = new AalMetaDataReaderControl(this);
-
-    if (m_mediaPlayerControl == nullptr)
-        qDebug() << "m_mediaPlayerControl is NULL, can't connect mediaChanged signal";
-
-    connect(m_mediaPlayerControl, SIGNAL(mediaChanged(QMediaContent)),
-            m_metaDataReaderControl, SLOT(onMediaChanged(QMediaContent)));
-}
-
 void AalMediaPlayerService::createPlaylistControl()
 {
     qDebug() << Q_FUNC_INFO;
@@ -561,15 +535,6 @@ void AalMediaPlayerService::deleteVideoRendererControl()
 
     delete m_videoOutput;
     m_videoOutput = nullptr;
-}
-
-void AalMediaPlayerService::deleteMetaDataReaderControl()
-{
-    if (m_hubPlayerSession == nullptr)
-        return;
-
-    delete m_metaDataReaderControl;
-    m_metaDataReaderControl = nullptr;
 }
 
 void AalMediaPlayerService::deletePlaylistControl()
@@ -677,7 +642,6 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
 
     createMediaPlayerControl();
     createVideoRendererControl();
-    createMetaDataReaderControl();
 
     if (!m_playbackStatusChangedConnection.is_connected())
     {

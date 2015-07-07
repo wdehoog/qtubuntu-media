@@ -21,12 +21,10 @@ HEADERS += \
     ../../src/aal/aalmediaplayerservice.h \
     ../../src/aal/aalmediaplayerserviceplugin.h \
     ../../src/aal/aalvideorenderercontrol.h \
-    ../../src/aal/aalmetadatareadercontrol.h \
     ../../src/aal/aalmediaplaylistprovider.h \
     ../../src/aal/aalmediaplaylistcontrol.h \
     ../../src/aal/aalutility.h \
     tst_mediaplayerplugin.h \
-    tst_metadatareadercontrol.h \
     tst_mediaplaylistcontrol.h \
     player.h \
     service.h \
@@ -34,13 +32,11 @@ HEADERS += \
 
 SOURCES += \
     tst_mediaplayerplugin.cpp \
-    tst_metadatareadercontrol.cpp \
     tst_mediaplaylistcontrol.cpp \
     player.cpp \
     service.cpp \
     player_mock.cpp \
     ../../src/aal/aalmediaplayercontrol.cpp \
-    ../../src/aal/aalmetadatareadercontrol.cpp \
     ../../src/aal/aalmediaplaylistprovider.cpp \
     ../../src/aal/aalmediaplaylistcontrol.cpp \
     ../../src/aal/aalmediaplayerservice.cpp \

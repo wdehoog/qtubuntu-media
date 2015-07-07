@@ -35,6 +35,14 @@ void tst_MediaPlaylist::cleanupTestCase()
 {
 }
 
+void tst_MediaPlaylist::init()
+{
+    // NOTE: This sleep is currently needed in order to give media-hub a bit of time
+    // between our different tests to cleanup and come back in a state where it can
+    // respond to our requests.
+    sleep(1);
+}
+
 void tst_MediaPlaylist::addTwoTracksAndVerify()
 {
 #ifndef DISABLE_TEST
@@ -93,10 +101,14 @@ void tst_MediaPlaylist::goToNextTrack()
 
     player->play();
 
+    QCoreApplication::processEvents();
+
     const QUrl audioToVerify(playlist->currentMedia().canonicalUrl());
     QCOMPARE(audioToVerify, audio);
 
     playlist->next();
+
+    QCoreApplication::processEvents();
 
     const QUrl videoToVerify(playlist->currentMedia().canonicalUrl());
     QCOMPARE(videoToVerify, video);
@@ -124,10 +136,14 @@ void tst_MediaPlaylist::goToPreviousTrack()
 
     player->play();
 
+    QCoreApplication::processEvents();
+
     const QUrl audio2ToVerify(playlist->currentMedia().canonicalUrl());
     QCOMPARE(audio2ToVerify, audio2);
 
     playlist->previous();
+
+    QCoreApplication::processEvents();
 
     const QUrl audio1ToVerify(playlist->currentMedia().canonicalUrl());
     QCOMPARE(audio2ToVerify, audio1);
@@ -208,6 +224,9 @@ void tst_MediaPlaylist::verifyCurrentIndex()
     QCOMPARE(playlist->mediaCount(), 3);
 
     playlist->setCurrentIndex(1);
+
+    QCoreApplication::processEvents();
+
     QCOMPARE(playlist->currentIndex(), 1);
 
     delete playlist;
@@ -230,6 +249,8 @@ void tst_MediaPlaylist::verifyNextIndex()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
     playlist->addMedia(content);
+
+    QCoreApplication::processEvents();
 
     QCOMPARE(playlist->mediaCount(), 6);
 

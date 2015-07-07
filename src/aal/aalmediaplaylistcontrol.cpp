@@ -72,6 +72,11 @@ int AalMediaPlaylistControl::currentIndex() const
 
 void AalMediaPlaylistControl::setCurrentIndex(int position)
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't change current position";
+        return;
+    }
+
     qDebug() << Q_FUNC_INFO;
     const auto mediaCount = m_playlistProvider->mediaCount();
     qDebug() << "position: " << position << ", mediaCount: " << mediaCount;
@@ -236,6 +241,11 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
 
 void AalMediaPlaylistControl::connect_signals()
 {
+    if (!m_hubTrackList) {
+        qWarning() << "Can't connect to track list signals as it doesn't exist";
+        return;
+    }
+
     m_trackChangedConnection = m_hubTrackList->on_track_changed().connect([this](const media::Track::Id& id)
     {
         QMetaObject::invokeMethod(this, "onTrackChanged", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));

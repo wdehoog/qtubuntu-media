@@ -538,18 +538,20 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
     if (m_hubPlayerSession == NULL)
         return;
 
-#if 1
+    delete m_mediaPlayerControl;
+    m_mediaPlayerControl = NULL;
+
     try {
         // Invalidates the media-hub player session
         m_hubService->destroy_session(m_hubPlayerSession->uuid(), media::Player::Client::default_configuration());
+
+        // When we arrived here the session is already invalid and we
+        // can safely drop the reference.
+        m_hubPlayerSession = nullptr;
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to destroy existing media-hub player session: " << e.what();
     }
-#endif
-
-    delete m_mediaPlayerControl;
-    m_mediaPlayerControl = NULL;
 }
 
 void AalMediaPlayerService::deleteVideoRendererControl()

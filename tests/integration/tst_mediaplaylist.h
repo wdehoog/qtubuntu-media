@@ -45,6 +45,8 @@ private Q_SLOTS:
 
     void init();
 
+    void constructDestroyRepeat();
+
     void addTwoTracksAndVerify();
     void addListOfTracksAndVerify();
 
@@ -64,6 +66,9 @@ private:
     template<typename R>
         bool is_ready(std::future<R> const& f)
         { return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
+
+    template<typename R>
+        void wait_for_signal(std::future<R> const& f);
 };
 
 #endif // TST_MEDIAPLAYLIST_H

@@ -43,10 +43,24 @@ void tst_MediaPlaylist::init()
     sleep(1);
 }
 
+void tst_MediaPlaylist::constructDestroyRepeat()
+{
+#ifndef DISABLE_TEST
+    for (int i=0; i<25; i++)
+    {
+        QMediaPlayer *player = new QMediaPlayer;
+        QMediaPlaylist *playlist = new QMediaPlaylist;
+        player->setPlaylist(playlist);
+
+        delete playlist;
+        delete player;
+    }
+#endif
+}
+
 void tst_MediaPlaylist::addTwoTracksAndVerify()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -64,7 +78,6 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
 void tst_MediaPlaylist::addListOfTracksAndVerify()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -85,7 +98,6 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
 void tst_MediaPlaylist::goToNextTrack()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -121,7 +133,6 @@ void tst_MediaPlaylist::goToNextTrack()
 void tst_MediaPlaylist::goToPreviousTrack()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -157,7 +168,6 @@ void tst_MediaPlaylist::goToPreviousTrack()
 void tst_MediaPlaylist::verifyMedia()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -185,7 +195,6 @@ void tst_MediaPlaylist::verifyMedia()
 void tst_MediaPlaylist::removeTrackAndVerify()
 {
 #ifndef DISABLE_TEST
-    qDebug() << Q_FUNC_INFO;
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -223,10 +232,25 @@ void tst_MediaPlaylist::verifyCurrentIndex()
 
     QCOMPARE(playlist->mediaCount(), 3);
 
+    QMediaContent current_media;
+    std::promise<QMediaContent> promise;
+    std::future<QMediaContent> future{promise.get_future()};
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
+    {
+            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
+            current_media = content;
+            promise.set_value(current_media);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+    });
+
+    qDebug() << "Setting current index to be 1";
     playlist->setCurrentIndex(1);
 
-    QCoreApplication::processEvents();
+    // Wait for the currentMediaChanged signal to be emited
+    wait_for_signal(future);
 
+    qDebug() << "Checking if current index is 1";
     QCOMPARE(playlist->currentIndex(), 1);
 
     delete playlist;
@@ -296,13 +320,8 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
     qDebug() << "Call player->play()";
     player->play();
 
-    while (!is_ready<QMediaContent>(future))
-    {
-        // Make sure we don't block the main QEventLoop, which
-        // would hinder receiving the currentMediaChanged event above
-        QCoreApplication::processEvents();
-        std::this_thread::yield();
-    }
+    // Wait for the currentMediaChanged signal to be emited
+    wait_for_signal(future);
 
     QCOMPARE(playlist->currentIndex(), 0);
 
@@ -344,13 +363,8 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
 
     player->play();
 
-    while (!is_ready<QMediaContent>(future))
-    {
-        // Make sure we don't block the main QEventLoop, which
-        // would hinder receiving the currentMediaChanged event above
-        QCoreApplication::processEvents();
-        std::this_thread::yield();
-    }
+    // Wait for the currentMediaChanged signal to be emited
+    wait_for_signal(future);
 
     QCOMPARE(playlist->currentIndex(), 1);
 
@@ -359,6 +373,18 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
     delete playlist;
     delete player;
 #endif
+}
+
+template<typename R>
+void tst_MediaPlaylist::wait_for_signal(std::future<R> const& f)
+{
+    while (!is_ready<QMediaContent>(f))
+    {
+        // Make sure we don't block the main QEventLoop, which
+        // would hinder receiving the currentMediaChanged event above
+        QCoreApplication::processEvents();
+        std::this_thread::yield();
+    }
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

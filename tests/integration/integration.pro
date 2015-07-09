@@ -5,7 +5,7 @@ QMAKE_CXXFLAGS += -std=c++11
 DEFINES += QT_NO_KEYWORDS
 TARGET = tst_integration
 
-QT += multimedia opengl quick testlib
+QT += core multimedia testlib
 
 QT_TESTCASE_BUILDDIR = .
 
@@ -18,3 +18,6 @@ HEADERS += \
 SOURCES += \
     tst_mediaplaylist.cpp \
     ../../src/aal/aalutility.cpp
+
+# media-hub is required to be running for these tests
+system(stop media-hub; start media-hub)

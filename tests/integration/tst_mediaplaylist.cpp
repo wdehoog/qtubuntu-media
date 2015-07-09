@@ -25,8 +25,6 @@
 
 #include <QtTest/QtTest>
 
-//#define DISABLE_TEST
-
 void tst_MediaPlaylist::initTestCase()
 {
 }
@@ -45,7 +43,6 @@ void tst_MediaPlaylist::init()
 
 void tst_MediaPlaylist::constructDestroyRepeat()
 {
-#ifndef DISABLE_TEST
     for (int i=0; i<25; i++)
     {
         QMediaPlayer *player = new QMediaPlayer;
@@ -55,12 +52,10 @@ void tst_MediaPlaylist::constructDestroyRepeat()
         delete playlist;
         delete player;
     }
-#endif
 }
 
 void tst_MediaPlaylist::addTwoTracksAndVerify()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -72,12 +67,10 @@ void tst_MediaPlaylist::addTwoTracksAndVerify()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::addListOfTracksAndVerify()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -92,12 +85,10 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::goToNextTrack()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -127,12 +118,10 @@ void tst_MediaPlaylist::goToNextTrack()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::goToPreviousTrack()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -162,12 +151,10 @@ void tst_MediaPlaylist::goToPreviousTrack()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyMedia()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -189,12 +176,10 @@ void tst_MediaPlaylist::verifyMedia()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::removeTrackAndVerify()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -214,12 +199,10 @@ void tst_MediaPlaylist::removeTrackAndVerify()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyCurrentIndex()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -255,12 +238,10 @@ void tst_MediaPlaylist::verifyCurrentIndex()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyNextIndex()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -286,12 +267,10 @@ void tst_MediaPlaylist::verifyNextIndex()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -329,12 +308,10 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 
     delete playlist;
     delete player;
-#endif
 }
 
 void tst_MediaPlaylist::verifyPlaybackModeSequential()
 {
-#ifndef DISABLE_TEST
     QMediaPlayer *player = new QMediaPlayer;
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
@@ -372,7 +349,6 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
 
     delete playlist;
     delete player;
-#endif
 }
 
 template<typename R>

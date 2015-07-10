@@ -117,30 +117,46 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
 {
     const int x  = m_currentIndex - steps;
     const int tracklistSize = m_playlistProvider->mediaCount();
+    //const int reducedSteps = steps - ((steps / tracklistSize) * tracklistSize);
+    // Calculate how many of x are in tracklistSize to reduce the calculation
+    // to only wrap around the list one time
+    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
 #if 1
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
     qDebug() << "x: " << x;
+    qDebug() << "m: " << m;
     qDebug() << "------------------------";
 #endif
     if (x >= 0)
         return x;
     else if (std::abs(x) > tracklistSize)
     {
-        // Calculate how many of x are in tracklistSize to reduce the calculation
-        // to only wrap around the list one time
-        const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
-        qDebug() << "m: " << m;
+        uint16_t i = m_currentIndex, stepCount = 0;
+        bool doExit = false;
+        while (!doExit)
+        {
+            if (i == 0)
+                i = tracklistSize - 1;
+            else
+                --i;
+
+            ++stepCount;
+            if (stepCount == steps)
+                doExit = true;
+        }
+
+        return i;
+#if 0
         qDebug() << "std::abs(x) / m (" << std::abs(x) << " / " << m << "): " << (std::abs(x) / m);
         qDebug() << "std::abs(x) % m: " << (std::abs(x) % m);
         //return std::abs(tracklistSize - ((std::abs(x) / m) - tracklistSize));
         return std::abs(x) - (tracklistSize * m);
+#endif
     }
     else
         return tracklistSize - std::abs(x);
-
-    return 0;
 }
 
 void AalMediaPlaylistControl::next()

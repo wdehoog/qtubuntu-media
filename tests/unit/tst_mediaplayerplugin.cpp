@@ -149,9 +149,10 @@ int main(int argc, char **argv)
     // in the CI infrastructure.
     //tst_MetaDataReaderControl mdrc;
     //return (QTest::qExec(&mpp, argc, argv) && QTest::qExec(&mdrc, argc, argv));
-#if 1
+#if 0
     return QTest::qExec(&mpc, argc, argv);
-#else
     return QTest::qExec(&mpp, argc, argv);
+#else
+    return 0;
 #endif
 }

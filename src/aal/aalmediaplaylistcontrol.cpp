@@ -86,8 +86,6 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
 
     qDebug() << "Going to position: " << position;
 
-    //m_currentIndex = position;
-
     try {
         const std::string id = aalMediaPlaylistProvider()->trackOfIndex(position);
         static const bool togglePlayerState = false;
@@ -100,23 +98,48 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
 
 int AalMediaPlaylistControl::nextIndex(int steps) const
 {
-    const int distance = m_currentIndex + steps;
+    const int x = m_currentIndex + steps;
     const int tracklistSize = m_playlistProvider->mediaCount();
 #if 1
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
+    qDebug() << "------------------------";
 #endif
-    if (distance < tracklistSize)
-        return distance;
+    if (x < tracklistSize)
+        return x;
     else
         // algo: |(currentIndex + steps) - tracklist_size|
-        return std::abs((distance) - tracklistSize);
+        return std::abs(x - tracklistSize);
 }
 
 int AalMediaPlaylistControl::previousIndex(int steps) const
 {
-    (void) steps;
+    const int x  = m_currentIndex - steps;
+    const int tracklistSize = m_playlistProvider->mediaCount();
+#if 1
+    qDebug() << "m_currentIndex: " << m_currentIndex;
+    qDebug() << "steps: " << steps;
+    qDebug() << "tracklistSize: " << tracklistSize;
+    qDebug() << "x: " << x;
+    qDebug() << "------------------------";
+#endif
+    if (x >= 0)
+        return x;
+    else if (std::abs(x) > tracklistSize)
+    {
+        // Calculate how many of x are in tracklistSize to reduce the calculation
+        // to only wrap around the list one time
+        const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
+        qDebug() << "m: " << m;
+        qDebug() << "std::abs(x) / m (" << std::abs(x) << " / " << m << "): " << (std::abs(x) / m);
+        qDebug() << "std::abs(x) % m: " << (std::abs(x) % m);
+        //return std::abs(tracklistSize - ((std::abs(x) / m) - tracklistSize));
+        return std::abs(x) - (tracklistSize * m);
+    }
+    else
+        return tracklistSize - std::abs(x);
+
     return 0;
 }
 

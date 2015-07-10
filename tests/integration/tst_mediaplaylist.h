@@ -58,6 +58,7 @@ private Q_SLOTS:
 
     void verifyCurrentIndex();
     void verifyNextIndex();
+    void verifyPreviousIndex();
 
     void verifyPlaybackModeCurrentItemInLoop();
     void verifyPlaybackModeSequential();

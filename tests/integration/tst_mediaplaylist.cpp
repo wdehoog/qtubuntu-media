@@ -269,6 +269,36 @@ void tst_MediaPlaylist::verifyNextIndex()
     delete player;
 }
 
+void tst_MediaPlaylist::verifyPreviousIndex()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(content);
+
+    QCoreApplication::processEvents();
+
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    QCOMPARE(playlist->previousIndex(1), 5);
+    QCOMPARE(playlist->previousIndex(4), 2);
+    QCOMPARE(playlist->previousIndex(6), 0);
+    QCOMPARE(playlist->previousIndex(11), 1);
+    QCOMPARE(playlist->previousIndex(21), 3);
+    QCOMPARE(playlist->previousIndex(19), 5);
+
+    delete playlist;
+    delete player;
+}
+
 void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 {
     QMediaPlayer *player = new QMediaPlayer;

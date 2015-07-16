@@ -78,6 +78,7 @@ public:
     void setAudioRole(QMediaPlayer::AudioRole audioRole);
 
     void setMedia(const QUrl &url);
+    void setMedia(const QMediaContent &media);
     void setMediaPlaylist(const QMediaPlaylist& playlist);
     void play();
     void pause();

@@ -19,6 +19,7 @@
 #include "aalmetadatareadercontrol.h"
 #include "aalmediaplaylistcontrol.h"
 #include "aalmediaplaylistprovider.h"
+#include "aalutility.h"
 
 #include <qmediaplaylistcontrol_p.h>
 
@@ -231,6 +232,7 @@ void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
 
 void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
 {
+    qDebug() << Q_FUNC_INFO;
     if (m_hubPlayerSession == NULL)
     {
         qWarning() << "Cannot set playlist without a valid media-hub player session";
@@ -252,6 +254,11 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         qWarning() << "Cannot open uri without a valid media-hub player session";
         return;
     }
+    if (m_mediaPlaylistProvider == NULL)
+    {
+        qWarning() << "Cannot open media without a valid QMediaPlaylistProvider instance";
+        return;
+    }
     if (url.isEmpty())
     {
         qWarning() << "Failed to set media source, url must be set." << endl;
@@ -261,10 +268,42 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
     try {
-        m_hubPlayerSession->open_uri(uri);
+        m_mediaPlaylistProvider->addMedia(QMediaContent(url));
+        //m_hubPlayerSession->open_uri(uri);
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to open media " << url << ": " << e.what();
+        return;
+    }
+
+    if (isVideoSource())
+        m_videoOutput->setupSurface();
+}
+
+void AalMediaPlayerService::setMedia(const QMediaContent &media)
+{
+    if (m_hubPlayerSession == NULL)
+    {
+        qWarning() << "Cannot open media without a valid media-hub player session";
+        return;
+    }
+    if (m_mediaPlaylistProvider == NULL)
+    {
+        qWarning() << "Cannot open media without a valid QMediaPlaylistProvider instance";
+        return;
+    }
+    if (media.isNull())
+    {
+        qWarning() << "Failed to set media source, media must be set." << endl;
+        return;
+    }
+
+    qDebug() << "Setting media to: " << AalUtility::unescape(media);
+    try {
+        m_mediaPlaylistProvider->addMedia(media);
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to open media " << AalUtility::unescape(media) << ": " << e.what();
         return;
     }
 

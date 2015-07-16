@@ -81,7 +81,7 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
     const auto mediaCount = m_playlistProvider->mediaCount();
     qDebug() << "position: " << position << ", mediaCount: " << mediaCount;
 
-    if (position >= mediaCount)
+    if (position < 0 || position >= mediaCount)
         return;
 
     qDebug() << "Going to position: " << position;

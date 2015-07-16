@@ -155,6 +155,8 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &conte
     (void) index;
     (void) content;
 
+    qWarning() << Q_FUNC_INFO << " - Not yet implemented";
+
     return false;
 }
 
@@ -162,6 +164,8 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QList<QMediaContent>
 {
     (void) index;
     (void) content;
+
+    qWarning() << Q_FUNC_INFO << " - Not yet implemented";
 
     return false;
 }
@@ -242,6 +246,7 @@ void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id
     if (!id.empty())
     {
         const int index = indexOfTrack(id);
+        Q_EMIT mediaAboutToBeInserted(index, index);
         // Added one track, so start and end are the same index values
         Q_EMIT mediaInserted(index, index);
     }
@@ -289,6 +294,12 @@ int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const
 const media::Track::Id AalMediaPlaylistProvider::trackOfIndex(int index) const
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (track_index_lut.size() == 0)
+    {
+        qWarning() << "track_index_lut is empty, can't return valid track id for index: " << index;
+        return media::TrackList::after_empty_track();
+    }
 
     qDebug() << "Returning track_index_lut.at(" << index << ")";
     try {

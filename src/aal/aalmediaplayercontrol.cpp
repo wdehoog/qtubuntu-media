@@ -215,25 +215,10 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 {
     Q_UNUSED(stream);
     qDebug() << __PRETTY_FUNCTION__ << endl;
-    QMediaPlaylist *list;
 
-    if (stream != NULL) {
-        try
-        {
-            list = reinterpret_cast<QMediaPlaylist*>(stream);
-            m_service->setMediaPlaylist(*list);
-
-            // Stream is a QMediaPlaylist object
-            m_mediaContent = QMediaContent(list);
-        }
-        catch (const std::bad_cast &e)
-        {
-            // TODO: Support real streams
-            qDebug() << "Streams are not currently supported";
-            stop();
-            return;
-        }
-    } else {
+    if (media.playlist())
+    {
+        qDebug() << "setMedia() media: " << AalUtility::unescape(media);
         m_mediaContent = media;
 
         // Make sure we can actually load something valid

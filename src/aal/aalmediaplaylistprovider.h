@@ -56,11 +56,13 @@ public:
 
 private Q_SLOTS:
     void onTrackAdded(const core::ubuntu::media::Track::Id& id);
+    void onTrackRemoved(const core::ubuntu::media::Track::Id& id);
 
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();
     void disconnect_signals();
+    bool removeTrack(const core::ubuntu::media::Track::Id &id);
     int indexOfTrack(const core::ubuntu::media::Track::Id &id) const;
     const core::ubuntu::media::Track::Id trackOfIndex(int index) const;
 
@@ -68,6 +70,7 @@ private:
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
 
     core::Connection m_trackAddedConnection;
+    core::Connection m_trackRemovedConnection;
 
     // Simple table that holds a list (order is significant and explicit) of
     // Track::Id's for a lookup. track_index_lut.at[x] gives the corresponding

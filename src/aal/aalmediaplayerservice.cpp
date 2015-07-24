@@ -699,24 +699,6 @@ void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &er
     signalQMediaPlayerError(error);
 }
 
-void AalMediaPlayerService::pushPlaylist()
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Cannot push playlist without a valid media-hub player session";
-        return;
-    }
-
-    if (m_mediaPlaylist == NULL)
-        return;
-
-    for (int i = 0; i < m_mediaPlaylist->mediaCount(); i++)
-    {
-        const media::Track::UriType uri(m_mediaPlaylist->media(i).canonicalUrl().url().toStdString());
-        m_hubPlayerSession->track_list()->add_track_with_uri_at(uri, media::TrackList::after_empty_track(), false);
-    }
-}
-
 void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player)
 {
     m_hubPlayerSession = player;

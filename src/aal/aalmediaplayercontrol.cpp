@@ -50,19 +50,6 @@ AalMediaPlayerControl::~AalMediaPlayerControl()
     m_cachedVolume = 0;
 }
 
-bool AalMediaPlayerControl::eventFilter(QObject *obj, QEvent *event)
-{
-    if (event->type() == QEvent::ApplicationDeactivate) {
-       m_applicationActive = false;
-       m_service->pushPlaylist();
-    }
-    else if (event->type() == QEvent::ApplicationActivate) {
-       m_applicationActive = true;
-    }
-
-    return QObject::eventFilter(obj, event);
-}
-
 QMediaPlayer::State AalMediaPlayerControl::state() const
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;

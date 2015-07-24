@@ -20,7 +20,6 @@
 #include <core/signal.h>
 
 #include <QEventLoop>
-#include <QGuiApplication>
 #include <QMediaPlaylist>
 
 #include <QDebug>
@@ -43,8 +42,6 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
-
-    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlaylistControl::onApplicationStateChanged);
 }
 
 AalMediaPlaylistControl::~AalMediaPlaylistControl()
@@ -258,24 +255,6 @@ void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubunt
     }
 
     connect_signals();
-}
-
-void AalMediaPlaylistControl::onApplicationStateChanged(Qt::ApplicationState state)
-{
-    qDebug() << "*** " << Q_FUNC_INFO;
-
-    switch (state)
-    {
-    case Qt::ApplicationSuspended:
-        qDebug() << "**Application has been suspended";
-        break;
-    case Qt::ApplicationActive:
-        qDebug() << "**Application is now active";
-        break;
-    default:
-        qDebug() << "Unknown ApplicationState or purposefully not reacting to current state change";
-        break;
-    }
 }
 
 void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::Id& id)

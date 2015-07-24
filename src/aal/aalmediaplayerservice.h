@@ -110,6 +110,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void onPlaybackStatusChanged();
+    void onApplicationStateChanged(Qt::ApplicationState state);
 
 protected:
 #ifdef MEASURE_PERFORMANCE
@@ -147,6 +148,7 @@ private:
     const QMediaPlaylist* m_mediaPlaylist;
 
     core::ubuntu::media::Player::PlaybackStatus m_newStatus;
+    std::string m_sessionUuid;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;

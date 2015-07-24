@@ -61,7 +61,6 @@ Q_SIGNALS:
     void playbackModeChanged(QMediaPlaylist::PlaybackMode mode);
 
 private Q_SLOTS:
-    void onApplicationStateChanged(Qt::ApplicationState state);
     void onTrackChanged(const core::ubuntu::media::Track::Id& id);
 
 private:

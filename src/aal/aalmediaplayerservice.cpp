@@ -29,6 +29,7 @@
 #include <errno.h>
 
 #include <QAbstractVideoSurface>
+#include <QGuiApplication>
 #include <QTimerEvent>
 #include <QThread>
 
@@ -97,6 +98,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
+
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
@@ -176,6 +179,15 @@ bool AalMediaPlayerService::newMediaPlayer()
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
+        return false;
+    }
+
+    try {
+        // Get the player session UUID so we can suspend/restore our session when the ApplicationState
+        // changes
+        m_sessionUuid = m_hubPlayerSession->uuid();
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to retrieve the current player's uuid: " << e.what() << endl;
         return false;
     }
 
@@ -556,7 +568,8 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
     try {
         // Invalidates the media-hub player session
-        m_hubService->destroy_session(m_hubPlayerSession->uuid(), media::Player::Client::default_configuration());
+        m_hubService->destroy_session(m_sessionUuid, media::Player::Client::default_configuration());
+        m_sessionUuid.clear();
 
         // When we arrived here the session is already invalid and we
         // can safely drop the reference.
@@ -650,6 +663,34 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
     }
 
     qDebug() << "PlaybackStatus changed to: " << m_newStatus;
+}
+
+void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state)
+{
+    try {
+        switch (state)
+        {
+            case Qt::ApplicationSuspended:
+                qDebug() << "** Application has been suspended";
+                break;
+            case Qt::ApplicationHidden:
+                qDebug() << "** Application is now hidden";
+                break;
+            case Qt::ApplicationInactive:
+                qDebug() << "** Application is now inactive";
+                m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
+                break;
+            case Qt::ApplicationActive:
+                qDebug() << "** Application is now active";
+                m_hubPlayerSession = m_hubService->reattach_session(m_sessionUuid, media::Player::Client::default_configuration());
+                break;
+            default:
+                qDebug() << "Unknown ApplicationState";
+                break;
+        }
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to respond to ApplicationState change: " << e.what();
+    }
 }
 
 void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)

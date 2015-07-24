@@ -185,50 +185,63 @@ void AalMediaPlaylistControl::previous()
 
 QMediaPlaylist::PlaybackMode AalMediaPlaylistControl::playbackMode() const
 {
+    QMediaPlaylist::PlaybackMode currentMode = QMediaPlaylist::Sequential;
     const auto loopStatus = m_hubPlayerSession->loop_status();
     switch (loopStatus)
     {
         case media::Player::LoopStatus::none:
-            return QMediaPlaylist::Sequential;
+            currentMode = QMediaPlaylist::Sequential;
+            break;
         case media::Player::LoopStatus::track:
-            return QMediaPlaylist::CurrentItemInLoop;
+            currentMode = QMediaPlaylist::CurrentItemInLoop;
+            break;
         case media::Player::LoopStatus::playlist:
-            return QMediaPlaylist::Loop;
+            currentMode = QMediaPlaylist::Loop;
+            break;
         default:
             qWarning() << "Unknown loop status: " << loopStatus;
     }
 
+    // Shuffle overrides loopStatus since in the media-hub API random is not part of loop_status
+    // like it's all one for QMediaPlaylist::PlaybackMode
     if (m_hubPlayerSession->shuffle())
-        return QMediaPlaylist::Random;
+        currentMode = QMediaPlaylist::Random;
 
-    return QMediaPlaylist::Sequential;
+    return currentMode;
 }
 
 void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
 {
+    qDebug() << Q_FUNC_INFO;
     switch (mode)
     {
         case QMediaPlaylist::CurrentItemOnce:
+            qDebug() << "PlaybackMode: CurrentItemOnce";
             m_hubPlayerSession->shuffle() = false;
             qWarning() << "No media-hub equivalent for QMediaPlaylist::CurrentItemOnce";
             break;
         case QMediaPlaylist::CurrentItemInLoop:
+            qDebug() << "PlaybackMode: CurrentItemInLoop";
             m_hubPlayerSession->shuffle() = false;
             m_hubPlayerSession->loop_status() = media::Player::LoopStatus::track;
             break;
         case QMediaPlaylist::Sequential:
+            qDebug() << "PlaybackMode: Sequential";
             m_hubPlayerSession->shuffle() = false;
             m_hubPlayerSession->loop_status() = media::Player::LoopStatus::none;
             break;
         case QMediaPlaylist::Loop:
+            qDebug() << "PlaybackMode: Loop";
             m_hubPlayerSession->shuffle() = false;
             m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
             break;
         case QMediaPlaylist::Random:
+            qDebug() << "PlaybackMode: Random";
             m_hubPlayerSession->shuffle() = true;
             break;
         default:
             qWarning() << "Unknown playback mode: " << mode;
+            m_hubPlayerSession->shuffle() = false;
     }
 }
 

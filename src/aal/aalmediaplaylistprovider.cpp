@@ -50,8 +50,6 @@ AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 
 int AalMediaPlaylistProvider::mediaCount() const
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (!m_hubTrackList) {
         qWarning() << "Tracklist doesn't exist";
         return 0;
@@ -72,12 +70,12 @@ QMediaContent AalMediaPlaylistProvider::media(int index) const
         return QMediaContent();
 
     const media::Track::Id id = trackOfIndex(index);
-    qDebug() << "id: " << id.c_str();
+    //qDebug() << "id: " << id.c_str();
 
     QMediaContent content;
     try {
         media::Track::UriType uri = m_hubTrackList->query_uri_for_track(id);
-        qDebug() << "Uri: " << uri.c_str();
+        //qDebug() << "Uri: " << uri.c_str();
         content = QMediaContent(QUrl(QString(uri.c_str())));
     }
     catch (const std::runtime_error &e) {
@@ -317,8 +315,6 @@ bool AalMediaPlaylistProvider::removeTrack(const core::ubuntu::media::Track::Id 
 
 int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (id.empty() || track_index_lut.size() == 0)
         return -1;
 
@@ -334,15 +330,13 @@ int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const
 
 const media::Track::Id AalMediaPlaylistProvider::trackOfIndex(int index) const
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (track_index_lut.size() == 0)
     {
         qWarning() << "track_index_lut is empty, can't return valid track id for index: " << index;
         return media::TrackList::after_empty_track();
     }
 
-    qDebug() << "Returning track_index_lut.at(" << index << ")";
+    //qDebug() << "Returning track_index_lut.at(" << index << ")";
     try {
         return track_index_lut.at(index);
     }

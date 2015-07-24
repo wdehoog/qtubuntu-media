@@ -632,7 +632,6 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
     // the app is notified about this so it can change it's status
     switch (m_newStatus)
     {
-        qDebug() << "PlaybackStatus changed to: " << m_newStatus;
         case media::Player::PlaybackStatus::ready:
         case media::Player::PlaybackStatus::stopped:
             m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
@@ -649,6 +648,8 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
         default:
             qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
     }
+
+    qDebug() << "PlaybackStatus changed to: " << m_newStatus;
 }
 
 void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)

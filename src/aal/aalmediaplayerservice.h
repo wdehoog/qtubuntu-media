@@ -149,6 +149,7 @@ private:
 
     core::ubuntu::media::Player::PlaybackStatus m_newStatus;
     std::string m_sessionUuid;
+    bool m_doReattachSession;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;

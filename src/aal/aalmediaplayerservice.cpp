@@ -68,7 +68,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_videoOutputReady(false),
     m_firstPlayback(true),
     m_cachedDuration(0),
-    m_mediaPlaylist(NULL)
+    m_mediaPlaylist(NULL),
+    m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
      , m_lastFrameDecodeStart(0)
      , m_currentFrameDecodeStart(0)
@@ -266,11 +267,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         qWarning() << "Cannot open uri without a valid media-hub player session";
         return;
     }
-    if (m_mediaPlaylistProvider == NULL)
-    {
-        qWarning() << "Cannot open media without a valid QMediaPlaylistProvider instance";
-        return;
-    }
     if (url.isEmpty())
     {
         qWarning() << "Failed to set media source, url must be set." << endl;
@@ -280,8 +276,10 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
     try {
-        m_mediaPlaylistProvider->addMedia(QMediaContent(url));
-        //m_hubPlayerSession->open_uri(uri);
+        if (m_mediaPlaylistProvider != NULL)
+            m_mediaPlaylistProvider->addMedia(QMediaContent(url));
+        else
+            m_hubPlayerSession->open_uri(uri);
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to open media " << url << ": " << e.what();
@@ -679,10 +677,14 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
+                m_doReattachSession = true;
                 break;
             case Qt::ApplicationActive:
                 qDebug() << "** Application is now active";
-                m_hubPlayerSession = m_hubService->reattach_session(m_sessionUuid, media::Player::Client::default_configuration());
+                // Avoid doing this for when the client application first loads as this
+                // will break video playback
+                if (m_doReattachSession)
+                    m_hubPlayerSession = m_hubService->reattach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";

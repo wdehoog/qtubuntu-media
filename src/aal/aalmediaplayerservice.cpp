@@ -197,10 +197,11 @@ bool AalMediaPlayerService::newMediaPlayer()
 
 std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    if (not m_hubPlayerSession) throw std::runtime_error
-    {
-        "Cannot create a video sink without a valid media-hub player session"
-    };
+    if (m_hubPlayerSession == NULL)
+        throw std::runtime_error
+        {
+            "Cannot create a video sink without a valid media-hub player session"
+        };
 
     auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
     m_videoOutputReady = true;
@@ -211,6 +212,7 @@ std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createV
 void AalMediaPlayerService::resetVideoSink()
 {
     qDebug() << Q_FUNC_INFO;
+    Q_EMIT SharedSignal::instance()->sinkReset();
     m_firstPlayback = false;
     if (m_videoOutput != NULL)
         m_videoOutput->playbackComplete();
@@ -271,6 +273,14 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     {
         qWarning() << "Failed to set media source, url must be set." << endl;
         return;
+    }
+
+    // This is critical to allowing a different video source to be able to play correctly
+    // if another video is already playing in the same AalMediaPlayerService instance
+    if (m_videoOutput->textureId() > 0)
+    {
+        m_mediaPlayerControl->stop();
+        resetVideoSink();
     }
 
     qDebug() << "Setting media to: " << url;

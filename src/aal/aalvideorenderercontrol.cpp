@@ -286,13 +286,6 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
         qDebug() << "Already have a texture id and video sink, not creating a new one";
 }
 
-void AalVideoRendererControl::onServiceReady()
-{
-    qDebug() << __PRETTY_FUNCTION__ << " - Service is ready";
-    m_textureBuffer = new AalGLTextureBuffer(m_textureId);
-    setupSurface();
-}
-
 void AalVideoRendererControl::onGLConsumerSet()
 {
     qDebug() << Q_FUNC_INFO;

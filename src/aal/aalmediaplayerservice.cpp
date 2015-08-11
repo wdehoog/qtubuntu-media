@@ -65,6 +65,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
     m_mediaPlaylistControl(nullptr),
+    m_mediaPlaylistProvider(nullptr),
     m_videoOutputReady(false),
     m_firstPlayback(true),
     m_cachedDuration(0),
@@ -284,9 +285,17 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     const media::Track::UriType uri(url.url().toStdString());
     try {
         if (m_mediaPlaylistProvider != NULL)
+        {
+            qDebug() << "Calling addMedia()";
             m_mediaPlaylistProvider->addMedia(QMediaContent(url));
+            qDebug() << "Called addMedia()";
+        }
         else
+        {
+            qDebug() << "Calling open_uri";
             m_hubPlayerSession->open_uri(uri);
+            qDebug() << "Called open_uri";
+        }
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to open media " << url << ": " << e.what();

@@ -24,6 +24,9 @@
 
 #include <QDebug>
 
+// Uncomment for more verbose debugging to stdout/err
+//#define VERBOSE_DEBUG
+
 namespace media = core::ubuntu::media;
 
 Q_DECLARE_METATYPE(core::ubuntu::media::Track::Id)
@@ -97,7 +100,7 @@ int AalMediaPlaylistControl::nextIndex(int steps) const
 {
     const int x = m_currentIndex + steps;
     const int tracklistSize = m_playlistProvider->mediaCount();
-#if 1
+#ifdef VERBOSE_DEBUG
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
@@ -118,7 +121,7 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
     // Calculate how many of x are in tracklistSize to reduce the calculation
     // to only wrap around the list one time
     const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
-#if 1
+#ifdef VERBOSE_DEBUG
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
@@ -145,12 +148,6 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
         }
 
         return i;
-#if 0
-        qDebug() << "std::abs(x) / m (" << std::abs(x) << " / " << m << "): " << (std::abs(x) / m);
-        qDebug() << "std::abs(x) % m: " << (std::abs(x) % m);
-        //return std::abs(tracklistSize - ((std::abs(x) / m) - tracklistSize));
-        return std::abs(x) - (tracklistSize * m);
-#endif
     }
     else
         return tracklistSize - std::abs(x);
@@ -259,7 +256,6 @@ void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubunt
 
 void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::Id& id)
 {
-    qDebug() << "onTrackChanged, id: " << id.c_str();
     if (!id.empty())
     {
         m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
@@ -285,8 +281,6 @@ void AalMediaPlaylistControl::connect_signals()
 
 void AalMediaPlaylistControl::disconnect_signals()
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (m_trackChangedConnection.is_connected())
         m_trackChangedConnection.disconnect();
 }

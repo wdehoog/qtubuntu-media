@@ -43,7 +43,6 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 {
-    qDebug() << Q_FUNC_INFO;
     clear();
     disconnect_signals();
 }
@@ -70,12 +69,10 @@ QMediaContent AalMediaPlaylistProvider::media(int index) const
         return QMediaContent();
 
     const media::Track::Id id = trackOfIndex(index);
-    //qDebug() << "id: " << id.c_str();
 
     QMediaContent content;
     try {
         media::Track::UriType uri = m_hubTrackList->query_uri_for_track(id);
-        //qDebug() << "Uri: " << uri.c_str();
         content = QMediaContent(QUrl(QString(uri.c_str())));
     }
     catch (const std::runtime_error &e) {
@@ -307,7 +304,7 @@ bool AalMediaPlaylistProvider::removeTrack(const core::ubuntu::media::Track::Id 
     if (pos == -1)
         return false;
 
-    qDebug() << "Erasing track from table: " << id.c_str();
+    qDebug() << "Erasing track from track lookup table: " << id.c_str();
     track_index_lut.erase(track_index_lut.begin() + pos);
 
     return true;
@@ -336,7 +333,6 @@ const media::Track::Id AalMediaPlaylistProvider::trackOfIndex(int index) const
         return media::TrackList::after_empty_track();
     }
 
-    //qDebug() << "Returning track_index_lut.at(" << index << ")";
     try {
         return track_index_lut.at(index);
     }

@@ -118,7 +118,6 @@ AalMediaPlayerService::~AalMediaPlayerService()
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
-    qDebug() << "requestControl name: " << name;
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
         if (not m_mediaPlayerControl)
@@ -137,7 +136,6 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
     if (qstrcmp(name, QMediaPlaylistControl_iid) == 0)
     {
-        qDebug() << "Client requested QMediaPlaylistControl_iid";
         if (not m_mediaPlaylistControl)
             createPlaylistControl();
 
@@ -247,7 +245,6 @@ void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
 
 void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
 {
-    qDebug() << Q_FUNC_INFO;
     if (m_hubPlayerSession == NULL)
     {
         qWarning() << "Cannot set playlist without a valid media-hub player session";
@@ -535,8 +532,6 @@ void AalMediaPlayerService::setVolume(int volume)
 
 void AalMediaPlayerService::createMediaPlayerControl()
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (m_hubPlayerSession == NULL)
         return;
 

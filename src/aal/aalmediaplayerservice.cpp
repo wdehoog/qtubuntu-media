@@ -286,7 +286,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     try {
         if (m_mediaPlaylistProvider != NULL)
             m_mediaPlaylistProvider->addMedia(QMediaContent(url));
-        }
         else
             m_hubPlayerSession->open_uri(uri);
     }

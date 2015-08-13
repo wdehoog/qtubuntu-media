@@ -109,8 +109,7 @@ AalMediaPlayerService::~AalMediaPlayerService()
     m_errorConnection.disconnect();
     m_playbackStatusChangedConnection.disconnect();
 
-    if (isVideoSource())
-        deleteVideoRendererControl();
+    deleteVideoRendererControl();
 
     deletePlaylistControl();
 
@@ -595,9 +594,6 @@ void AalMediaPlayerService::deleteVideoRendererControl()
 
 void AalMediaPlayerService::deletePlaylistControl()
 {
-    if (m_hubPlayerSession == nullptr)
-        return;
-
     delete m_mediaPlaylistProvider;
     m_mediaPlaylistProvider = nullptr;
     delete m_mediaPlaylistControl;

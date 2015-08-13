@@ -43,7 +43,6 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 {
-    clear();
     disconnect_signals();
 }
 

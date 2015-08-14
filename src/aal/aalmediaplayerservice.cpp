@@ -35,6 +35,9 @@
 
 #include <qtubuntu_media_signals.h>
 
+// Uncomment to re-enable media-hub Player session detach/reattach functionality
+//#define DO_PLAYER_ATTACH_DETACH
+
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>
@@ -538,13 +541,6 @@ void AalMediaPlayerService::createMediaPlayerControl()
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
     connect_signals();
-#if 0
-    m_endOfStreamConnection = m_hubPlayerSession->end_of_stream().connect([this]()
-    {
-        m_firstPlayback = false;
-        Q_EMIT playbackComplete();
-    });
-#endif
 }
 
 void AalMediaPlayerService::createVideoRendererControl()
@@ -682,12 +678,15 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                 break;
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
+#ifdef DO_PLAYER_ATTACH_DETACH
                 disconnect_signals();
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 m_doReattachSession = true;
+#endif
                 break;
             case Qt::ApplicationActive:
                 qDebug() << "** Application is now active";
+#ifdef DO_PLAYER_ATTACH_DETACH
                 // Avoid doing this for when the client application first loads as this
                 // will break video playback
                 if (m_doReattachSession)
@@ -698,6 +697,7 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                     updateClientSignals();
                     connect_signals();
                 }
+#endif
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";
@@ -714,13 +714,8 @@ void AalMediaPlayerService::updateClientSignals()
     if (m_mediaPlayerControl == nullptr)
         return;
 
-    const int64_t d = duration();
-    const int64_t p = position();
-    qDebug() << "** Updating player duration to be: " << d;
-    Q_EMIT m_mediaPlayerControl->durationChanged(d);
-    qDebug() << "** Updating player duration to be: " << p;
-    Q_EMIT m_mediaPlayerControl->positionChanged(p);
-    qDebug() << "** Updating player state to be: " << m_newStatus;
+    Q_EMIT m_mediaPlayerControl->durationChanged(duration());
+    Q_EMIT m_mediaPlayerControl->positionChanged(position());
     switch (m_newStatus)
     {
         case media::Player::PlaybackStatus::ready:
@@ -742,7 +737,6 @@ void AalMediaPlayerService::connect_signals()
 {
     if (!m_endOfStreamConnection.is_connected())
     {
-        qDebug() << "Connecting m_endOfStreamConnection";
         m_endOfStreamConnection = m_hubPlayerSession->end_of_stream().connect([this]()
         {
             m_firstPlayback = false;

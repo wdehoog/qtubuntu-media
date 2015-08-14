@@ -113,6 +113,9 @@ public Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
 
 protected:
+    void updateClientSignals();
+    void connect_signals();
+    void disconnect_signals();
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif
@@ -135,6 +138,7 @@ private:
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     core::Connection m_playbackStatusChangedConnection;
     core::Connection m_errorConnection;
+    core::Connection m_endOfStreamConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;

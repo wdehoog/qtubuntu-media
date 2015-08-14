@@ -62,6 +62,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
     m_hubPlayerSession(NULL),
     m_playbackStatusChangedConnection(the_void.connect([](){})),
     m_errorConnection(the_void.connect([](){})),
+    m_endOfStreamConnection(the_void.connect([](){})),
     m_mediaPlayerControl(nullptr),
     m_videoOutput(nullptr),
     m_mediaPlaylistControl(nullptr),
@@ -536,11 +537,14 @@ void AalMediaPlayerService::createMediaPlayerControl()
         return;
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
-    m_hubPlayerSession->end_of_stream().connect([this]()
+    connect_signals();
+#if 0
+    m_endOfStreamConnection = m_hubPlayerSession->end_of_stream().connect([this]()
     {
         m_firstPlayback = false;
         Q_EMIT playbackComplete();
     });
+#endif
 }
 
 void AalMediaPlayerService::createVideoRendererControl()
@@ -678,6 +682,7 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                 break;
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
+                disconnect_signals();
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 m_doReattachSession = true;
                 break;
@@ -686,7 +691,13 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                 // Avoid doing this for when the client application first loads as this
                 // will break video playback
                 if (m_doReattachSession)
+                {
                     m_hubPlayerSession = m_hubService->reattach_session(m_sessionUuid, media::Player::Client::default_configuration());
+                    // Make sure the client's status (position, duraiton, state, etc) are all correct when reattaching
+                    // to the media-hub Player session
+                    updateClientSignals();
+                    connect_signals();
+                }
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";
@@ -695,6 +706,55 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
     } catch (const std::runtime_error &e) {
         qWarning() << "Failed to respond to ApplicationState change: " << e.what();
     }
+}
+
+void AalMediaPlayerService::updateClientSignals()
+{
+    qDebug() << Q_FUNC_INFO;
+    if (m_mediaPlayerControl == nullptr)
+        return;
+
+    const int64_t d = duration();
+    const int64_t p = position();
+    qDebug() << "** Updating player duration to be: " << d;
+    Q_EMIT m_mediaPlayerControl->durationChanged(d);
+    qDebug() << "** Updating player duration to be: " << p;
+    Q_EMIT m_mediaPlayerControl->positionChanged(p);
+    qDebug() << "** Updating player state to be: " << m_newStatus;
+    switch (m_newStatus)
+    {
+        case media::Player::PlaybackStatus::ready:
+        case media::Player::PlaybackStatus::stopped:
+            m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
+            break;
+        case media::Player::PlaybackStatus::paused:
+            m_mediaPlayerControl->setState(QMediaPlayer::PausedState);
+            break;
+        case media::Player::PlaybackStatus::playing:
+            m_mediaPlayerControl->setState(QMediaPlayer::PlayingState);
+            break;
+        default:
+            qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
+    }
+}
+
+void AalMediaPlayerService::connect_signals()
+{
+    if (!m_endOfStreamConnection.is_connected())
+    {
+        qDebug() << "Connecting m_endOfStreamConnection";
+        m_endOfStreamConnection = m_hubPlayerSession->end_of_stream().connect([this]()
+        {
+            m_firstPlayback = false;
+            Q_EMIT playbackComplete();
+        });
+    }
+}
+
+void AalMediaPlayerService::disconnect_signals()
+{
+    if (m_endOfStreamConnection.is_connected())
+        m_endOfStreamConnection.disconnect();
 }
 
 void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)

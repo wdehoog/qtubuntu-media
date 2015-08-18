@@ -84,6 +84,12 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 {
     m_hubService = media::Service::Client::instance();
 
+    // As core::Connection doesn't allow us to start with a disconnected connection
+    // instance we have to connect it first with a dummy signal and then disconnect
+    // it again. If we don't do this connect_signals() will never be able to attach
+    // to the relevant signals.
+    m_endOfStreamConnection.disconnect();
+
     if (!newMediaPlayer())
         qWarning() << "Failed to create a new media player backend. Video playback will not function." << endl;
 

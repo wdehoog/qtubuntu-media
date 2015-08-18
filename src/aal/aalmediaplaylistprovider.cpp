@@ -43,6 +43,7 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 {
+    qDebug() << Q_FUNC_INFO;
     disconnect_signals();
 }
 

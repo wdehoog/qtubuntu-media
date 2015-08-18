@@ -113,11 +113,17 @@ AalMediaPlayerService::~AalMediaPlayerService()
     m_errorConnection.disconnect();
     m_playbackStatusChangedConnection.disconnect();
 
-    deleteVideoRendererControl();
+    if (m_videoOutput)
+        deleteVideoRendererControl();
 
-    deletePlaylistControl();
+    if (m_mediaPlaylistControl)
+        deletePlaylistControl();
 
-    deleteMediaPlayerControl();
+    if (m_mediaPlayerControl)
+        deleteMediaPlayerControl();
+
+    if (m_hubPlayerSession)
+        destroyPlayerSession();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -155,14 +161,8 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
 {
-    if (control == m_mediaPlayerControl)
-        deleteMediaPlayerControl();
-    else if (control == m_videoOutput)
+    if (control == m_videoOutput)
         deleteVideoRendererControl();
-    else if (control == m_mediaPlaylistControl)
-        deletePlaylistControl();
-    else
-        delete control;
 }
 
 bool AalMediaPlayerService::newMediaPlayer()
@@ -563,11 +563,22 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 {
     qDebug() << Q_FUNC_INFO;
 
-    if (m_hubPlayerSession == NULL)
+    if (not m_hubPlayerSession)
         return;
 
-    delete m_mediaPlayerControl;
-    m_mediaPlayerControl = NULL;
+    if (m_mediaPlayerControl)
+    {
+        delete m_mediaPlayerControl;
+        m_mediaPlayerControl = nullptr;
+    }
+}
+
+void AalMediaPlayerService::destroyPlayerSession()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    if (not m_hubPlayerSession)
+        return;
 
     try {
         // Invalidates the media-hub player session
@@ -585,19 +596,27 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
 void AalMediaPlayerService::deleteVideoRendererControl()
 {
-    if (m_hubPlayerSession == nullptr)
-        return;
-
-    delete m_videoOutput;
-    m_videoOutput = nullptr;
+    if (m_videoOutput)
+    {
+        delete m_videoOutput;
+        m_videoOutput = nullptr;
+    }
 }
 
 void AalMediaPlayerService::deletePlaylistControl()
 {
-    delete m_mediaPlaylistProvider;
-    m_mediaPlaylistProvider = nullptr;
-    delete m_mediaPlaylistControl;
-    m_mediaPlaylistControl = nullptr;
+    qDebug() << Q_FUNC_INFO;
+
+    if (m_mediaPlaylistProvider)
+    {
+        delete m_mediaPlaylistProvider;
+        m_mediaPlaylistProvider = nullptr;
+    }
+    if (m_mediaPlaylistControl)
+    {
+        delete m_mediaPlaylistControl;
+        m_mediaPlaylistControl = nullptr;
+    }
 }
 
 void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &error)

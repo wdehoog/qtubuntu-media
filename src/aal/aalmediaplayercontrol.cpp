@@ -44,7 +44,6 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
 
 AalMediaPlayerControl::~AalMediaPlayerControl()
 {
-    stop();
     m_state = QMediaPlayer::StoppedState;
     m_status = QMediaPlayer::NoMedia;
     m_cachedVolume = 0;
@@ -115,13 +114,11 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
 
 int AalMediaPlayerControl::volume() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return m_service->getVolume();
 }
 
 void AalMediaPlayerControl::setVolume(int volume)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_cachedVolume = volume;
     m_service->setVolume(volume);
     Q_EMIT volumeChanged(m_cachedVolume);
@@ -129,13 +126,11 @@ void AalMediaPlayerControl::setVolume(int volume)
 
 bool AalMediaPlayerControl::isMuted() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return (volume() == 0);
 }
 
 void AalMediaPlayerControl::setMuted(bool muted)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     if (muted)
     {
         m_cachedVolume = volume();
@@ -193,7 +188,6 @@ QMediaContent AalMediaPlayerControl::media() const
 
 const QIODevice* AalMediaPlayerControl::mediaStream() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // This is only valid if a stream was passed into setMedia()
     return NULL;
 }

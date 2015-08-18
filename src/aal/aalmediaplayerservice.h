@@ -126,6 +126,7 @@ private:
     void createPlaylistControl();
 
     void deleteMediaPlayerControl();
+    void destroyPlayerSession();
     void deleteVideoRendererControl();
     void deletePlaylistControl();
 

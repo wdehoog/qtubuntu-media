@@ -4,4 +4,4 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     src \
-    unittests
+    tests

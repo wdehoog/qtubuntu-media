@@ -22,7 +22,6 @@
 
 AalServicePlugin::AalServicePlugin()
 {
-    qDebug() << "Initializing AalServicePlugin";
 }
 
 QMediaService* AalServicePlugin::create(QString const& key)

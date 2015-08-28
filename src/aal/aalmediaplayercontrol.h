@@ -30,8 +30,6 @@ public:
     AalMediaPlayerControl(AalMediaPlayerService *service, QObject *parent = 0);
     ~AalMediaPlayerControl();
 
-    bool eventFilter(QObject *obj, QEvent *event);
-
     virtual QMediaPlayer::State state() const;
     virtual QMediaPlayer::MediaStatus mediaStatus() const;
     virtual QMediaPlayer::AudioRole audioRole() const;

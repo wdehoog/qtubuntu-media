@@ -33,11 +33,11 @@ namespace core {
 namespace ubuntu {
 namespace media {
 
-class TestPlayer : public Player
+class PlayerMock : public Player
 {
 public:
-    TestPlayer();
-    virtual ~TestPlayer();
+    PlayerMock();
+    virtual ~PlayerMock();
 
     virtual std::string uuid() const;
     virtual void reconnect();
@@ -90,6 +90,7 @@ public:
     virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
     virtual const core::Signal<core::ubuntu::media::video::Dimensions>& video_dimension_changed() const;
+    virtual const core::Signal<uint64_t>& duration_changed() const;
     virtual const core::Signal<Error>& error() const;
 
 private:

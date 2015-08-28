@@ -30,8 +30,9 @@
 #include <memory>
 
 class AalMediaPlayerControl;
+class AalMediaPlaylistControl;
+class AalMediaPlaylistProvider;
 class QMediaPlayerControl;
-class QMetaDataReaderControl;
 class AalVideoRendererControl;
 class tst_MediaPlayerPlugin;
 class QTimerEvent;
@@ -64,6 +65,7 @@ public:
     void releaseControl(QMediaControl *control);
 
     AalMediaPlayerControl *mediaPlayerControl() const { return m_mediaPlayerControl; }
+    AalMediaPlaylistControl *mediaPlaylistControl() const { return m_mediaPlaylistControl; }
     AalVideoRendererControl *videoOutputControl() const { return m_videoOutput; }
 
     bool newMediaPlayer();
@@ -76,6 +78,7 @@ public:
     void setAudioRole(QMediaPlayer::AudioRole audioRole);
 
     void setMedia(const QUrl &url);
+    void setMedia(const QMediaContent &media);
     void setMediaPlaylist(const QMediaPlaylist& playlist);
     void play();
     void pause();
@@ -107,8 +110,12 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void onPlaybackStatusChanged();
+    void onApplicationStateChanged(Qt::ApplicationState state);
 
 protected:
+    void updateClientSignals();
+    void connect_signals();
+    void disconnect_signals();
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif
@@ -116,11 +123,12 @@ protected:
 private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
-    void createMetaDataReaderControl();
+    void createPlaylistControl();
 
     void deleteMediaPlayerControl();
+    void destroyPlayerSession();
     void deleteVideoRendererControl();
-    void deleteMetaDataReaderControl();
+    void deletePlaylistControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -131,10 +139,12 @@ private:
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     core::Connection m_playbackStatusChangedConnection;
     core::Connection m_errorConnection;
+    core::Connection m_endOfStreamConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
-    QMetaDataReaderControl *m_metaDataReaderControl;
+    AalMediaPlaylistControl *m_mediaPlaylistControl;
+    AalMediaPlaylistProvider *m_mediaPlaylistProvider;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 
@@ -143,6 +153,8 @@ private:
     const QMediaPlaylist* m_mediaPlaylist;
 
     core::ubuntu::media::Player::PlaybackStatus m_newStatus;
+    std::string m_sessionUuid;
+    bool m_doReattachSession;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;

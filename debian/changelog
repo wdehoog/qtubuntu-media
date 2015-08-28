@@ -1,4 +1,10 @@
-qtubuntu-media (0.7.1+15.10.20150710-0ubuntu1) wily; urgency=medium
+qtubuntu-media (0.7.1+15.04.20150710-0ubuntu2) UNRELEASED; urgency=medium
+
+  * Bump version for vivid sync
+
+ -- Jim Hodapp <jim.hodapp@canonical.com>  Mon, 03 Aug 2015 15:50:50 -0400
+
+qtubuntu-media (0.7.1+15.04.20150710-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -9,7 +15,7 @@ qtubuntu-media (0.7.1+15.10.20150710-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 10 Jul 2015 18:12:45 +0000
 
-qtubuntu-media (0.7.1+15.10.20150602.3-0ubuntu1) wily; urgency=medium
+qtubuntu-media (0.7.1+15.04.20150602.3-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -20,7 +26,7 @@ qtubuntu-media (0.7.1+15.10.20150602.3-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 19:37:22 +0000
 
-qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
+qtubuntu-media (0.7.1+15.04.20150602.1-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -30,7 +36,7 @@ qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 16:55:53 +0000
 
-qtubuntu-media (0.7.1+15.10.20150527.2-0ubuntu1) wily; urgency=medium
+qtubuntu-media (0.7.1+15.04.20150527.2-0ubuntu1) vivid; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -42,7 +48,7 @@ qtubuntu-media (0.7.1+15.10.20150527.2-0ubuntu1) wily; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 27 May 2015 18:38:32 +0000
 
-qtubuntu-media (0.7.1+15.10.20150522-0ubuntu1) wily; urgency=medium
+qtubuntu-media (0.7.1+15.04.20150522-0ubuntu1) vivid; urgency=medium
 
   [ Jim Hodapp ]
   * Make sure that stopped and ready (same state for QMediaPlayer) are

@@ -310,6 +310,12 @@ const core::Signal<core::ubuntu::media::video::Dimensions>& TestPlayer::video_di
     return ret;
 }
 
+const core::Signal<uint64_t>& TestPlayer::duration_changed() const
+{
+    static core::Signal<uint64_t> ret;
+    return ret;
+}
+
 const core::Signal<Player::Error>& TestPlayer::error() const
 {
     static core::Signal<Player::Error> ret;

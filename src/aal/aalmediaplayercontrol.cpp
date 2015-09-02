@@ -17,6 +17,7 @@
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
 #include "aalvideorenderercontrol.h"
+#include "aalutility.h"
 
 #include <media/media_compatibility_layer.h>
 
@@ -43,23 +44,9 @@ AalMediaPlayerControl::AalMediaPlayerControl(AalMediaPlayerService *service, QOb
 
 AalMediaPlayerControl::~AalMediaPlayerControl()
 {
-    stop();
     m_state = QMediaPlayer::StoppedState;
     m_status = QMediaPlayer::NoMedia;
     m_cachedVolume = 0;
-}
-
-bool AalMediaPlayerControl::eventFilter(QObject *obj, QEvent *event)
-{
-    if (event->type() == QEvent::ApplicationDeactivate) {
-       m_applicationActive = false;
-       m_service->pushPlaylist();
-    }
-    else if (event->type() == QEvent::ApplicationActivate) {
-       m_applicationActive = true;
-    }
-
-    return QObject::eventFilter(obj, event);
 }
 
 QMediaPlayer::State AalMediaPlayerControl::state() const
@@ -127,13 +114,11 @@ void AalMediaPlayerControl::setPosition(qint64 msec)
 
 int AalMediaPlayerControl::volume() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return m_service->getVolume();
 }
 
 void AalMediaPlayerControl::setVolume(int volume)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     m_cachedVolume = volume;
     m_service->setVolume(volume);
     Q_EMIT volumeChanged(m_cachedVolume);
@@ -141,13 +126,11 @@ void AalMediaPlayerControl::setVolume(int volume)
 
 bool AalMediaPlayerControl::isMuted() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     return (volume() == 0);
 }
 
 void AalMediaPlayerControl::setMuted(bool muted)
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     if (muted)
     {
         m_cachedVolume = volume();
@@ -205,7 +188,6 @@ QMediaContent AalMediaPlayerControl::media() const
 
 const QIODevice* AalMediaPlayerControl::mediaStream() const
 {
-    qDebug() << __PRETTY_FUNCTION__ << endl;
     // This is only valid if a stream was passed into setMedia()
     return NULL;
 }
@@ -214,40 +196,23 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 {
     Q_UNUSED(stream);
     qDebug() << __PRETTY_FUNCTION__ << endl;
-    QMediaPlaylist *list;
 
-    if (stream != NULL) {
-        try
-        {
-            list = reinterpret_cast<QMediaPlaylist*>(stream);
-            m_service->setMediaPlaylist(*list);
+    qDebug() << "setMedia() media: " << AalUtility::unescape(media);
+    m_mediaContent = media;
 
-            // Stream is a QMediaPlaylist object
-            m_mediaContent = QMediaContent(list);
-        }
-        catch (const std::bad_cast &e)
-        {
-            // TODO: Support real streams
-            qDebug() << "Streams are not currently supported";
+    // Make sure we can actually load something valid
+    if (!media.isNull())
+    {
+        QMediaPlayer::MediaStatus priorStatus = mediaStatus();
+        setMediaStatus(QMediaPlayer::LoadingMedia);
+        m_service->setMedia(AalUtility::unescape(media));
+        // This is important to do for QMediaPlaylist instances that
+        // are set to loop. Without this, such a playlist will only
+        // play once
+        if (priorStatus == QMediaPlayer::EndOfMedia)
             stop();
-            return;
-        }
-    } else {
-        m_mediaContent = media;
-
-        // Make sure we can actually load something valid
-        if (!media.isNull())
-        {
-            QMediaPlayer::MediaStatus priorStatus = mediaStatus();
-            setMediaStatus(QMediaPlayer::LoadingMedia);
-            m_service->setMedia(unescape(media));
-            // This is important to do for QMediaPlaylist instances that
-            // are set to loop. Without this, such a playlist will only
-            // play once
-            if (priorStatus == QMediaPlayer::EndOfMedia)
-                stop();
-        }
     }
+
     Q_EMIT mediaChanged(m_mediaContent);
 }
 
@@ -305,21 +270,6 @@ void AalMediaPlayerControl::updateCachedDuration(qint64 duration)
     m_cachedDuration = duration;
     if (duration > 0)
         emitDurationChanged(duration);
-}
-
-QUrl AalMediaPlayerControl::unescape(const QMediaContent &media) const
-{
-    if (media.isNull())
-        return QUrl();
-
-    if (media.canonicalUrl().isLocalFile()) {
-        qDebug() << "Local file URI: " << QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
-        return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
-    }
-    else {
-        qDebug() << "Remote stream URI: " << QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
-        return QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
-    }
 }
 
 void AalMediaPlayerControl::setMediaStatus(QMediaPlayer::MediaStatus status)

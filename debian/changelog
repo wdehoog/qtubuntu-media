@@ -1,3 +1,15 @@
+qtubuntu-media (0.7.1+15.10.20150710-0ubuntu2~gcc5.2) wily; urgency=medium
+
+  * No-change test rebuild for g++5 ABI transition
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 30 Jul 2015 12:09:11 +0200
+
+qtubuntu-media (0.7.1+15.10.20150710-0ubuntu2~gcc5.1) wily; urgency=medium
+
+  * No-change test rebuild for g++5 ABI transition
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 22 Jul 2015 23:30:42 +0000
+
 qtubuntu-media (0.7.1+15.10.20150710-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]

@@ -1,3 +1,40 @@
+qtubuntu-media (0.7.1+15.10.20150903.1-0ubuntu1) wily; urgency=medium
+
+  [ Alfonso Sanchez-Beato ]
+  * [ Jim Hodapp ] Added background playlist support connecting
+    qtmultimedia with media-hub. added:
+    src/aal/aalmediaplaylistcontrol.cpp
+    src/aal/aalmediaplaylistcontrol.h
+    src/aal/aalmediaplaylistprovider.cpp
+    src/aal/aalmediaplaylistprovider.h src/aal/aalutility.cpp
+    src/aal/aalutility.h src/aal/private/
+    src/aal/private/qmediaplaylistnavigator_p.h
+    src/aal/private/qmediaplaylistprovider_p.h
+    src/aal/qmediaplaylistcontrol_p.h tests/integration/
+    tests/integration/integration.pro tests/integration/testdata/
+    tests/integration/testdata/testfile.mp4
+    tests/integration/testdata/testfile.ogg
+    tests/integration/tst_mediaplaylist.cpp
+    tests/integration/tst_mediaplaylist.h tests/tests.pro tests/unit/
+    tests/unit/player_mock.cpp tests/unit/player_mock.h
+    tests/unit/tst_mediaplaylistcontrol.cpp
+    tests/unit/tst_mediaplaylistcontrol.h renamed: unittests/ => tests/
+    unittests/player.cpp => tests/unit/player.cpp unittests/player.h =>
+    tests/unit/player.h unittests/service.cpp => tests/unit/service.cpp
+    unittests/service.h => tests/unit/service.h
+    unittests/setup_mediascanner.sh => tests/unit/setup_mediascanner.sh
+    unittests/tst_mediaplayerplugin.cpp =>
+    tests/unit/tst_mediaplayerplugin.cpp
+    unittests/tst_mediaplayerplugin.h =>
+    tests/unit/tst_mediaplayerplugin.h
+    unittests/tst_metadatareadercontrol.cpp =>
+    tests/unit/tst_metadatareadercontrol.cpp
+    unittests/tst_metadatareadercontrol.h =>
+    tests/unit/tst_metadatareadercontrol.h unittests/unittests.pro =>
+    tests/unit/unit.pro
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 03 Sep 2015 08:25:29 +0000
+
 qtubuntu-media (0.7.1+15.10.20150710-0ubuntu2~gcc5.2) wily; urgency=medium
 
   * No-change test rebuild for g++5 ABI transition

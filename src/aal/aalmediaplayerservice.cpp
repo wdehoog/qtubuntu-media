@@ -36,7 +36,7 @@
 #include <qtubuntu_media_signals.h>
 
 // Uncomment to re-enable media-hub Player session detach/reattach functionality
-//#define DO_PLAYER_ATTACH_DETACH
+#define DO_PLAYER_ATTACH_DETACH
 
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
@@ -86,7 +86,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     // As core::Connection doesn't allow us to start with a disconnected connection
     // instance we have to connect it first with a dummy signal and then disconnect
-    // it again. If we don't do this connect_signals() will never be able to attach
+    // it again. If we don't do this connectSignals() will never be able to attach
     // to the relevant signals.
     m_endOfStreamConnection.disconnect();
 
@@ -271,7 +271,7 @@ void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
 
 void AalMediaPlayerService::setMedia(const QUrl &url)
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
     {
         qWarning() << "Cannot open uri without a valid media-hub player session";
         return;
@@ -293,15 +293,16 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
     try {
-        if (m_mediaPlaylistProvider != NULL)
-            m_mediaPlaylistProvider->addMedia(QMediaContent(url));
-        else
+        if (m_mediaPlaylistProvider == nullptr)
             m_hubPlayerSession->open_uri(uri);
     }
     catch (const std::runtime_error &e) {
-        qWarning() << "Failed to open media " << url << ": " << e.what();
+        qWarning() << "Failed to set media " << url << ": " << e.what();
         return;
     }
+
+    // Make sure this player can be controlled by MPRIS if appropriate
+    updateCurrentPlayer();
 
     if (isVideoSource())
         m_videoOutput->setupSurface();
@@ -327,12 +328,17 @@ void AalMediaPlayerService::setMedia(const QMediaContent &media)
 
     qDebug() << "Setting media to: " << AalUtility::unescape(media);
     try {
+        // TODO: Change this to use the QUrl from QMediaContent and then call
+        // open_uri(uri) like the other version of setMedia does above
         m_mediaPlaylistProvider->addMedia(media);
     }
     catch (const std::runtime_error &e) {
-        qWarning() << "Failed to open media " << AalUtility::unescape(media) << ": " << e.what();
+        qWarning() << "Failed to set media " << AalUtility::unescape(media) << ": " << e.what();
         return;
     }
+
+    // Make sure this player can be controlled by MPRIS if appropriate
+    updateCurrentPlayer();
 
     if (isVideoSource())
         m_videoOutput->setupSurface();
@@ -546,7 +552,7 @@ void AalMediaPlayerService::createMediaPlayerControl()
         return;
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
-    connect_signals();
+    connectSignals();
 }
 
 void AalMediaPlayerService::createVideoRendererControl()
@@ -704,7 +710,7 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
 #ifdef DO_PLAYER_ATTACH_DETACH
-                disconnect_signals();
+                disconnectSignals();
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 m_doReattachSession = true;
 #endif
@@ -720,7 +726,7 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                     // Make sure the client's status (position, duraiton, state, etc) are all correct when reattaching
                     // to the media-hub Player session
                     updateClientSignals();
-                    connect_signals();
+                    connectSignals();
                 }
 #endif
                 break;
@@ -758,7 +764,7 @@ void AalMediaPlayerService::updateClientSignals()
     }
 }
 
-void AalMediaPlayerService::connect_signals()
+void AalMediaPlayerService::connectSignals()
 {
     if (!m_endOfStreamConnection.is_connected())
     {
@@ -770,10 +776,27 @@ void AalMediaPlayerService::connect_signals()
     }
 }
 
-void AalMediaPlayerService::disconnect_signals()
+void AalMediaPlayerService::disconnectSignals()
 {
     if (m_endOfStreamConnection.is_connected())
         m_endOfStreamConnection.disconnect();
+}
+
+void AalMediaPlayerService::updateCurrentPlayer()
+{
+    try {
+        // If this player is a multimedia audioRole, then it should possible to
+        // use it for MPRIS control
+        if (audioRole() == QMediaPlayer::MultimediaRole)
+        {
+            qDebug() << "Setting player as current player";
+            const media::Player::PlayerKey key = m_hubPlayerSession->key();
+            m_hubService->set_current_player(key);
+        }
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to set player as current player: " << e.what();
+        return;
+    }
 }
 
 void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)

@@ -35,9 +35,6 @@
 
 #include <qtubuntu_media_signals.h>
 
-// Uncomment to re-enable media-hub Player session detach/reattach functionality
-#define DO_PLAYER_ATTACH_DETACH
-
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>
@@ -292,13 +289,15 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
 
     qDebug() << "Setting media to: " << url;
     const media::Track::UriType uri(url.url().toStdString());
-    try {
-        if (m_mediaPlaylistProvider == nullptr)
+    if (m_mediaPlaylistProvider == nullptr)
+    {
+        try {
             m_hubPlayerSession->open_uri(uri);
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to set media " << url << ": " << e.what();
-        return;
+        }
+        catch (const std::runtime_error &e) {
+            qWarning() << "Failed to set media " << url << ": " << e.what();
+            return;
+        }
     }
 
     // Make sure this player can be controlled by MPRIS if appropriate
@@ -709,15 +708,12 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                 break;
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
-#ifdef DO_PLAYER_ATTACH_DETACH
                 disconnectSignals();
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 m_doReattachSession = true;
-#endif
                 break;
             case Qt::ApplicationActive:
                 qDebug() << "** Application is now active";
-#ifdef DO_PLAYER_ATTACH_DETACH
                 // Avoid doing this for when the client application first loads as this
                 // will break video playback
                 if (m_doReattachSession)
@@ -728,7 +724,6 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                     updateClientSignals();
                     connectSignals();
                 }
-#endif
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";
@@ -784,18 +779,18 @@ void AalMediaPlayerService::disconnectSignals()
 
 void AalMediaPlayerService::updateCurrentPlayer()
 {
-    try {
         // If this player is a multimedia audioRole, then it should possible to
         // use it for MPRIS control
-        if (audioRole() == QMediaPlayer::MultimediaRole)
-        {
-            qDebug() << "Setting player as current player";
+    if (audioRole() == QMediaPlayer::MultimediaRole)
+    {
+        qDebug() << "Setting player as current player";
+        try {
             const media::Player::PlayerKey key = m_hubPlayerSession->key();
             m_hubService->set_current_player(key);
+        } catch (const std::runtime_error &e) {
+            qWarning() << "Failed to set player as current player: " << e.what();
+            return;
         }
-    } catch (const std::runtime_error &e) {
-        qWarning() << "Failed to set player as current player: " << e.what();
-        return;
     }
 }
 

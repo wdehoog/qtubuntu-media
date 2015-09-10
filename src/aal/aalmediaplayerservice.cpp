@@ -451,12 +451,14 @@ void AalMediaPlayerService::setPosition(int64_t msec)
         qWarning() << "Cannot set current playback position without a valid media-hub player session";
         return;
     }
+    qDebug() << "Starting seek";
     try {
         m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to set position to " << msec << ": " << e.what();
     }
+    qDebug() << "Finished seek";
 }
 
 int64_t AalMediaPlayerService::duration()
@@ -692,7 +694,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
             qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
     }
 
-    qDebug() << "PlaybackStatus changed to: " << m_newStatus;
+    qDebug() << "PlaybackStatus changed to: " << playbackStatusStr(m_newStatus);
 }
 
 void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state)
@@ -794,13 +796,31 @@ void AalMediaPlayerService::updateCurrentPlayer()
     }
 }
 
-void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)
+void AalMediaPlayerService::onError(const media::Player::Error &error)
 {
     qWarning() << "** Media playback error: " << error;
     signalQMediaPlayerError(error);
 }
 
-void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player)
+QString AalMediaPlayerService::playbackStatusStr(const media::Player::PlaybackStatus &status)
+{
+    switch (status)
+    {
+        case media::Player::PlaybackStatus::ready:
+            return "ready";
+        case media::Player::PlaybackStatus::stopped:
+            return "stopped";
+        case media::Player::PlaybackStatus::paused:
+            return "paused";
+        case media::Player::PlaybackStatus::playing:
+            return "playing";
+        default:
+            qWarning() << "Unknown PlaybackStatus: " << status;
+            return QString();
+    }
+}
+
+void AalMediaPlayerService::setPlayer(const std::shared_ptr<media::Player> &player)
 {
     m_hubPlayerSession = player;
 
@@ -817,7 +837,7 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
     }
 }
 
-void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)
+void AalMediaPlayerService::setService(const std::shared_ptr<media::Service> &service)
 {
     m_hubService = service;
 }

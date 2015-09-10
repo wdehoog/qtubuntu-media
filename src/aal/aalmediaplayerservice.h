@@ -136,6 +136,8 @@ private:
 
     void onError(const core::ubuntu::media::Player::Error &error);
 
+    inline QString playbackStatusStr(const core::ubuntu::media::Player::PlaybackStatus &status);
+
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     core::Connection m_playbackStatusChangedConnection;

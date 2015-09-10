@@ -451,14 +451,12 @@ void AalMediaPlayerService::setPosition(int64_t msec)
         qWarning() << "Cannot set current playback position without a valid media-hub player session";
         return;
     }
-    qDebug() << "Starting seek";
     try {
         m_hubPlayerSession->seek_to(std::chrono::microseconds{msec * 1000});
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to set position to " << msec << ": " << e.what();
     }
-    qDebug() << "Finished seek";
 }
 
 int64_t AalMediaPlayerService::duration()

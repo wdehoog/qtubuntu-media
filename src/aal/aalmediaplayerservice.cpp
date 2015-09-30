@@ -16,7 +16,6 @@
 
 #include "aalmediaplayercontrol.h"
 #include "aalmediaplayerservice.h"
-#include "aalmetadatareadercontrol.h"
 #include "aalmediaplaylistcontrol.h"
 #include "aalmediaplaylistprovider.h"
 #include "aalutility.h"

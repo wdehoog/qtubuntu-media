@@ -32,8 +32,8 @@ public:
 
     virtual QMediaPlayer::State state() const;
     virtual QMediaPlayer::MediaStatus mediaStatus() const;
-    virtual QMediaPlayer::AudioRole audioRole() const;
-    virtual void setAudioRole(QMediaPlayer::AudioRole audioRole);
+    virtual QAudio::Role audioRole() const;
+    virtual void setAudioRole(QAudio::Role audioRole);
     virtual qint64 duration() const;
     virtual qint64 position() const;
     virtual void setPosition(qint64);

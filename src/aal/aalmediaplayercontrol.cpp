@@ -61,12 +61,12 @@ QMediaPlayer::MediaStatus AalMediaPlayerControl::mediaStatus() const
     return m_status;
 }
 
-QMediaPlayer::AudioRole AalMediaPlayerControl::audioRole() const
+QAudio::Role AalMediaPlayerControl::audioRole() const
 {
     return m_service->audioRole();
 }
 
-void AalMediaPlayerControl::setAudioRole(QMediaPlayer::AudioRole audioRole)
+void AalMediaPlayerControl::setAudioRole(QAudio::Role audioRole)
 {
     qDebug() << __PRETTY_FUNCTION__;
     m_service->setAudioRole(audioRole);

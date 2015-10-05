@@ -226,21 +226,21 @@ void AalMediaPlayerService::resetVideoSink()
         m_videoOutput->playbackComplete();
 }
 
-QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
+QAudio::Role AalMediaPlayerService::audioRole() const
 {
     if (m_hubPlayerSession == NULL)
-        return QMediaPlayer::MultimediaRole;
+        return QAudio::VideoRole;
 
     try {
-        return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
+        return static_cast<QAudio::Role>(m_hubPlayerSession->audio_stream_role().get());
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to get audio stream role: " << e.what();
-        return QMediaPlayer::MultimediaRole;
+        return QAudio::VideoRole;
     }
 }
 
-void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
+void AalMediaPlayerService::setAudioRole(QAudio::Role audioRole)
 {
     if (m_hubPlayerSession == NULL)
         return;

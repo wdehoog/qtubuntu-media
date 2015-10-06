@@ -74,8 +74,13 @@ public:
     // Call this before attempting to play the same video a second time (after EOS)
     void resetVideoSink();
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+    QMediaPlayer::AudioRole audioRole() const;
+    void setAudioRole(QMediaPlayer::AudioRole audioRole);
+#else
     QAudio::Role audioRole() const;
     void setAudioRole(QAudio::Role audioRole);
+#endif
 
     void setMedia(const QUrl &url);
     void setMedia(const QMediaContent &media);

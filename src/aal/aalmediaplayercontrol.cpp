@@ -61,12 +61,20 @@ QMediaPlayer::MediaStatus AalMediaPlayerControl::mediaStatus() const
     return m_status;
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+QMediaPlayer::AudioRole AalMediaPlayerControl::audioRole() const
+#else
 QAudio::Role AalMediaPlayerControl::audioRole() const
+#endif
 {
     return m_service->audioRole();
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
+void AalMediaPlayerControl::setAudioRole(QMediaPlayer::AudioRole audioRole)
+#else
 void AalMediaPlayerControl::setAudioRole(QAudio::Role audioRole)
+#endif
 {
     qDebug() << __PRETTY_FUNCTION__;
     m_service->setAudioRole(audioRole);

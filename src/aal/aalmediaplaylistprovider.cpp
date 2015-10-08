@@ -54,13 +54,7 @@ int AalMediaPlaylistProvider::mediaCount() const
         return 0;
     }
 
-    try {
-        return m_hubTrackList->tracks()->size();
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to get playlist media count: " << e.what();
-        return 0;
-    }
+    return track_index_lut.size();
 }
 
 QMediaContent AalMediaPlaylistProvider::media(int index) const

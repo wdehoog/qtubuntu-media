@@ -35,6 +35,12 @@
 
 #include <qtubuntu_media_signals.h>
 
+// Uncomment to re-enable media-hub Player session detach/reattach functionality.
+// It is not clear at all whether we should do this or not, as detaching
+// is probably something that should be done when the app finishes, not when it
+// simply moves to the background.
+//#define DO_PLAYER_ATTACH_DETACH
+
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
 #include <QDateTime>
@@ -708,22 +714,28 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                 break;
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
+#ifdef DO_PLAYER_ATTACH_DETACH
                 disconnectSignals();
                 m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
                 m_doReattachSession = true;
+#endif
                 break;
             case Qt::ApplicationActive:
                 qDebug() << "** Application is now active";
+#ifdef DO_PLAYER_ATTACH_DETACH
                 // Avoid doing this for when the client application first loads as this
                 // will break video playback
                 if (m_doReattachSession)
                 {
-                    m_hubPlayerSession = m_hubService->reattach_session(m_sessionUuid, media::Player::Client::default_configuration());
-                    // Make sure the client's status (position, duraiton, state, etc) are all correct when reattaching
-                    // to the media-hub Player session
+                    m_hubPlayerSession = m_hubService->
+                        reattach_session(m_sessionUuid,
+                                         media::Player::Client::default_configuration());
+                    // Make sure the client's status (position, duraiton, state, etc) are all
+                    // correct when reattaching to the media-hub Player session
                     updateClientSignals();
                     connectSignals();
                 }
+#endif
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";

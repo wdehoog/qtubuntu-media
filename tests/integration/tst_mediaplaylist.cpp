@@ -215,23 +215,11 @@ void tst_MediaPlaylist::verifyCurrentIndex()
 
     QCOMPARE(playlist->mediaCount(), 3);
 
-    QMediaContent current_media;
-    std::promise<QMediaContent> promise;
-    std::future<QMediaContent> future{promise.get_future()};
-    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
-    {
-            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
-            current_media = content;
-            promise.set_value(current_media);
-            // Make sure the promise is not fulfilled twice
-            QObject::disconnect(c);
-    });
-
     qDebug() << "Setting current index to be 1";
     playlist->setCurrentIndex(1);
 
     // Wait for the currentMediaChanged signal to be emited
-    wait_for_signal(future);
+    waitTrackChange(playlist);
 
     qDebug() << "Checking if current index is 1";
     QCOMPARE(playlist->currentIndex(), 1);
@@ -312,29 +300,15 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
 
     QCOMPARE(playlist->mediaCount(), 2);
 
-    QMediaContent current_media;
-    std::promise<QMediaContent> promise;
-    std::future<QMediaContent> future{promise.get_future()};
-    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
-    {
-            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
-            current_media = content;
-            promise.set_value(current_media);
-            // Make sure the promise is not fulfilled twice
-            QObject::disconnect(c);
-    });
-
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
     qDebug() << "Call player->play()";
     player->play();
 
     // Wait for the currentMediaChanged signal to be emited
-    wait_for_signal(future);
+    waitTrackChange(playlist);
 
     QCOMPARE(playlist->currentIndex(), 0);
-
-    QObject::disconnect(c);
 
     delete playlist;
     delete player;
@@ -346,19 +320,6 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
-    QMediaContent current_media;
-    std::promise<QMediaContent> promise;
-    std::future<QMediaContent> future{promise.get_future()};
-
-    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
-    {
-            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
-            current_media = content;
-            promise.set_value(current_media);
-            // Make sure the promise is not fulfilled twice
-            QObject::disconnect(c);
-    });
-
     QList<QMediaContent> content;
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
@@ -368,14 +329,48 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
 
     playlist->setPlaybackMode(QMediaPlaylist::Sequential);
 
+    // Wait until the first track is set as the current one
+    waitTrackChange(playlist);
+
     player->play();
 
-    // Wait for the currentMediaChanged signal to be emited
-    wait_for_signal(future);
+    // Wait until the second track is selected
+    waitTrackChange(playlist);
 
     QCOMPARE(playlist->currentIndex(), 1);
 
-    QObject::disconnect(c);
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::playReusePlayTrackList()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    const QUrl audio(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+
+    for (int i = 0; i < 5; ++i) {
+        playlist->addMedia(audio);
+        playlist->addMedia(video);
+        playlist->addMedia(audio);
+        QCOMPARE(playlist->mediaCount(), 3);
+
+        player->play();
+        QCoreApplication::processEvents();
+
+        const QUrl audioToVerify(playlist->currentMedia().canonicalUrl());
+        QCOMPARE(audioToVerify, audio);
+
+        player->stop();
+        QCoreApplication::processEvents();
+
+        playlist->clear();
+
+        QCOMPARE(playlist->mediaCount(), 0);
+    }
 
     delete playlist;
     delete player;
@@ -391,6 +386,25 @@ void tst_MediaPlaylist::wait_for_signal(std::future<R> const& f)
         QCoreApplication::processEvents();
         std::this_thread::yield();
     }
+}
+
+void tst_MediaPlaylist::waitTrackChange(QMediaPlaylist *playlist)
+{
+    QMediaContent current_media;
+    std::promise<QMediaContent> promise;
+    std::future<QMediaContent> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentMediaChanged,
+        [&](const QMediaContent& content)
+        {
+            qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
+            current_media = content;
+            promise.set_value(current_media);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
+
+    wait_for_signal(future);
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

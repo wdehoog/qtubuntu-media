@@ -63,6 +63,8 @@ private Q_SLOTS:
     void verifyPlaybackModeCurrentItemInLoop();
     void verifyPlaybackModeSequential();
 
+    void playReusePlayTrackList();
+
 private:
     template<typename R>
         bool is_ready(std::future<R> const& f)
@@ -70,6 +72,8 @@ private:
 
     template<typename R>
         void wait_for_signal(std::future<R> const& f);
+
+    void waitTrackChange(QMediaPlaylist *playlist);
 };
 
 #endif // TST_MEDIAPLAYLIST_H

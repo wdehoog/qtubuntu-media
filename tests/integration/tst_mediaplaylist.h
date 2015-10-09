@@ -49,6 +49,7 @@ private Q_SLOTS:
 
     void addTwoTracksAndVerify();
     void addListOfTracksAndVerify();
+    void addLargeListOfTracksAndVerify();
 
     void goToNextTrack();
     void goToPreviousTrack();
@@ -74,6 +75,7 @@ private:
         void wait_for_signal(std::future<R> const& f);
 
     void waitTrackChange(QMediaPlaylist *playlist);
+    void waitTrackInserted(QMediaPlaylist *playlist);
 };
 
 #endif // TST_MEDIAPLAYLIST_H

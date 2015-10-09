@@ -95,23 +95,23 @@ bool AalMediaPlaylistProvider::isReadOnly() const
 
 bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (!m_hubTrackList) {
         qWarning() << "Track list does not exist so can't add a new track!";
         return false;
     }
 
-    try {
-        const QUrl url = content.canonicalUrl();
-        std::string urlStr = AalUtility::unescape_str(content);
-        qDebug() << "scheme: " << url.scheme();
-        qDebug() << "Contains file://?" << url.toString().contains("file://", Qt::CaseInsensitive);
-        if (url.scheme().isEmpty() and url.scheme() != "file")
-            urlStr = "file://" + AalUtility::unescape_str(content);
+    const QUrl url = content.canonicalUrl();
+    std::string urlStr = AalUtility::unescape_str(content);
+    if (url.scheme().isEmpty() and url.scheme() != "file")
+        urlStr = "file://" + urlStr;
 
-        static const bool make_current = false;
-        m_hubTrackList->add_track_with_uri_at(urlStr, media::TrackList::after_empty_track(), make_current);
+    static const bool make_current = false;
+    const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
+
+    const int newIndex = track_index_lut.size();
+    Q_EMIT mediaAboutToBeInserted(newIndex, newIndex);
+    try {
+        m_hubTrackList->add_track_with_uri_at(urlStr, after_empty_track, make_current);
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
@@ -123,12 +123,11 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 
 bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (contentList.empty())
         return false;
 
-    for (int i=0; i<contentList.count(); i++)
+    uint16_t i;
+    for (i=0; i<contentList.count(); i++)
     {
         if (!addMedia(contentList.at(i)))
         {
@@ -228,30 +227,6 @@ void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubun
     connect_signals();
 }
 
-void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id& id)
-{
-    qDebug() << "onTrackAdded id: " << id.c_str();
-    if (!id.empty())
-    {
-        const int index = indexOfTrack(id);
-        Q_EMIT mediaAboutToBeInserted(index, index);
-        // Added one track, so start and end are the same index values
-        Q_EMIT mediaInserted(index, index);
-    }
-}
-
-void AalMediaPlaylistProvider::onTrackRemoved(const core::ubuntu::media::Track::Id& id)
-{
-    qDebug() << "onTrackRemoved id: " << id.c_str();
-    if (!id.empty())
-    {
-        const int index = indexOfTrack(id);
-        Q_EMIT mediaAboutToBeRemoved(index, index);
-        // Removed one track, so start and end are the same index values
-        Q_EMIT mediaRemoved(index, index);
-    }
-}
-
 void AalMediaPlaylistProvider::connect_signals()
 {
     if (!m_hubTrackList) {
@@ -262,19 +237,24 @@ void AalMediaPlaylistProvider::connect_signals()
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
         track_index_lut.push_back(id);
+        // This must come after push_back(id) or indexOfTrack won't find id in the LUT
         const int index = indexOfTrack(id);
         Q_EMIT mediaAboutToBeInserted(index, index);
-        QMetaObject::invokeMethod(this, "onTrackAdded", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
+        qDebug() << "mediaInserted, index: " << index;
+        Q_EMIT mediaInserted(index, index);
     });
 
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
+        const int index = indexOfTrack(id);
+        Q_EMIT mediaAboutToBeRemoved(index, index);
         // Remove the track from the local look-up-table
         const bool ret = removeTrack(id);
         if (!ret)
             qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
 
-        QMetaObject::invokeMethod(this, "onTrackRemoved", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
+        // Removed one track, so start and end are the same index values
+        Q_EMIT mediaRemoved(index, index);
     });
 }
 

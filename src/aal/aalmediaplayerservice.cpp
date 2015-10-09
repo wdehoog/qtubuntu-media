@@ -312,42 +312,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         m_videoOutput->setupSurface();
 }
 
-void AalMediaPlayerService::setMedia(const QMediaContent &media)
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Cannot open media without a valid media-hub player session";
-        return;
-    }
-    if (m_mediaPlaylistProvider == NULL)
-    {
-        qWarning() << "Cannot open media without a valid QMediaPlaylistProvider instance";
-        return;
-    }
-    if (media.isNull())
-    {
-        qWarning() << "Failed to set media source, media must be set." << endl;
-        return;
-    }
-
-    qDebug() << "Setting media to: " << AalUtility::unescape(media);
-    try {
-        // TODO: Change this to use the QUrl from QMediaContent and then call
-        // open_uri(uri) like the other version of setMedia does above
-        m_mediaPlaylistProvider->addMedia(media);
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to set media " << AalUtility::unescape(media) << ": " << e.what();
-        return;
-    }
-
-    // Make sure this player can be controlled by MPRIS if appropriate
-    updateCurrentPlayer();
-
-    if (isVideoSource())
-        m_videoOutput->setupSurface();
-}
-
 void AalMediaPlayerService::play()
 {
     qDebug() << Q_FUNC_INFO;

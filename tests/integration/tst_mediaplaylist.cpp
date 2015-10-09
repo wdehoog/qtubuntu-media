@@ -87,6 +87,37 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
     delete player;
 }
 
+void tst_MediaPlaylist::addLargeListOfTracksAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    // Total number of tracks added will be iterations * 5
+    const uint16_t iterations = 20;
+    QElapsedTimer timer;
+    timer.start();
+    for (uint16_t i=0; i<iterations; i++)
+    {
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+        //waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+        //waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        //waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        //waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        //waitTrackInserted(playlist);
+    }
+    qDebug() << "** addMedia loop took" << timer.elapsed() << "milliseconds";
+
+    QCOMPARE(playlist->mediaCount(), iterations * 5);
+
+    delete playlist;
+    delete player;
+}
+
 void tst_MediaPlaylist::goToNextTrack()
 {
     QMediaPlayer *player = new QMediaPlayer;
@@ -379,7 +410,7 @@ void tst_MediaPlaylist::playReusePlayTrackList()
 template<typename R>
 void tst_MediaPlaylist::wait_for_signal(std::future<R> const& f)
 {
-    while (!is_ready<QMediaContent>(f))
+    while (!is_ready<R>(f))
     {
         // Make sure we don't block the main QEventLoop, which
         // would hinder receiving the currentMediaChanged event above
@@ -400,6 +431,25 @@ void tst_MediaPlaylist::waitTrackChange(QMediaPlaylist *playlist)
             qDebug() << "currentMediaChanged to: " << content.canonicalUrl().toString();
             current_media = content;
             promise.set_value(current_media);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
+
+    wait_for_signal(future);
+}
+
+void tst_MediaPlaylist::waitTrackInserted(QMediaPlaylist *playlist)
+{
+    int index = 0;
+    std::promise<int> promise;
+    std::future<int> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::mediaInserted,
+        [&](int start, int end)
+        {
+            qDebug() << "mediaInserted start: " << start << ", end: " << end;
+            index = end;
+            promise.set_value(index);
             // Make sure the promise is not fulfilled twice
             QObject::disconnect(c);
         });

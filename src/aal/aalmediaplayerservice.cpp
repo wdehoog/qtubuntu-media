@@ -736,6 +736,7 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                     connectSignals();
                 }
 #endif
+                updateCurrentPlayer();
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";

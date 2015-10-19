@@ -54,6 +54,10 @@ std::shared_ptr<Player> TestService::resume_session(Player::PlayerKey)
     return 0;
 }
 
+void TestService::set_current_player(Player::PlayerKey)
+{
+}
+
 void TestService::pause_other_sessions(Player::PlayerKey)
 {
 }

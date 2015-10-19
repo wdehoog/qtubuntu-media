@@ -19,7 +19,6 @@
 #include "aalmediaplayerservice.h"
 #include "aalmediaplaylistcontrol.h"
 #include "tst_mediaplayerplugin.h"
-#include "tst_metadatareadercontrol.h"
 #include "tst_mediaplaylistcontrol.h"
 
 #include <QObject>

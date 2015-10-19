@@ -10,11 +10,9 @@ QT += multimedia opengl quick testlib
 INCLUDEPATH += ../../src/aal \
     /usr/include/qt5/QtMultimedia \
     /usr/include/hybris \
-    /usr/include/libqtubuntu-media-signals \
-    /usr/include/mediascanner-2.0
+    /usr/include/libqtubuntu-media-signals
 LIBS += \
-    -lqtubuntu-media-signals \
-    -lmediascanner-2.0
+    -lqtubuntu-media-signals
 
 HEADERS += \
     ../../src/aal/aalmediaplayercontrol.h \
@@ -43,6 +41,3 @@ SOURCES += \
     ../../src/aal/aalmediaplayerserviceplugin.cpp \
     ../../src/aal/aalvideorenderercontrol.cpp \
     ../../src/aal/aalutility.cpp
-
-# Installs required test media into place where the mediascanner will scan them
-system(cd $$PWD; echo $$PWD; ./setup_mediascanner.sh)

@@ -16,7 +16,6 @@
 
 #include "aalmediaplayerserviceplugin.h"
 #include "aalmediaplayerservice.h"
-#include "aalmetadatareadercontrol.h"
 
 #include <QDebug>
 

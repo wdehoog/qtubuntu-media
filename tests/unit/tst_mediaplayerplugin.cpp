@@ -19,7 +19,6 @@
 #include "aalmediaplayerservice.h"
 #include "aalutility.h"
 #include "tst_mediaplayerplugin.h"
-#include "tst_metadatareadercontrol.h"
 #include "tst_mediaplaylistcontrol.h"
 
 #include <memory>
@@ -144,15 +143,5 @@ int main(int argc, char **argv)
     QCoreApplication app(argc, argv);
     tst_MediaPlayerPlugin mpp;
     tst_MediaPlaylistControl mpc;
-    // FIXME: Disabled for now until we can get metadata from mediascanner without a file
-    // first needing to be indexed. This is required so that the metadata tests will work
-    // in the CI infrastructure.
-    //tst_MetaDataReaderControl mdrc;
-    //return (QTest::qExec(&mpp, argc, argv) && QTest::qExec(&mdrc, argc, argv));
-#if 0
-    return QTest::qExec(&mpc, argc, argv);
-    return QTest::qExec(&mpp, argc, argv);
-#else
-    return 0;
-#endif
+    return (QTest::qExec(&mpp, argc, argv) && QTest::qExec(&mpc, argc, argv));
 }

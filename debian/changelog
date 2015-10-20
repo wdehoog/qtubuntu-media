@@ -1,4 +1,4 @@
-qtubuntu-media (0.7.1+15.10.20151020-0ubuntu1) UNRELEASED; urgency=medium
+qtubuntu-media (0.7.1+15.10.20151020.1-0ubuntu1) wily; urgency=medium
 
   [ Alfonso Sanchez-Beato ]
   * Make sure the that the current player instance is controlable by
@@ -12,7 +12,10 @@ qtubuntu-media (0.7.1+15.10.20151020-0ubuntu1) UNRELEASED; urgency=medium
     control. Also, don't add a track to the tracklist when
     AalMediaPlayerService::setMedia() is called. (LP: #1500859)
 
- -- Alfonso Sanchez-Beato (email Canonical) <alfonso.sanchez-beato@canonical.com>  Tue, 20 Oct 2015 12:35:43 +0200
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Tue, 20 Oct 2015 13:10:40 +0000
 
 qtubuntu-media (0.7.1+15.10.20151019.1-0ubuntu1) wily; urgency=medium
 

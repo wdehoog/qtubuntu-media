@@ -1,4 +1,4 @@
-qtubuntu-media (0.7.1+15.10.20151016-0ubuntu1) UNRELEASED; urgency=medium
+qtubuntu-media (0.7.1+15.10.20151020-0ubuntu1) UNRELEASED; urgency=medium
 
   [ Alfonso Sanchez-Beato ]
   * Make sure the that the current player instance is controlable by
@@ -12,7 +12,18 @@ qtubuntu-media (0.7.1+15.10.20151016-0ubuntu1) UNRELEASED; urgency=medium
     control. Also, don't add a track to the tracklist when
     AalMediaPlayerService::setMedia() is called. (LP: #1500859)
 
- -- Alfonso Sanchez-Beato (email Canonical) <alfonso.sanchez-beato@canonical.com>  Fri, 16 Oct 2015 12:35:43 +0200
+ -- Alfonso Sanchez-Beato (email Canonical) <alfonso.sanchez-beato@canonical.com>  Tue, 20 Oct 2015 12:35:43 +0200
+
+qtubuntu-media (0.7.1+15.10.20151019.1-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Get rid of the unnecessary dependency on libmediascanner. Update
+    mock service interface with changes from media-hub. (LP: #1500859)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Mon, 19 Oct 2015 16:21:01 +0000
 
 qtubuntu-media (0.7.1+15.10.20150903.1-0ubuntu1) wily; urgency=medium
 

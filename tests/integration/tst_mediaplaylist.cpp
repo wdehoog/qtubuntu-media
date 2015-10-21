@@ -188,7 +188,7 @@ void tst_MediaPlaylist::addTwoListsOfTracksAtOnceAndVerify()
     qDebug() << "** First list addMedia(QList) took" << timer.elapsed() << "milliseconds";
 
     waitTrackInserted(playlist);
-    QCOMPARE(playlist->mediaCount(), 3);
+    QCOMPARE(playlist->mediaCount(), 10);
 
     timer.invalidate();
     timer.start();
@@ -196,7 +196,7 @@ void tst_MediaPlaylist::addTwoListsOfTracksAtOnceAndVerify()
     qDebug() << "** Second list addMedia(QList) took" << timer.elapsed() << "milliseconds";
 
     waitTrackInserted(playlist);
-    QCOMPARE(playlist->mediaCount(), 6);
+    QCOMPARE(playlist->mediaCount(), 20);
 
     delete playlist;
     delete player;

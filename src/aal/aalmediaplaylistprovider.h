@@ -59,13 +59,15 @@ private:
     void connect_signals();
     void disconnect_signals();
     bool removeTrack(const core::ubuntu::media::Track::Id &id);
-    int indexOfTrack(const core::ubuntu::media::Track::Id &id) const;
+    // Finds the index of the first tracks that matches id, or the last if reverse is true
+    int indexOfTrack(const core::ubuntu::media::Track::Id &id, bool reverse=false) const;
     const core::ubuntu::media::Track::Id trackOfIndex(int index) const;
 
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;
     std::shared_ptr<core::ubuntu::media::TrackList> m_hubTrackList;
 
     core::Connection m_trackAddedConnection;
+    core::Connection m_tracksAddedConnection;
     core::Connection m_trackRemovedConnection;
 
     // Simple table that holds a list (order is significant and explicit) of

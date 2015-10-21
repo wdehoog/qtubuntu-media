@@ -50,6 +50,8 @@ private Q_SLOTS:
     void addTwoTracksAndVerify();
     void addListOfTracksAndVerify();
     void addLargeListOfTracksAndVerify();
+    void addLargeListOfTracksAtOnceAndVerify();
+    void addTwoListsOfTracksAtOnceAndVerify();
 
     void goToNextTrack();
     void goToPreviousTrack();

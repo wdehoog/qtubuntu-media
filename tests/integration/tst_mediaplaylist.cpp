@@ -94,25 +94,109 @@ void tst_MediaPlaylist::addLargeListOfTracksAndVerify()
     player->setPlaylist(playlist);
 
     // Total number of tracks added will be iterations * 5
-    const uint16_t iterations = 20;
+    const uint16_t iterations = 200;
     QElapsedTimer timer;
     timer.start();
     for (uint16_t i=0; i<iterations; i++)
     {
         playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
-        //waitTrackInserted(playlist);
+        waitTrackInserted(playlist);
         playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
-        //waitTrackInserted(playlist);
+        waitTrackInserted(playlist);
         playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
-        //waitTrackInserted(playlist);
+        waitTrackInserted(playlist);
         playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
-        //waitTrackInserted(playlist);
+        waitTrackInserted(playlist);
         playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
-        //waitTrackInserted(playlist);
+        waitTrackInserted(playlist);
     }
     qDebug() << "** addMedia loop took" << timer.elapsed() << "milliseconds";
 
     QCOMPARE(playlist->mediaCount(), iterations * 5);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::addLargeListOfTracksAtOnceAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    int i;
+    for (i=0; i<200; i++)
+    {
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    }
+
+    QElapsedTimer timer;
+    timer.start();
+    playlist->addMedia(content);
+    qDebug() << "** addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), i * 10);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::addTwoListsOfTracksAtOnceAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content1;
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+
+    QList<QMediaContent> content2;
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+
+    QElapsedTimer timer;
+    timer.start();
+    playlist->addMedia(content1);
+    qDebug() << "** First list addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 3);
+
+    timer.invalidate();
+    timer.start();
+    playlist->addMedia(content2);
+    qDebug() << "** Second list addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 6);
 
     delete playlist;
     delete player;

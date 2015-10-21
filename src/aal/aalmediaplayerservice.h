@@ -119,8 +119,9 @@ public Q_SLOTS:
 
 protected:
     void updateClientSignals();
-    void connect_signals();
-    void disconnect_signals();
+    void connectSignals();
+    void disconnectSignals();
+    void updateCurrentPlayer();
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif
@@ -158,6 +159,7 @@ private:
     const QMediaPlaylist* m_mediaPlaylist;
 
     core::ubuntu::media::Player::PlaybackStatus m_newStatus;
+
     std::string m_sessionUuid;
     bool m_doReattachSession;
 

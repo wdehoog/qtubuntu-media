@@ -1,3 +1,33 @@
+qtubuntu-media (0.7.1+15.10.20151020.1-0ubuntu1) wily; urgency=medium
+
+  [ Alfonso Sanchez-Beato ]
+  * Make sure the that the current player instance is controlable by
+    MPRIS controls if the type of player is appropriate for playlist
+    control. Also, don't add a track to the tracklist when
+    AalMediaPlayerService::setMedia() is called. (LP: #1500859)
+
+  [ Jim Hodapp ]
+  * Make sure the that the current player instance is controlable by
+    MPRIS controls if the type of player is appropriate for playlist
+    control. Also, don't add a track to the tracklist when
+    AalMediaPlayerService::setMedia() is called. (LP: #1500859)
+
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Tue, 20 Oct 2015 13:10:40 +0000
+
+qtubuntu-media (0.7.1+15.10.20151019.1-0ubuntu1) wily; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Get rid of the unnecessary dependency on libmediascanner. Update
+    mock service interface with changes from media-hub. (LP: #1500859)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Mon, 19 Oct 2015 16:21:01 +0000
+
 qtubuntu-media (0.7.1+15.10.20150903.1-0ubuntu1) wily; urgency=medium
 
   [ Alfonso Sanchez-Beato ]

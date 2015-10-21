@@ -813,7 +813,11 @@ void AalMediaPlayerService::updateCurrentPlayer()
 {
         // If this player is a multimedia audioRole, then it should possible to
         // use it for MPRIS control
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     if (audioRole() == QMediaPlayer::MultimediaRole)
+#else
+    if (audioRole() == QAudio::VideoRole)
+#endif
     {
         qDebug() << "Setting player as current player";
         try {

@@ -19,6 +19,7 @@
 
 #include <core/media/player.h>
 
+#include <deque>
 #include <future>
 #include <memory>
 
@@ -35,6 +36,13 @@ class tst_MediaPlaylist : public QObject
 
     AalMediaPlaylistControl *m_mediaPlaylistControl;
 
+public:
+    enum Signals {
+        Unknown,
+        CurrentMediaChanged,
+        MediaInserted
+    };
+
 Q_SIGNALS:
 
 private Q_SLOTS:
@@ -49,6 +57,9 @@ private Q_SLOTS:
 
     void addTwoTracksAndVerify();
     void addListOfTracksAndVerify();
+    void addLargeListOfTracksAndVerify();
+    void addLargeListOfTracksAtOnceAndVerify();
+    void addTwoListsOfTracksAtOnceAndVerify();
 
     void goToNextTrack();
     void goToPreviousTrack();
@@ -66,6 +77,8 @@ private Q_SLOTS:
     void playReusePlayTrackList();
 
 private:
+    std::deque<Signals> m_signalsDeque;
+
     template<typename R>
         bool is_ready(std::future<R> const& f)
         { return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready; }
@@ -74,6 +87,13 @@ private:
         void wait_for_signal(std::future<R> const& f);
 
     void waitTrackChange(QMediaPlaylist *playlist);
+    void waitTrackInserted(QMediaPlaylist *playlist);
+
+    // A generic way of getting a signal registered into m_signalsDeque without blocking
+    // which can be used to later check the order of signals that were emitted. Simply call
+    // this method for each signal that you'd like to check and it'll be pushed onto the deque
+    // when it's fired.
+    void connectSignal(QMediaPlaylist *playlist, Signals signal);
 };
 
 #endif // TST_MEDIAPLAYLIST_H

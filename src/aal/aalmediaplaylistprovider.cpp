@@ -35,6 +35,7 @@ core::Signal<void> the_void;
 AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
     : QMediaPlaylistProvider(parent),
       m_trackAddedConnection(the_void.connect([](){})),
+      m_tracksAddedConnection(the_void.connect([](){})),
       m_trackRemovedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
@@ -49,18 +50,15 @@ AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 
 int AalMediaPlaylistProvider::mediaCount() const
 {
+    qDebug() << Q_FUNC_INFO;
     if (!m_hubTrackList) {
         qWarning() << "Tracklist doesn't exist";
         return 0;
     }
 
-    try {
-        return m_hubTrackList->tracks()->size();
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to get playlist media count: " << e.what();
-        return 0;
-    }
+    qDebug() << "track_index_lut.size(): " << track_index_lut.size();
+
+    return track_index_lut.size();
 }
 
 QMediaContent AalMediaPlaylistProvider::media(int index) const
@@ -101,23 +99,28 @@ bool AalMediaPlaylistProvider::isReadOnly() const
 
 bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (!m_hubTrackList) {
-        qWarning() << "Track list does not exist so can't add a new track!";
+        qWarning() << "Track list does not exist so can't add a new track";
         return false;
     }
 
-    try {
-        const QUrl url = content.canonicalUrl();
-        std::string urlStr = AalUtility::unescape_str(content);
-        qDebug() << "scheme: " << url.scheme();
-        qDebug() << "Contains file://?" << url.toString().contains("file://", Qt::CaseInsensitive);
-        if (url.scheme().isEmpty() and url.scheme() != "file")
-            urlStr = "file://" + AalUtility::unescape_str(content);
+    const QUrl url = content.canonicalUrl();
+    std::string urlStr = AalUtility::unescape_str(content);
+    if (url.scheme().isEmpty() and url.scheme() != "file")
+        urlStr = "file://" + urlStr;
 
-        static const bool make_current = false;
-        m_hubTrackList->add_track_with_uri_at(urlStr, media::TrackList::after_empty_track(), make_current);
+    static const bool make_current = false;
+    const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
+
+    const int newIndex = track_index_lut.size();
+    Q_EMIT mediaAboutToBeInserted(newIndex, newIndex);
+    try {
+        m_hubTrackList->add_track_with_uri_at(urlStr, after_empty_track, make_current);
+    }
+    catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
+    {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
@@ -129,18 +132,32 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 
 bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (contentList.empty())
         return false;
 
-    for (int i=0; i<contentList.count(); i++)
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't add new tracks";
+        return false;
+    }
+
+    media::TrackList::ContainerURI uris;
+    for (const auto mediaContent : contentList)
+        uris.push_back(AalUtility::unescape_str(mediaContent));
+
+    const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
+    const int newIndex = track_index_lut.size();
+    Q_EMIT mediaAboutToBeInserted(newIndex, newIndex + contentList.size());
+    try {
+        m_hubTrackList->add_tracks_with_uri_at(uris, after_empty_track);
+    }
+    catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
     {
-        if (!addMedia(contentList.at(i)))
-        {
-            qWarning() << "Not all tracks were added to the playlist";
-            return false;
-        }
+        qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
+        return false;
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
+        return false;
     }
 
     return true;
@@ -234,30 +251,6 @@ void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubun
     connect_signals();
 }
 
-void AalMediaPlaylistProvider::onTrackAdded(const core::ubuntu::media::Track::Id& id)
-{
-    qDebug() << "onTrackAdded id: " << id.c_str();
-    if (!id.empty())
-    {
-        const int index = indexOfTrack(id);
-        Q_EMIT mediaAboutToBeInserted(index, index);
-        // Added one track, so start and end are the same index values
-        Q_EMIT mediaInserted(index, index);
-    }
-}
-
-void AalMediaPlaylistProvider::onTrackRemoved(const core::ubuntu::media::Track::Id& id)
-{
-    qDebug() << "onTrackRemoved id: " << id.c_str();
-    if (!id.empty())
-    {
-        const int index = indexOfTrack(id);
-        Q_EMIT mediaAboutToBeRemoved(index, index);
-        // Removed one track, so start and end are the same index values
-        Q_EMIT mediaRemoved(index, index);
-    }
-}
-
 void AalMediaPlaylistProvider::connect_signals()
 {
     if (!m_hubTrackList) {
@@ -268,19 +261,50 @@ void AalMediaPlaylistProvider::connect_signals()
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
         track_index_lut.push_back(id);
+        // This must come after push_back(id) or indexOfTrack won't find id in the LUT
         const int index = indexOfTrack(id);
         Q_EMIT mediaAboutToBeInserted(index, index);
-        QMetaObject::invokeMethod(this, "onTrackAdded", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
+        qDebug() << "mediaInserted, index: " << index;
+        Q_EMIT mediaInserted(index, index);
+    });
+
+    m_tracksAddedConnection = m_hubTrackList->on_tracks_added().connect([this](const media::TrackList::ContainerURI& tracks)
+    {
+        // TODO: Fill in on_tracks_added here
+        qDebug() << "on_tracks_added(), tracks.size()" << tracks.size();
+
+        int i =0;
+        for (const media::Track::Id& id : tracks)
+        {
+            ++i;
+            track_index_lut.push_back(id);
+        }
+        qDebug() << "Inserted " << i << " tracks";
+
+        // This must come after push_back(id) or indexOfTrack won't find id in the LUT
+        const int first_index = indexOfTrack(tracks.front());
+        int last_index = 0;
+        if (tracks.size() < 2)
+            last_index = indexOfTrack(tracks.front());
+        else
+            last_index = indexOfTrack(*(--tracks.end()), true);
+
+        Q_EMIT mediaAboutToBeInserted(first_index, last_index);
+        qDebug() << "mediaInserted, first_index: " << first_index << " last_index: " << last_index;
+        Q_EMIT mediaInserted(first_index, last_index);
     });
 
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
+        const int index = indexOfTrack(id);
+        Q_EMIT mediaAboutToBeRemoved(index, index);
         // Remove the track from the local look-up-table
         const bool ret = removeTrack(id);
         if (!ret)
             qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
 
-        QMetaObject::invokeMethod(this, "onTrackRemoved", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
+        // Removed one track, so start and end are the same index values
+        Q_EMIT mediaRemoved(index, index);
     });
 }
 
@@ -290,6 +314,9 @@ void AalMediaPlaylistProvider::disconnect_signals()
 
     if (m_trackRemovedConnection.is_connected())
         m_trackRemovedConnection.disconnect();
+
+    if (m_tracksAddedConnection.is_connected())
+        m_tracksAddedConnection.disconnect();
 
     if (m_trackAddedConnection.is_connected())
         m_trackAddedConnection.disconnect();
@@ -310,12 +337,22 @@ bool AalMediaPlaylistProvider::removeTrack(const core::ubuntu::media::Track::Id 
     return true;
 }
 
-int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id) const
+int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id, bool reverse) const
 {
     if (id.empty() || track_index_lut.size() == 0)
         return -1;
 
-    const auto trackPos = std::find(track_index_lut.begin(), track_index_lut.end(), id);
+    std::vector<media::Track::Id>::const_iterator trackPos;
+    if (not reverse)
+    {
+        trackPos = std::find(track_index_lut.begin(), track_index_lut.end(), id);
+    }
+    else
+    {
+        const std::vector<media::Track::Id> searchTerm = {id};
+        trackPos = std::find_end(track_index_lut.begin(), track_index_lut.end(), searchTerm.begin(), searchTerm.end());
+    }
+
     if (trackPos == track_index_lut.end())
     {
         qWarning() << "Failed to look up index for non-existent track id: " << id.c_str();

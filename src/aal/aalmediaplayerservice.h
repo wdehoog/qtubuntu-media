@@ -78,7 +78,6 @@ public:
     void setAudioRole(QMediaPlayer::AudioRole audioRole);
 
     void setMedia(const QUrl &url);
-    void setMedia(const QMediaContent &media);
     void setMediaPlaylist(const QMediaPlaylist& playlist);
     void play();
     void pause();
@@ -135,6 +134,8 @@ private:
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
 
     void onError(const core::ubuntu::media::Player::Error &error);
+
+    inline QString playbackStatusStr(const core::ubuntu::media::Player::PlaybackStatus &status);
 
     std::shared_ptr<core::ubuntu::media::Service> m_hubService;
     std::shared_ptr<core::ubuntu::media::Player> m_hubPlayerSession;

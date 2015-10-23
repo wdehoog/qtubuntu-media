@@ -87,6 +87,121 @@ void tst_MediaPlaylist::addListOfTracksAndVerify()
     delete player;
 }
 
+void tst_MediaPlaylist::addLargeListOfTracksAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    // Total number of tracks added will be iterations * 5
+    const uint16_t iterations = 20;
+    QElapsedTimer timer;
+    timer.start();
+    for (uint16_t i=0; i<iterations; i++)
+    {
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+        waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+        waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        waitTrackInserted(playlist);
+        playlist->addMedia(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        waitTrackInserted(playlist);
+    }
+    qDebug() << "** addMedia loop took" << timer.elapsed() << "milliseconds";
+
+    QCOMPARE(playlist->mediaCount(), iterations * 5);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::addLargeListOfTracksAtOnceAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content;
+    int i;
+    for (i=0; i<20; i++)
+    {
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+        content.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    }
+
+    QElapsedTimer timer;
+    timer.start();
+    playlist->addMedia(content);
+    qDebug() << "** addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), i * 10);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::addTwoListsOfTracksAtOnceAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content1;
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+
+    QList<QMediaContent> content2;
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile.mp4")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile1.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile2.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile3.ogg")));
+    content2.push_back(QUrl(QFINDTESTDATA("testdata/testfile4.ogg")));
+
+    QElapsedTimer timer;
+    timer.start();
+    playlist->addMedia(content1);
+    qDebug() << "** First list addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 10);
+
+    timer.invalidate();
+    timer.start();
+    playlist->addMedia(content2);
+    qDebug() << "** Second list addMedia(QList) took" << timer.elapsed() << "milliseconds";
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 20);
+
+    delete playlist;
+    delete player;
+}
+
 void tst_MediaPlaylist::goToNextTrack()
 {
     QMediaPlayer *player = new QMediaPlayer;
@@ -188,6 +303,7 @@ void tst_MediaPlaylist::removeTrackAndVerify()
     const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
     playlist->addMedia(video);
 
+    waitTrackInserted(playlist);
     QCOMPARE(playlist->mediaCount(), 2);
 
     playlist->removeMedia(0);
@@ -213,6 +329,7 @@ void tst_MediaPlaylist::verifyCurrentIndex()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     playlist->addMedia(content);
 
+    waitTrackInserted(playlist);
     QCOMPARE(playlist->mediaCount(), 3);
 
     qDebug() << "Setting current index to be 1";
@@ -243,8 +360,7 @@ void tst_MediaPlaylist::verifyNextIndex()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
     playlist->addMedia(content);
 
-    QCoreApplication::processEvents();
-
+    waitTrackInserted(playlist);
     QCOMPARE(playlist->mediaCount(), 6);
 
     QCOMPARE(playlist->nextIndex(1), 1);
@@ -272,8 +388,7 @@ void tst_MediaPlaylist::verifyPreviousIndex()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
     playlist->addMedia(content);
 
-    QCoreApplication::processEvents();
-
+    waitTrackInserted(playlist);
     QCOMPARE(playlist->mediaCount(), 6);
 
     QCOMPARE(playlist->previousIndex(1), 5);
@@ -293,16 +408,20 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
+    connectSignal(playlist, Signals::MediaInserted);
+
     QList<QMediaContent> content;
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     playlist->addMedia(content);
 
+    // Wait until the first track is set as the current one
+    waitTrackChange(playlist);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 2);
 
     playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
 
-    qDebug() << "Call player->play()";
     player->play();
 
     // Wait for the currentMediaChanged signal to be emited
@@ -320,17 +439,19 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
+    connectSignal(playlist, Signals::MediaInserted);
+
     QList<QMediaContent> content;
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
     playlist->addMedia(content);
 
+    // Wait until the first track is set as the current one
+    waitTrackChange(playlist);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 2);
 
     playlist->setPlaybackMode(QMediaPlaylist::Sequential);
-
-    // Wait until the first track is set as the current one
-    waitTrackChange(playlist);
 
     player->play();
 
@@ -354,8 +475,11 @@ void tst_MediaPlaylist::playReusePlayTrackList()
 
     for (int i = 0; i < 5; ++i) {
         playlist->addMedia(audio);
+        waitTrackInserted(playlist);
         playlist->addMedia(video);
+        waitTrackInserted(playlist);
         playlist->addMedia(audio);
+        waitTrackInserted(playlist);
         QCOMPARE(playlist->mediaCount(), 3);
 
         player->play();
@@ -379,7 +503,7 @@ void tst_MediaPlaylist::playReusePlayTrackList()
 template<typename R>
 void tst_MediaPlaylist::wait_for_signal(std::future<R> const& f)
 {
-    while (!is_ready<QMediaContent>(f))
+    while (!is_ready<R>(f))
     {
         // Make sure we don't block the main QEventLoop, which
         // would hinder receiving the currentMediaChanged event above
@@ -405,6 +529,57 @@ void tst_MediaPlaylist::waitTrackChange(QMediaPlaylist *playlist)
         });
 
     wait_for_signal(future);
+}
+
+void tst_MediaPlaylist::waitTrackInserted(QMediaPlaylist *playlist)
+{
+    int index = 0;
+    std::promise<int> promise;
+    std::future<int> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::mediaInserted,
+        [&](int start, int end)
+        {
+            qDebug() << "mediaInserted start: " << start << ", end: " << end;
+            index = end;
+            promise.set_value(index);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
+
+    wait_for_signal(future);
+}
+
+void tst_MediaPlaylist::connectSignal(QMediaPlaylist *playlist, Signals signal)
+{
+    switch (signal)
+    {
+        case Signals::Unknown:
+            break;
+        case Signals::CurrentMediaChanged:
+        {
+            connect(playlist, &QMediaPlaylist::currentMediaChanged, [&](const QMediaContent& content)
+            {
+                (void) content;
+                qDebug() << "Pushing CurrentMediaChanged onto m_signalsDeque";
+                m_signalsDeque.push_back(signal);
+            });
+            break;
+        }
+        case Signals::MediaInserted:
+        {
+            connect(playlist, &QMediaPlaylist::mediaInserted, [&](int start, int end)
+            {
+                (void) start;
+                (void) end;
+                qDebug() << "Pushing MediaInserted onto m_signalsDeque";
+                m_signalsDeque.push_back(signal);
+            });
+            break;
+        }
+        default:
+            qWarning() << "Unknown signal type, can't add to queue:" << signal;
+    }
 }
 
 QTEST_GUILESS_MAIN(tst_MediaPlaylist)

@@ -9,7 +9,7 @@ Build-Depends: debhelper (>= 9),
                libgl1-mesa-dev | libgl-dev,
                libgles2-mesa-dev,
                libhybris-dev (>= 0.1.0+git20131207+e452e83-0ubuntu13),
-               libmedia-hub-dev (>= 3.2.0),
+               libmedia-hub-dev (>= 3.3.0),
                libpulse-dev,
                libqt5opengl5-dev,
                libqtubuntu-media-signals-dev (>= 0.3+15.04.20150618.1-0ubuntu1),
@@ -19,15 +19,6 @@ Build-Depends: debhelper (>= 9),
                qtbase5-dev,
                qtdeclarative5-dev,
                qtmultimedia5-dev,
-               libmediascanner-2.0-dev,
-# Since we need mediascanner2.0 to start while building this package, we
-# add it as a build-dep.
-               mediascanner2.0,
-# Since we need media-hub to start while building this package, we
-# add it as a build-dep.
-               media-hub,
-               libmedia-hub-common3,
-               libmedia-hub-client3,
 Standards-Version: 3.9.4
 # If you don't have commit rights to lp:qtubuntu-media but need to upload
 # packaging changes, just go ahead.  The developers will notice and sync
@@ -43,8 +34,7 @@ Replaces: mediaplayerplugin-aal
 Provides: mediaplayerplugin-aal
 Depends: ${misc:Depends},
          ${shlibs:Depends},
-         qtvideonode-plugin,
-         libmediascanner-2.0-3
+         qtvideonode-plugin
 Description: QtMultimedia plugin for AAL+
  Video and audio playback plugin that interfaces Qt with
  the hybris media backend on Android.

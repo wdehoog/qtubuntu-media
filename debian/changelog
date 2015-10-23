@@ -1,3 +1,19 @@
+qtubuntu-media (0.7.1+15.04.20151014-0ubuntu1) vivid; urgency=medium
+
+  [ Alfonso Sanchez-Beato ]
+  * Make sure the that the current player instance is controlable by
+    MPRIS controls if the type of player is appropriate for playlist
+    control. Also, don't add a track to the tracklist when
+    AalMediaPlayerService::setMedia() is called. (LP: #1500859)
+
+  [ Jim Hodapp ]
+  * Make sure the that the current player instance is controlable by
+    MPRIS controls if the type of player is appropriate for playlist
+    control. Also, don't add a track to the tracklist when
+    AalMediaPlayerService::setMedia() is called. (LP: #1500859)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 14 Oct 2015 20:58:46 +0000
+
 qtubuntu-media (0.7.1+15.04.20150828-0ubuntu1) vivid; urgency=medium
 
   [ Jim Hodapp ]

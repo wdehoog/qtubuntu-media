@@ -117,6 +117,11 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
     try {
         m_hubTrackList->add_track_with_uri_at(urlStr, after_empty_track, make_current);
     }
+    catch (const media::TrackList::InsufficientPermissionsToAddTrack &e)
+    {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
+    }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
         return false;
@@ -144,6 +149,11 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
     Q_EMIT mediaAboutToBeInserted(newIndex, newIndex + contentList.size());
     try {
         m_hubTrackList->add_tracks_with_uri_at(uris, after_empty_track);
+    }
+    catch (const media::TrackList::InsufficientPermissionsToAddTrack &e)
+    {
+        qWarning() << "Failed to add tracks '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
@@ -334,7 +344,9 @@ int AalMediaPlaylistProvider::indexOfTrack(const media::Track::Id &id, bool reve
 
     std::vector<media::Track::Id>::const_iterator trackPos;
     if (not reverse)
+    {
         trackPos = std::find(track_index_lut.begin(), track_index_lut.end(), id);
+    }
     else
     {
         const std::vector<media::Track::Id> searchTerm = {id};

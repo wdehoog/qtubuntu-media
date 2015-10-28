@@ -25,6 +25,7 @@
 
 #include <core/connection.h>
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -74,6 +75,10 @@ private:
     // Track::Id's for a lookup. track_index_lut.at[x] gives the corresponding
     // Track::Id for index x, and vice-versa.
     std::vector<core::ubuntu::media::Track::Id> track_index_lut;
+
+    // Did the client perform an insertTrack() (as opposed to an addTrack()) operation?
+    // If yes, the index will be zero or greater, if not index will be -1;
+    std::atomic<int> m_insertTrackIndex;
 };
 
 QT_END_NAMESPACE

@@ -36,7 +36,8 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
     : QMediaPlaylistProvider(parent),
       m_trackAddedConnection(the_void.connect([](){})),
       m_tracksAddedConnection(the_void.connect([](){})),
-      m_trackRemovedConnection(the_void.connect([](){}))
+      m_trackRemovedConnection(the_void.connect([](){})),
+      m_insertTrackIndex(-1)
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -165,12 +166,52 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
 
 bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &content)
 {
-    (void) index;
-    (void) content;
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't add a new track";
+        return false;
+    }
 
-    qWarning() << Q_FUNC_INFO << " - Not yet implemented";
+    if (index < 0 or index >= static_cast<int>(track_index_lut.size())) {
+        qWarning() << Q_FUNC_INFO << "index is out of valid range";
+        return false;
+    }
 
-    return false;
+    const QUrl url = content.canonicalUrl();
+    std::string urlStr = AalUtility::unescape_str(content);
+    if (url.scheme().isEmpty() and url.scheme() != "file")
+        urlStr = "file://" + urlStr;
+
+    const media::Track::Id after_this_track = trackOfIndex(index);
+    if (after_this_track.empty()) {
+        qWarning() << Q_FUNC_INFO
+            << "failed to insertMedia due to failure to look up correct insertion position";
+        return false;
+    }
+
+    qDebug() << "after_this_track:" << after_this_track.c_str();
+
+    static const bool make_current = false;
+    const int newIndex = index + 1;
+    if (newIndex >= static_cast<int>(track_index_lut.size())) {
+        qWarning() << Q_FUNC_INFO << "newIndex is greater than track_index_lut.size()";
+        return false;
+    }
+    Q_EMIT mediaAboutToBeInserted(newIndex, newIndex);
+    m_insertTrackIndex = newIndex;
+    try {
+        m_hubTrackList->add_track_with_uri_at(urlStr, after_this_track, make_current);
+    }
+    catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
+    {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        return false;
+    }
+
+    return true;
 }
 
 bool AalMediaPlaylistProvider::insertMedia(int index, const QList<QMediaContent> &content)
@@ -260,7 +301,28 @@ void AalMediaPlaylistProvider::connect_signals()
 
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {
-        track_index_lut.push_back(id);
+        // If m_insertTrackIndex >= 0, then the user requested to insert a track and we don't want to push
+        // this track onto the back of the track_index_lut.
+        // Otherwise the user requested to add a track which automatically gets pushed onto the back.
+        if (m_insertTrackIndex >= 0)
+        {
+            const media::Track::Id after_track_id = trackOfIndex(m_insertTrackIndex);
+            qDebug() << "Inserting track into specific position after track id:" << after_track_id.c_str();
+            const auto trackPos = std::find(track_index_lut.begin(), track_index_lut.end(), after_track_id);
+            if (trackPos != track_index_lut.end())
+                track_index_lut.insert(trackPos - 1, id);
+            else
+                qWarning() << "Failed to find insertion point for non-existent track id: " << after_track_id.c_str();
+
+            // No longer doing an insert track, so reset flag
+            m_insertTrackIndex = -1;
+        }
+        else
+        {
+            track_index_lut.push_back(id);
+            qDebug() << "Added track id:" << id.c_str();
+        }
+
         // This must come after push_back(id) or indexOfTrack won't find id in the LUT
         const int index = indexOfTrack(id);
         Q_EMIT mediaAboutToBeInserted(index, index);
@@ -270,9 +332,6 @@ void AalMediaPlaylistProvider::connect_signals()
 
     m_tracksAddedConnection = m_hubTrackList->on_tracks_added().connect([this](const media::TrackList::ContainerURI& tracks)
     {
-        // TODO: Fill in on_tracks_added here
-        qDebug() << "on_tracks_added(), tracks.size()" << tracks.size();
-
         int i =0;
         for (const media::Track::Id& id : tracks)
         {

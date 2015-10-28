@@ -56,6 +56,8 @@ private Q_SLOTS:
     void constructDestroyRepeat();
 
     void addTwoTracksAndVerify();
+    void insertTracksAtPositionAndVerify();
+    void moveTrackAndVerify();
     void addListOfTracksAndVerify();
     void addLargeListOfTracksAndVerify();
     void addLargeListOfTracksAtOnceAndVerify();
@@ -88,6 +90,7 @@ private:
 
     void waitTrackChange(QMediaPlaylist *playlist);
     void waitTrackInserted(QMediaPlaylist *playlist);
+    void waitTrackRemoved(QMediaPlaylist *playlist);
 
     // A generic way of getting a signal registered into m_signalsDeque without blocking
     // which can be used to later check the order of signals that were emitted. Simply call

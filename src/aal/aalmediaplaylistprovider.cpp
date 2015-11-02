@@ -51,7 +51,6 @@ AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 
 int AalMediaPlaylistProvider::mediaCount() const
 {
-    qDebug() << Q_FUNC_INFO;
     if (!m_hubTrackList) {
         qWarning() << "Tracklist doesn't exist";
         return 0;
@@ -100,6 +99,8 @@ bool AalMediaPlaylistProvider::isReadOnly() const
 
 bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 {
+    qDebug() << Q_FUNC_INFO;
+
     if (!m_hubTrackList) {
         qWarning() << "Track list does not exist so can't add a new track";
         return false;
@@ -116,6 +117,7 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
     const int newIndex = track_index_lut.size();
     Q_EMIT mediaAboutToBeInserted(newIndex, newIndex);
     try {
+        qDebug() << "Adding track " << urlStr.c_str();
         m_hubTrackList->add_track_with_uri_at(urlStr, after_empty_track, make_current);
     }
     catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
@@ -133,6 +135,8 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 
 bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
 {
+    qDebug() << Q_FUNC_INFO << " num " << contentList.size();
+
     if (contentList.empty())
         return false;
 
@@ -142,8 +146,10 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
     }
 
     media::TrackList::ContainerURI uris;
-    for (const auto mediaContent : contentList)
+    for (const auto mediaContent : contentList) {
+        qDebug() << "Adding track " << AalUtility::unescape(mediaContent).toString();
         uris.push_back(AalUtility::unescape_str(mediaContent));
+    }
 
     const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
     const int newIndex = track_index_lut.size();
@@ -289,6 +295,8 @@ void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubun
         qWarning() << "FATAL: Failed to retrieve the current player session TrackList: " << e.what();
     }
 
+    /* Disconnect first to avoid duplicated calls */
+    disconnect_signals();
     connect_signals();
 }
 
@@ -298,6 +306,8 @@ void AalMediaPlaylistProvider::connect_signals()
         qWarning() << "Can't connect to track list signals as it doesn't exist";
         return;
     }
+
+    qDebug() << Q_FUNC_INFO;
 
     m_trackAddedConnection = m_hubTrackList->on_track_added().connect([this](const media::Track::Id& id)
     {

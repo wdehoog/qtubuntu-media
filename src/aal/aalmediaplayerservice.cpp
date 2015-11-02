@@ -278,11 +278,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         qWarning() << "Cannot open uri without a valid media-hub player session";
         return;
     }
-    if (url.isEmpty())
-    {
-        qWarning() << "Failed to set media source, url must be set." << endl;
-        return;
-    }
 
     // This is critical to allowing a different video source to be able to play correctly
     // if another video is already playing in the same AalMediaPlayerService instance
@@ -293,8 +288,12 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     }
 
     qDebug() << "Setting media to: " << url;
+
+    if (m_mediaPlaylistProvider && url.isEmpty())
+        m_mediaPlaylistProvider->clear();
+
     const media::Track::UriType uri(url.url().toStdString());
-    if (m_mediaPlaylistProvider == nullptr)
+    if (m_mediaPlaylistProvider == nullptr || m_mediaPlaylistProvider->mediaCount() == 0)
     {
         try {
             m_hubPlayerSession->open_uri(uri);

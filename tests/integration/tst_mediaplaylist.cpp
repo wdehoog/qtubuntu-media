@@ -490,7 +490,10 @@ void tst_MediaPlaylist::verifyPlaybackModeCurrentItemInLoop()
     Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 2);
 
-    playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+    waitPlaybackModeChange(playlist, [playlist]()
+        {
+            playlist->setPlaybackMode(QMediaPlaylist::CurrentItemInLoop);
+        });
 
     player->play();
 
@@ -521,7 +524,10 @@ void tst_MediaPlaylist::verifyPlaybackModeSequential()
     Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 2);
 
-    playlist->setPlaybackMode(QMediaPlaylist::Sequential);
+    waitPlaybackModeChange(playlist, [playlist]()
+        {
+            playlist->setPlaybackMode(QMediaPlaylist::Sequential);
+        });
 
     player->play();
 
@@ -640,6 +646,28 @@ void tst_MediaPlaylist::waitTrackRemoved(QMediaPlaylist *playlist)
             // Make sure the promise is not fulfilled twice
             QObject::disconnect(c);
         });
+
+    wait_for_signal(future);
+}
+
+void tst_MediaPlaylist::waitPlaybackModeChange(QMediaPlaylist *playlist,
+                                               const std::function<void()>& action)
+{
+    QMediaPlaylist::PlaybackMode current_mode;
+    std::promise<QMediaPlaylist::PlaybackMode> promise;
+    std::future<QMediaPlaylist::PlaybackMode> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::playbackModeChanged,
+        [&](QMediaPlaylist::PlaybackMode mode)
+        {
+            qDebug() << "playbackModeChanged to: " << mode;
+            current_mode = mode;
+            promise.set_value(current_mode);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
+
+    action();
 
     wait_for_signal(future);
 }

@@ -237,6 +237,8 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
             qWarning() << "Unknown playback mode: " << mode;
             m_hubPlayerSession->shuffle() = false;
     }
+
+    Q_EMIT playbackModeChanged(mode);
 }
 
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)

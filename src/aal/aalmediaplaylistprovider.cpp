@@ -40,8 +40,7 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackRemovedConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1),
       m_moveTrackStartIndex(-1),
-      m_moveTrackDestIndex(-1),
-      m_clearingTrackList(false)
+      m_moveTrackDestIndex(-1)
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -316,14 +315,6 @@ bool AalMediaPlaylistProvider::removeMedia(int pos)
         return false;
     }
 
-    Q_EMIT mediaAboutToBeRemoved(pos, pos);
-    // Remove the track from the local look-up-table
-    const bool ret = removeTrack(id);
-    if (!ret)
-    {
-        qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
-        return false;
-    }
 
     return true;
 }
@@ -357,10 +348,6 @@ bool AalMediaPlaylistProvider::clear()
         qWarning() << "Failed to clear the playlist: " << e.what();
         return false;
     }
-
-    m_clearingTrackList = true;
-    Q_EMIT mediaAboutToBeRemoved(0, track_index_lut.size() - 1);
-    track_index_lut.clear();
 
     return true;
 }
@@ -461,17 +448,15 @@ void AalMediaPlaylistProvider::connect_signals()
 
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
-        if (m_clearingTrackList)
-        {
-            Q_EMIT mediaRemoved(0, track_index_lut.size() - 1);
-            m_clearingTrackList = false;
-        }
-        else
-        {
-            const int index = indexOfTrack(id);
-            // Removed one track, so start and end are the same index values
-            Q_EMIT mediaRemoved(index, index);
-        }
+        const int index = indexOfTrack(id);
+        Q_EMIT mediaAboutToBeRemoved(index, index);
+        // Remove the track from the local look-up-table
+        const bool ret = removeTrack(id);
+        if (!ret)
+            qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
+
+        // Removed one track, so start and end are the same index values
+        Q_EMIT mediaRemoved(index, index);
     });
 }
 

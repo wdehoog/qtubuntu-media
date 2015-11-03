@@ -109,6 +109,7 @@ void tst_MediaPlaylist::moveTrackAndVerify()
     QMediaPlaylist *playlist = new QMediaPlaylist;
     player->setPlaylist(playlist);
 
+
     QElapsedTimer timer;
     timer.start();
     QList<QMediaContent> content;
@@ -118,29 +119,21 @@ void tst_MediaPlaylist::moveTrackAndVerify()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
     const QMediaContent newLastTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
     content.push_back(newLastTrack);
-    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    const QMediaContent insertedTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(insertedTrack);
     playlist->addMedia(content);
     waitTrackInserted(playlist);
     qDebug() << "** addMedia took" << timer.elapsed() << "milliseconds";
 
+    connectSignal(playlist, Signals::MediaInserted);
+
     QCOMPARE(playlist->mediaCount(), 6);
 
-    // Remove our track of interest
-    playlist->removeMedia(5);
+    playlist->moveMedia(5, 2);
+
     waitTrackRemoved(playlist);
-    QCOMPARE(playlist->mediaCount(), 5);
-
-    // "Move" it by inserting it where we want it
-    const QMediaContent insertedTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
-    playlist->insertMedia(2, insertedTrack);
-    waitTrackInserted(playlist);
-
-    qDebug() << "playlist->media(2):" << playlist->media(2).canonicalUrl();
-    qDebug() << "insertedTrack:" << insertedTrack.canonicalUrl();
-    QCOMPARE(playlist->media(2), insertedTrack);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 6);
-
-    QCOMPARE(playlist->media(5), newLastTrack);
 
     delete playlist;
     delete player;
@@ -568,7 +561,12 @@ void tst_MediaPlaylist::playReusePlayTrackList()
         player->stop();
         QCoreApplication::processEvents();
 
+        connectSignal(playlist, Signals::MediaInserted);
         playlist->clear();
+
+        waitTrackRemoved(playlist);
+        Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
+        Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
 
         QCOMPARE(playlist->mediaCount(), 0);
     }
@@ -669,6 +667,16 @@ void tst_MediaPlaylist::connectSignal(QMediaPlaylist *playlist, Signals signal)
                 (void) start;
                 (void) end;
                 qDebug() << "Pushing MediaInserted onto m_signalsDeque";
+                m_signalsDeque.push_back(signal);
+            });
+            break;
+        }
+        case Signals::MediaRemoved:
+        {
+            connect(playlist, &QMediaPlaylist::mediaRemoved, [&](int index)
+            {
+                (void) index;
+                qDebug() << "Pushing MediaRemoved onto m_signalsDeque";
                 m_signalsDeque.push_back(signal);
             });
             break;

@@ -47,10 +47,13 @@ public:
 
     bool isReadOnly() const;
 
+    bool testFunction();
+
     bool addMedia(const QMediaContent &content);
     bool addMedia(const QList<QMediaContent> &contentList);
     bool insertMedia(int index, const QMediaContent &content);
     bool insertMedia(int index, const QList<QMediaContent> &content);
+    bool moveMedia(int from, int to);
     bool removeMedia(int pos);
     bool removeMedia(int start, int end);
     bool clear();
@@ -69,6 +72,7 @@ private:
 
     core::Connection m_trackAddedConnection;
     core::Connection m_tracksAddedConnection;
+    core::Connection m_trackMovedConnection;
     core::Connection m_trackRemovedConnection;
 
     // Simple table that holds a list (order is significant and explicit) of
@@ -79,6 +83,10 @@ private:
     // Did the client perform an insertTrack() (as opposed to an addTrack()) operation?
     // If yes, the index will be zero or greater, if not index will be -1;
     std::atomic<int> m_insertTrackIndex;
+    // Stores the starting index of the moveTrack request
+    std::atomic<int> m_moveTrackStartIndex;
+    // Stores the destination index of the moveTrack request
+    std::atomic<int> m_moveTrackDestIndex;
 };
 
 QT_END_NAMESPACE

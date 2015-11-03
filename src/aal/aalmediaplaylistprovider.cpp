@@ -36,8 +36,11 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
     : QMediaPlaylistProvider(parent),
       m_trackAddedConnection(the_void.connect([](){})),
       m_tracksAddedConnection(the_void.connect([](){})),
+      m_trackMovedConnection(the_void.connect([](){})),
       m_trackRemovedConnection(the_void.connect([](){})),
-      m_insertTrackIndex(-1)
+      m_insertTrackIndex(-1),
+      m_moveTrackStartIndex(-1),
+      m_moveTrackDestIndex(-1)
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -224,6 +227,69 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QList<QMediaContent>
     return false;
 }
 
+bool AalMediaPlaylistProvider::moveMedia(int from, int to)
+{
+    if (!m_hubTrackList) {
+        qWarning() << "Track list does not exist so can't add a new track";
+        return false;
+    }
+
+    if (from < 0 or from >= static_cast<int>(track_index_lut.size())) {
+        qWarning() << "Failed to moveMedia(), index 'from' is out of valid range";
+        return false;
+    }
+
+    if (to < 0 or to >= static_cast<int>(track_index_lut.size())) {
+        qWarning() << "Failed to moveMedia(), index 'to' is out of valid range";
+        return false;
+    }
+
+    if (from == to)
+        return true;
+
+    m_moveTrackStartIndex = from;
+    m_moveTrackDestIndex = to;
+
+    const media::Track::Id fromTrack = trackOfIndex(from);
+    if (fromTrack.empty()) {
+        qWarning() << Q_FUNC_INFO
+            << "failed to moveMedia due to failure to look up correct track id to move";
+        return false;
+    }
+
+    const media::Track::Id toTrack = trackOfIndex(to);
+    if (toTrack.empty()) {
+        qWarning() << Q_FUNC_INFO
+            << "failed to moveMedia due to failure to look up correct track id to move to";
+        return false;
+    }
+
+    try {
+        m_hubTrackList->move_track(fromTrack, toTrack);
+    }
+    catch (const std::runtime_error &e) {
+        qWarning() << "Failed to move track: " << e.what();
+        return false;
+    }
+
+    // Update the locally cached tracklist
+    Q_EMIT mediaAboutToBeRemoved(from, from);
+    std::vector<media::Track::Id>::const_iterator eraseIt = std::find(track_index_lut.begin(), track_index_lut.end(), fromTrack);
+    if (eraseIt != track_index_lut.end())
+        track_index_lut.erase(eraseIt);
+    else
+        return false;
+
+    Q_EMIT mediaAboutToBeInserted(to, to);
+    const std::vector<media::Track::Id>::const_iterator insertIt = std::find(track_index_lut.begin(), track_index_lut.end(), toTrack);
+    if (insertIt != track_index_lut.end())
+        track_index_lut.insert(insertIt, fromTrack);
+    else
+        return false;
+
+    return true;
+}
+
 bool AalMediaPlaylistProvider::removeMedia(int pos)
 {
     if (!m_hubTrackList) {
@@ -243,11 +309,21 @@ bool AalMediaPlaylistProvider::removeMedia(int pos)
         return false;
     }
 
+    Q_EMIT mediaAboutToBeRemoved(pos, pos);
+    // Remove the track from the local look-up-table
+    const bool ret = removeTrack(id);
+    if (!ret)
+    {
+        qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
+        return false;
+    }
+
     return true;
 }
 
 bool AalMediaPlaylistProvider::removeMedia(int start, int end)
 {
+    qWarning() << Q_FUNC_INFO;
     for (int i=start; i<=end; i++)
     {
         if (!removeMedia(i))
@@ -274,6 +350,9 @@ bool AalMediaPlaylistProvider::clear()
         qWarning() << "Failed to clear the playlist: " << e.what();
         return false;
     }
+
+    Q_EMIT mediaAboutToBeRemoved(0, track_index_lut.size() - 1);
+    track_index_lut.clear();
 
     return true;
 }
@@ -332,7 +411,7 @@ void AalMediaPlaylistProvider::connect_signals()
 
     m_tracksAddedConnection = m_hubTrackList->on_tracks_added().connect([this](const media::TrackList::ContainerURI& tracks)
     {
-        int i =0;
+        int i = 0;
         for (const media::Track::Id& id : tracks)
         {
             ++i;
@@ -353,14 +432,24 @@ void AalMediaPlaylistProvider::connect_signals()
         Q_EMIT mediaInserted(first_index, last_index);
     });
 
+    m_trackMovedConnection = m_hubTrackList->on_track_moved().connect([this](const media::Track::Id& id)
+    {
+        Q_UNUSED(id);
+        if (m_moveTrackStartIndex > 0 and m_moveTrackStartIndex < static_cast<int>(track_index_lut.size())
+                and m_moveTrackDestIndex > 0 and m_moveTrackDestIndex < static_cast<int>(track_index_lut.size()))
+        {
+            Q_EMIT mediaRemoved(m_moveTrackStartIndex, m_moveTrackStartIndex);
+            Q_EMIT mediaInserted(m_moveTrackDestIndex, m_moveTrackDestIndex);
+        }
+
+        // Reset for another moveTrack request
+        m_moveTrackStartIndex = -1;
+        m_moveTrackDestIndex = -1;
+    });
+
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
         const int index = indexOfTrack(id);
-        Q_EMIT mediaAboutToBeRemoved(index, index);
-        // Remove the track from the local look-up-table
-        const bool ret = removeTrack(id);
-        if (!ret)
-            qWarning() << "Failed to remove track with id " << id.c_str() << " from track_index_lut";
 
         // Removed one track, so start and end are the same index values
         Q_EMIT mediaRemoved(index, index);
@@ -373,6 +462,9 @@ void AalMediaPlaylistProvider::disconnect_signals()
 
     if (m_trackRemovedConnection.is_connected())
         m_trackRemovedConnection.disconnect();
+
+    if (m_trackMovedConnection.is_connected())
+        m_trackMovedConnection.disconnect();
 
     if (m_tracksAddedConnection.is_connected())
         m_tracksAddedConnection.disconnect();

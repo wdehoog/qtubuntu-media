@@ -40,7 +40,8 @@ public:
     enum Signals {
         Unknown,
         CurrentMediaChanged,
-        MediaInserted
+        MediaInserted,
+        MediaRemoved
     };
 
 Q_SIGNALS:

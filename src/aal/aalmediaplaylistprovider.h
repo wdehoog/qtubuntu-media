@@ -87,6 +87,7 @@ private:
     std::atomic<int> m_moveTrackStartIndex;
     // Stores the destination index of the moveTrack request
     std::atomic<int> m_moveTrackDestIndex;
+    std::atomic<bool> m_clearingTrackList;
 };
 
 QT_END_NAMESPACE

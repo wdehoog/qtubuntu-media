@@ -40,7 +40,8 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackRemovedConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1),
       m_moveTrackStartIndex(-1),
-      m_moveTrackDestIndex(-1)
+      m_moveTrackDestIndex(-1),
+      m_clearingTrackList(false)
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -357,6 +358,7 @@ bool AalMediaPlaylistProvider::clear()
         return false;
     }
 
+    m_clearingTrackList = true;
     Q_EMIT mediaAboutToBeRemoved(0, track_index_lut.size() - 1);
     track_index_lut.clear();
 
@@ -459,10 +461,17 @@ void AalMediaPlaylistProvider::connect_signals()
 
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
-        const int index = indexOfTrack(id);
-
-        // Removed one track, so start and end are the same index values
-        Q_EMIT mediaRemoved(index, index);
+        if (m_clearingTrackList)
+        {
+            Q_EMIT mediaRemoved(0, track_index_lut.size() - 1);
+            m_clearingTrackList = false;
+        }
+        else
+        {
+            const int index = indexOfTrack(id);
+            // Removed one track, so start and end are the same index values
+            Q_EMIT mediaRemoved(index, index);
+        }
     });
 }
 

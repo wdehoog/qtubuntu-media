@@ -1,3 +1,10 @@
+qtubuntu-media (0.7.1+16.04.20151104.1-0ubuntu1) xenial; urgency=medium
+
+  [ Timo Jyrinki ]
+  * Port to the new Audio Role API (LP: #1493851) (LP: #1493851)
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 04 Nov 2015 08:31:35 +0000
+
 qtubuntu-media (0.7.1+15.10.20151020.1-0ubuntu1) wily; urgency=medium
 
   [ Alfonso Sanchez-Beato ]

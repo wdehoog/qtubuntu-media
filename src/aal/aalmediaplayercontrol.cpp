@@ -226,8 +226,7 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 void AalMediaPlayerControl::play()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
-    if (m_state != QMediaPlayer::PlayingState)
-        m_service->play();
+    m_service->play();
 
     // FIXME: Why are these setState needed? State is changed also when signals
     // from media-hub are received, which seems the right way to track it.

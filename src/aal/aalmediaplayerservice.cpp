@@ -816,7 +816,7 @@ void AalMediaPlayerService::updateCurrentPlayer()
 #if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     if (audioRole() == QMediaPlayer::MultimediaRole)
 #else
-    if (audioRole() == QAudio::VideoRole || audioRole() == QAudio::MusicRole)
+    if (audioRole() == QAudio::VideoRole || audioRole() == QAudio::MusicRole)
 #endif
     {
         qDebug() << "Setting player as current player";

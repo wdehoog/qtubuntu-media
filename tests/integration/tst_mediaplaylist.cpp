@@ -124,13 +124,13 @@ void tst_MediaPlaylist::moveTrackAndVerify()
     waitTrackInserted(playlist);
     qDebug() << "** addMedia took" << timer.elapsed() << "milliseconds";
 
-    connectSignal(playlist, Signals::MediaInserted);
-
     QCOMPARE(playlist->mediaCount(), 6);
 
+    connectSignal(playlist, Signals::MediaRemoved);
+    connectSignal(playlist, Signals::MediaInserted);
     playlist->moveMedia(5, 2);
 
-    waitTrackRemoved(playlist);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
     Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 6);
 
@@ -160,21 +160,28 @@ void tst_MediaPlaylist::movePlayingTrackAndVerify()
     qDebug() << "** addMedia took" << timer.elapsed() << "milliseconds";
 
     playlist->setCurrentIndex(5);
-    player->play();
+    waitCurrentIndexChange(playlist);
+    QCOMPARE(playlist->currentIndex(), 5);
 
-    connectSignal(playlist, Signals::MediaInserted);
+    player->play();
 
     QCOMPARE(playlist->mediaCount(), 6);
 
     sleep(2);
 
+    connectSignal(playlist, Signals::MediaRemoved);
+    connectSignal(playlist, Signals::MediaInserted);
     playlist->moveMedia(5, 2);
 
-    waitTrackRemoved(playlist);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
+    qDebug() << "Verifying the presence of MediaInserted signal in deque";
     Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 6);
 
+    waitCurrentIndexChange(playlist);
+
     QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+    QCOMPARE(playlist->currentIndex(), 2);
 
     delete playlist;
     delete player;
@@ -709,6 +716,25 @@ void tst_MediaPlaylist::waitPlaybackModeChange(QMediaPlaylist *playlist,
         });
 
     action();
+
+    wait_for_signal(future);
+}
+
+void tst_MediaPlaylist::waitCurrentIndexChange(QMediaPlaylist *playlist)
+{
+    int index = 0;
+    std::promise<int> promise;
+    std::future<int> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentIndexChanged,
+        [&](int i)
+        {
+            qDebug() << "currentIndexChanged index: " << i;
+            index = i;
+            promise.set_value(index);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
 
     wait_for_signal(future);
 }

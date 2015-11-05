@@ -95,6 +95,7 @@ private:
     void waitTrackRemoved(QMediaPlaylist *playlist);
     void waitPlaybackModeChange(QMediaPlaylist *playlist,
                                 const std::function<void()>& action);
+    void waitCurrentIndexChange(QMediaPlaylist *playlist);
 
     // A generic way of getting a signal registered into m_signalsDeque without blocking
     // which can be used to later check the order of signals that were emitted. Simply call

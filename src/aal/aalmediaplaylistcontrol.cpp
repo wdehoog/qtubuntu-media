@@ -41,7 +41,8 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
       m_currentIndex(0),
-      m_trackChangedConnection(the_void.connect([](){}))
+      m_trackChangedConnection(the_void.connect([](){})),
+      m_trackMovedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -268,6 +269,13 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     }
 }
 
+void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
+{
+    Q_UNUSED(from);
+    Q_UNUSED(to);
+    m_currentId = aalMediaPlaylistProvider()->trackOfIndex(m_currentIndex);
+}
+
 void AalMediaPlaylistControl::connect_signals()
 {
     if (!m_hubTrackList) {
@@ -279,10 +287,54 @@ void AalMediaPlaylistControl::connect_signals()
     {
         QMetaObject::invokeMethod(this, "onTrackChanged", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
     });
+
+    m_trackMovedConnection = m_hubTrackList->on_track_moved().connect([this]
+            (const media::TrackList::TrackIdTuple& ids)
+    {
+        qDebug() << "-------------------------------------------------";
+        qDebug() << "source id:" << std::get<0>(ids).c_str();
+        qDebug() << "dest id:" << std::get<1>(ids).c_str();
+
+        if (!m_currentId.empty())
+        {
+            const auto new_current_track_it = aalMediaPlaylistProvider()->getTrackPosition(m_currentId);
+            if (!aalMediaPlaylistProvider()->isTrackEnd(new_current_track_it))
+            {
+                const int newCurrentIndex = aalMediaPlaylistProvider()->indexOfTrack(*new_current_track_it);
+                if (newCurrentIndex == -1)
+                    qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+
+                if (m_currentIndex != newCurrentIndex)
+                {
+                    m_currentIndex = newCurrentIndex;
+                    Q_EMIT currentIndexChanged(m_currentIndex);
+                    qDebug() << "*** Updated m_currentIndex: " << m_currentIndex;
+                }
+            }
+            else
+            {
+                qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+            }
+        }
+        else
+        {
+            qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+        }
+
+        m_currentId.clear();
+
+        qDebug() << "-------------------------------------------------";
+    });
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::startMoveTrack,
+            this, &AalMediaPlaylistControl::onStartMoveTrack);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()
 {
+    if (m_trackMovedConnection.is_connected())
+        m_trackMovedConnection.disconnect();
+
     if (m_trackChangedConnection.is_connected())
         m_trackChangedConnection.disconnect();
 }

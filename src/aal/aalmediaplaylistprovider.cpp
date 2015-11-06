@@ -319,13 +319,11 @@ bool AalMediaPlaylistProvider::removeMedia(int pos)
         return false;
     }
 
-
     return true;
 }
 
 bool AalMediaPlaylistProvider::removeMedia(int start, int end)
 {
-    qWarning() << Q_FUNC_INFO;
     for (int i=start; i<=end; i++)
     {
         if (!removeMedia(i))
@@ -493,13 +491,6 @@ bool AalMediaPlaylistProvider::moveTrack(int from, int to)
     const media::Track::Id toTrack = trackOfIndex(to);
     qDebug() << "fromTrack:" << fromTrack.c_str();
     qDebug() << "toTrack:" << toTrack.c_str();
-
-    if (fromTrack.empty() or toTrack.empty())
-    {
-        qWarning() << Q_FUNC_INFO
-            << "- failed to move track, 'fromTrack' or 'toTrack' track ids are empty";
-        return false;
-    }
 
     const std::vector<media::Track::Id>::const_iterator insertIt
             = std::find(track_index_lut.begin(), track_index_lut.end(), toTrack);

@@ -24,7 +24,6 @@
 
 #include <core/connection.h>
 
-#include <atomic>
 #include <memory>
 
 QT_BEGIN_NAMESPACE

@@ -70,6 +70,7 @@ private:
     core::Connection m_trackAddedConnection;
     core::Connection m_tracksAddedConnection;
     core::Connection m_trackRemovedConnection;
+    core::Connection m_trackListResetConnection;
 
     // Simple table that holds a list (order is significant and explicit) of
     // Track::Id's for a lookup. track_index_lut.at[x] gives the corresponding

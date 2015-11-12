@@ -121,8 +121,8 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
     //const int reducedSteps = steps - ((steps / tracklistSize) * tracklistSize);
     // Calculate how many of x are in tracklistSize to reduce the calculation
     // to only wrap around the list one time
-    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
 #ifdef VERBOSE_DEBUG
+    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
@@ -278,6 +278,9 @@ void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
 
 void AalMediaPlaylistControl::connect_signals()
 {
+    // Avoid duplicated subscriptions
+    disconnect_signals();
+
     if (!m_hubTrackList) {
         qWarning() << "Can't connect to track list signals as it doesn't exist";
         return;

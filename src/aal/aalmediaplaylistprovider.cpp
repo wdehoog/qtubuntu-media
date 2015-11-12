@@ -37,6 +37,7 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackAddedConnection(the_void.connect([](){})),
       m_tracksAddedConnection(the_void.connect([](){})),
       m_trackRemovedConnection(the_void.connect([](){})),
+      m_trackListResetConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1)
 {
     qDebug() << Q_FUNC_INFO;
@@ -345,6 +346,19 @@ bool AalMediaPlaylistProvider::clear()
 
     try {
         m_hubTrackList->reset();
+
+        // We do not wait for the TrackListReset signal to empty the lut to
+        // avoid sync problems.
+        // TODO: Do the same in other calls if possible, as these calls are
+        // considered to be synchronous, and the job can be considered finished
+        // when the DBus call returns without error. If we need some information
+        // from the signal we should block until it arrives.
+        int num_tracks = track_index_lut.size();
+        if (num_tracks > 0) {
+            track_index_lut.clear();
+            Q_EMIT mediaAboutToBeRemoved(0, num_tracks - 1);
+            Q_EMIT mediaRemoved(0, num_tracks - 1);
+        }
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to clear the playlist: " << e.what();
@@ -455,11 +469,19 @@ void AalMediaPlaylistProvider::connect_signals()
         // Removed one track, so start and end are the same index values
         Q_EMIT mediaRemoved(index, index);
     });
+
+    m_trackListResetConnection = m_hubTrackList->on_track_list_reset().connect([this]()
+    {
+        qDebug() << "TrackListReset signal received";
+    });
 }
 
 void AalMediaPlaylistProvider::disconnect_signals()
 {
     qDebug() << Q_FUNC_INFO;
+
+    if (m_trackListResetConnection.is_connected())
+        m_trackListResetConnection.disconnect();
 
     if (m_trackRemovedConnection.is_connected())
         m_trackRemovedConnection.disconnect();

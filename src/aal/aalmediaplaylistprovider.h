@@ -55,6 +55,9 @@ public:
     bool removeMedia(int start, int end);
     bool clear();
 
+Q_SIGNALS:
+    void aalIndexChanged();
+
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();

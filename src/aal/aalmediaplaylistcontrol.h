@@ -62,6 +62,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onTrackChanged(const core::ubuntu::media::Track::Id& id);
+    void onAalIndexChanged();
 
 private:
     void connect_signals();
@@ -73,6 +74,7 @@ private:
     QMediaPlaylistProvider *m_playlistProvider;
 
     int m_currentIndex;
+    core::ubuntu::media::Track::Id m_currentId;
 
     core::Connection m_trackChangedConnection;
 };

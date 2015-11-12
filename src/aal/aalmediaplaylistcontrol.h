@@ -63,6 +63,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onTrackChanged(const core::ubuntu::media::Track::Id& id);
     void onStartMoveTrack(int from, int to);
+    void onAalIndexChanged();
 
 private:
     void connect_signals();

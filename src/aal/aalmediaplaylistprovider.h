@@ -63,6 +63,7 @@ public:
 
 Q_SIGNALS:
     void startMoveTrack(int from, int to);
+    void aalIndexChanged();
 
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);

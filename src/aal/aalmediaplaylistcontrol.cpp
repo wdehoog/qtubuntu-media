@@ -41,10 +41,9 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
       m_currentIndex(0),
-      m_trackChangedConnection(the_void.connect([](){})),
-      m_trackMovedConnection(the_void.connect([](){})),
       m_currentId(),
-      m_trackChangedConnection(the_void.connect([](){}))
+      m_trackChangedConnection(the_void.connect([](){})),
+      m_trackMovedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();

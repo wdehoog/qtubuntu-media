@@ -41,7 +41,6 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
       m_currentIndex(0),
-      m_currentId(),
       m_trackChangedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
@@ -62,7 +61,7 @@ QMediaPlaylistProvider* AalMediaPlaylistControl::playlistProvider() const
 bool AalMediaPlaylistControl::setPlaylistProvider(QMediaPlaylistProvider *playlist)
 {
     m_playlistProvider = playlist;
-    connect(playlist, SIGNAL(aalIndexChanged()), this, SLOT(onAalIndexChanged()));
+    connect(playlist, SIGNAL(currentIndexChanged()), this, SLOT(onCurrentIndexChanged()));
     Q_EMIT playlistProviderChanged();
     return true;
 }
@@ -271,7 +270,7 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     }
 }
 
-void AalMediaPlaylistControl::onAalIndexChanged()
+void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
     int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
 

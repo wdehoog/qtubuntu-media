@@ -285,8 +285,8 @@ bool AalMediaPlaylistProvider::clear()
         // from the signal we should block until it arrives.
         int num_tracks = track_index_lut.size();
         if (num_tracks > 0) {
-            track_index_lut.clear();
             Q_EMIT mediaAboutToBeRemoved(0, num_tracks - 1);
+            track_index_lut.clear();
             Q_EMIT mediaRemoved(0, num_tracks - 1);
         }
     }
@@ -352,7 +352,7 @@ void AalMediaPlaylistProvider::connect_signals()
         Q_EMIT mediaAboutToBeInserted(index, index);
         qDebug() << "mediaInserted, index: " << index;
         Q_EMIT mediaInserted(index, index);
-        Q_EMIT aalIndexChanged();
+        Q_EMIT currentIndexChanged();
     });
 
     m_tracksAddedConnection = m_hubTrackList->on_tracks_added().connect([this](const media::TrackList::ContainerURI& tracks)
@@ -376,7 +376,7 @@ void AalMediaPlaylistProvider::connect_signals()
         Q_EMIT mediaAboutToBeInserted(first_index, last_index);
         qDebug() << "mediaInserted, first_index: " << first_index << " last_index: " << last_index;
         Q_EMIT mediaInserted(first_index, last_index);
-        Q_EMIT aalIndexChanged();
+        Q_EMIT currentIndexChanged();
     });
 
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
@@ -390,7 +390,7 @@ void AalMediaPlaylistProvider::connect_signals()
 
         // Removed one track, so start and end are the same index values
         Q_EMIT mediaRemoved(index, index);
-        Q_EMIT aalIndexChanged();
+        Q_EMIT currentIndexChanged();
     });
 
     m_trackListResetConnection = m_hubTrackList->on_track_list_reset().connect([this]()

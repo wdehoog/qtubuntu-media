@@ -56,7 +56,7 @@ public:
     bool clear();
 
 Q_SIGNALS:
-    void aalIndexChanged();
+    void currentIndexChanged();
 
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);

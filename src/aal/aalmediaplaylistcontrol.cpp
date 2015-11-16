@@ -90,7 +90,7 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
 
     try {
         const std::string id = aalMediaPlaylistProvider()->trackOfIndex(position);
-        static const bool togglePlayerState = false;
+        static const bool togglePlayerState = true;
         m_hubTrackList->go_to(id, togglePlayerState);
     }
     catch (const std::runtime_error &e) {

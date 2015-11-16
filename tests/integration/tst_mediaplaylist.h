@@ -70,6 +70,8 @@ private Q_SLOTS:
     void verifyMedia();
 
     void removeTrackAndVerify();
+    void removeCurrentNonPlayingTrackAndVerify();
+    void removeCurrentPlayingTrackAndVerify();
 
     void verifyCurrentIndex();
     void verifyNextIndex();

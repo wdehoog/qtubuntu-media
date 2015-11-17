@@ -448,8 +448,8 @@ void tst_MediaPlaylist::removeCurrentNonPlayingTrackAndVerify()
     content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
     content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile4.ogg")));
     playlist->addMedia(content1);
-    const QUrl video(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
-    playlist->addMedia(video);
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(track);
 
     waitTrackInserted(playlist);
     QCOMPARE(playlist->mediaCount(), 6);
@@ -468,8 +468,8 @@ void tst_MediaPlaylist::removeCurrentNonPlayingTrackAndVerify()
 
     QCOMPARE(playlist->mediaCount(), 5);
 
-    const QUrl videoToVerify(playlist->media(4).canonicalUrl());
-    QCOMPARE(videoToVerify, video);
+    const QUrl trackToVerify(playlist->media(4).canonicalUrl());
+    QCOMPARE(trackToVerify, track);
 
     delete playlist;
     delete player;
@@ -477,6 +477,44 @@ void tst_MediaPlaylist::removeCurrentNonPlayingTrackAndVerify()
 
 void tst_MediaPlaylist::removeCurrentPlayingTrackAndVerify()
 {
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content1;
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile4.ogg")));
+    playlist->addMedia(content1);
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(track);
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    player->play();
+
+    playlist->setCurrentIndex(2);
+    // Wait for the currentMediaChanged signal to be emited
+    waitTrackChange(playlist);
+    // We be  playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+    QCOMPARE(playlist->currentIndex(), 2);
+
+    playlist->removeMedia(2);
+
+    // We should still be playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+
+    QCOMPARE(playlist->mediaCount(), 5);
+
+    const QUrl trackToVerify(playlist->media(4).canonicalUrl());
+    QCOMPARE(trackToVerify, track);
+
+    delete playlist;
+    delete player;
 }
 
 void tst_MediaPlaylist::verifyCurrentIndex()

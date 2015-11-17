@@ -517,6 +517,40 @@ void tst_MediaPlaylist::removeCurrentPlayingTrackAndVerify()
     delete player;
 }
 
+void tst_MediaPlaylist::removeLastCurrentPlayingTrackAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(track);
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 1);
+
+    player->play();
+
+    playlist->setCurrentIndex(0);
+    qDebug() << "Waiting for playback status to change to playing";
+    // Wait for the currentMediaChanged signal to be emited
+    waitTrackChange(playlist);
+    // We be  playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+
+    qDebug() << "Removing track index 0";
+    playlist->removeMedia(0);
+
+    waitTrackRemoved(playlist);
+    // We should no longer be playing
+    QCOMPARE(player->state(), QMediaPlayer::State::StoppedState);
+
+    QCOMPARE(playlist->mediaCount(), 0);
+
+    delete playlist;
+    delete player;
+}
+
 void tst_MediaPlaylist::verifyCurrentIndex()
 {
     QMediaPlayer *player = new QMediaPlayer;

@@ -72,6 +72,7 @@ private Q_SLOTS:
     void removeTrackAndVerify();
     void removeCurrentNonPlayingTrackAndVerify();
     void removeCurrentPlayingTrackAndVerify();
+    void removeLastCurrentPlayingTrackAndVerify();
 
     void verifyCurrentIndex();
     void verifyNextIndex();

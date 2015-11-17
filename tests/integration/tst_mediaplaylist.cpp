@@ -689,19 +689,15 @@ void tst_MediaPlaylist::playReusePlayTrackList()
         QCOMPARE(playlist->mediaCount(), 3);
 
         player->play();
-        QCoreApplication::processEvents();
 
         const QUrl audioToVerify(playlist->currentMedia().canonicalUrl());
         QCOMPARE(audioToVerify, audio);
 
         player->stop();
-        QCoreApplication::processEvents();
 
-        connectSignal(playlist, Signals::MediaInserted);
+        connectSignal(playlist, Signals::MediaRemoved);
         playlist->clear();
 
-        waitTrackRemoved(playlist);
-        Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
         Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
 
         QCOMPARE(playlist->mediaCount(), 0);

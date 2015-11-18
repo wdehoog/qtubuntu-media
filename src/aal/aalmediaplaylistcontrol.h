@@ -62,6 +62,7 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onTrackChanged(const core::ubuntu::media::Track::Id& id);
+    void onStartMoveTrack(int from, int to);
     void onCurrentIndexChanged();
 
 private:
@@ -77,6 +78,7 @@ private:
     core::ubuntu::media::Track::Id m_currentId;
 
     core::Connection m_trackChangedConnection;
+    core::Connection m_trackMovedConnection;
 };
 
 QT_END_NAMESPACE

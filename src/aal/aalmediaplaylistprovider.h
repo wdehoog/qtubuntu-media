@@ -39,6 +39,8 @@ Q_OBJECT
 public:
     friend class AalMediaPlaylistControl;
 
+    typedef std::vector<core::ubuntu::media::Track::Id> ContainerTrackLut;
+
     AalMediaPlaylistProvider(QObject *parent=0);
     ~AalMediaPlaylistProvider();
 
@@ -51,17 +53,24 @@ public:
     bool addMedia(const QList<QMediaContent> &contentList);
     bool insertMedia(int index, const QMediaContent &content);
     bool insertMedia(int index, const QList<QMediaContent> &content);
+    bool moveMedia(int from, int to);
     bool removeMedia(int pos);
     bool removeMedia(int start, int end);
     bool clear();
 
+    ContainerTrackLut::const_iterator getTrackPosition(const core::ubuntu::media::Track::Id &id) const;
+    bool isTrackEnd(const ContainerTrackLut::const_iterator &it);
+
 Q_SIGNALS:
+    void startMoveTrack(int from, int to);
     void currentIndexChanged();
 
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();
     void disconnect_signals();
+    // Moves a track within the local track_index_lut
+    bool moveTrack(int from, int to);
     bool removeTrack(const core::ubuntu::media::Track::Id &id);
     // Finds the index of the first tracks that matches id, or the last if reverse is true
     int indexOfTrack(const core::ubuntu::media::Track::Id &id, bool reverse=false) const;

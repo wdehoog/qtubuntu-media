@@ -118,29 +118,70 @@ void tst_MediaPlaylist::moveTrackAndVerify()
     content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
     const QMediaContent newLastTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
     content.push_back(newLastTrack);
-    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    const QMediaContent insertedTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    content.push_back(insertedTrack);
     playlist->addMedia(content);
     waitTrackInserted(playlist);
     qDebug() << "** addMedia took" << timer.elapsed() << "milliseconds";
 
     QCOMPARE(playlist->mediaCount(), 6);
 
-    // Remove our track of interest
-    playlist->removeMedia(5);
-    waitTrackRemoved(playlist);
-    QCOMPARE(playlist->mediaCount(), 5);
+    connectSignal(playlist, Signals::MediaRemoved);
+    connectSignal(playlist, Signals::MediaInserted);
+    playlist->moveMedia(5, 2);
 
-    // "Move" it by inserting it where we want it
-    const QMediaContent insertedTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
-    playlist->insertMedia(2, insertedTrack);
-    waitTrackInserted(playlist);
-
-    qDebug() << "playlist->media(2):" << playlist->media(2).canonicalUrl();
-    qDebug() << "insertedTrack:" << insertedTrack.canonicalUrl();
-    QCOMPARE(playlist->media(2), insertedTrack);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
     QCOMPARE(playlist->mediaCount(), 6);
 
-    QCOMPARE(playlist->media(5), newLastTrack);
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::movePlayingTrackAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QElapsedTimer timer;
+    timer.start();
+    QList<QMediaContent> content;
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile1.ogg")));
+    content.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
+    const QMediaContent newLastTrack(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
+    content.push_back(newLastTrack);
+    const QMediaContent insertedTrack(QUrl("file://" + QFINDTESTDATA("testdata/Ubuntu.ogg")));
+    content.push_back(insertedTrack);
+    playlist->addMedia(content);
+    waitTrackInserted(playlist);
+    qDebug() << "** addMedia took" << timer.elapsed() << "milliseconds";
+
+    playlist->setCurrentIndex(5);
+    waitCurrentIndexChange(playlist);
+    QCOMPARE(playlist->currentIndex(), 5);
+
+    player->play();
+
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    sleep(2);
+
+    connectSignal(playlist, Signals::MediaRemoved);
+    connectSignal(playlist, Signals::MediaInserted);
+    playlist->moveMedia(5, 2);
+
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
+    qDebug() << "Verifying the presence of MediaInserted signal in deque";
+    Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaInserted);
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    waitCurrentIndexChange(playlist);
+
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+    QCOMPARE(playlist->currentIndex(), 2);
 
     delete playlist;
     delete player;
@@ -394,6 +435,122 @@ void tst_MediaPlaylist::removeTrackAndVerify()
     delete player;
 }
 
+void tst_MediaPlaylist::removeCurrentNonPlayingTrackAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content1;
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile4.ogg")));
+    playlist->addMedia(content1);
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(track);
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    playlist->setCurrentIndex(2);
+    // Wait for the currentMediaChanged signal to be emited
+    waitTrackChange(playlist);
+    // We should not be automatically playing
+    QCOMPARE(player->state(), QMediaPlayer::State::StoppedState);
+    QCOMPARE(playlist->currentIndex(), 2);
+
+    playlist->removeMedia(2);
+
+    // We should still not be playing
+    QCOMPARE(player->state(), QMediaPlayer::State::StoppedState);
+
+    QCOMPARE(playlist->mediaCount(), 5);
+
+    const QUrl trackToVerify(playlist->media(4).canonicalUrl());
+    QCOMPARE(trackToVerify, track);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::removeCurrentPlayingTrackAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    QList<QMediaContent> content1;
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile1.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile2.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile3.ogg")));
+    content1.push_back(QUrl("file://" + QFINDTESTDATA("testdata/testfile4.ogg")));
+    playlist->addMedia(content1);
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.mp4")));
+    playlist->addMedia(track);
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 6);
+
+    player->play();
+
+    playlist->setCurrentIndex(2);
+    // Wait for the currentMediaChanged signal to be emited
+    waitTrackChange(playlist);
+    // We be  playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+    QCOMPARE(playlist->currentIndex(), 2);
+
+    playlist->removeMedia(2);
+
+    // We should still be playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+
+    QCOMPARE(playlist->mediaCount(), 5);
+
+    const QUrl trackToVerify(playlist->media(4).canonicalUrl());
+    QCOMPARE(trackToVerify, track);
+
+    delete playlist;
+    delete player;
+}
+
+void tst_MediaPlaylist::removeLastCurrentPlayingTrackAndVerify()
+{
+    QMediaPlayer *player = new QMediaPlayer;
+    QMediaPlaylist *playlist = new QMediaPlaylist;
+    player->setPlaylist(playlist);
+
+    const QUrl track(QUrl("file://" + QFINDTESTDATA("testdata/testfile.ogg")));
+    playlist->addMedia(track);
+
+    waitTrackInserted(playlist);
+    QCOMPARE(playlist->mediaCount(), 1);
+
+    player->play();
+
+    playlist->setCurrentIndex(0);
+    qDebug() << "Waiting for playback status to change to playing";
+    // Wait for the currentMediaChanged signal to be emited
+    waitTrackChange(playlist);
+    // We be  playing
+    QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+
+    qDebug() << "Removing track index 0";
+    playlist->removeMedia(0);
+
+    waitTrackRemoved(playlist);
+    // We should no longer be playing
+    QCOMPARE(player->state(), QMediaPlayer::State::StoppedState);
+
+    QCOMPARE(playlist->mediaCount(), 0);
+
+    delete playlist;
+    delete player;
+}
+
 void tst_MediaPlaylist::verifyCurrentIndex()
 {
     QMediaPlayer *player = new QMediaPlayer;
@@ -566,15 +723,16 @@ void tst_MediaPlaylist::playReusePlayTrackList()
         QCOMPARE(playlist->mediaCount(), 3);
 
         player->play();
-        QCoreApplication::processEvents();
 
         const QUrl audioToVerify(playlist->currentMedia().canonicalUrl());
         QCOMPARE(audioToVerify, audio);
 
         player->stop();
-        QCoreApplication::processEvents();
 
+        connectSignal(playlist, Signals::MediaRemoved);
         playlist->clear();
+
+        Q_ASSERT(m_signalsDeque.pop_front() == Signals::MediaRemoved);
 
         QCOMPARE(playlist->mediaCount(), 0);
     }
@@ -674,6 +832,25 @@ void tst_MediaPlaylist::waitPlaybackModeChange(QMediaPlaylist *playlist,
     wait_for_signal(future);
 }
 
+void tst_MediaPlaylist::waitCurrentIndexChange(QMediaPlaylist *playlist)
+{
+    int index = 0;
+    std::promise<int> promise;
+    std::future<int> future{promise.get_future()};
+
+    QMetaObject::Connection c = connect(playlist, &QMediaPlaylist::currentIndexChanged,
+        [&](int i)
+        {
+            qDebug() << "currentIndexChanged index: " << i;
+            index = i;
+            promise.set_value(index);
+            // Make sure the promise is not fulfilled twice
+            QObject::disconnect(c);
+        });
+
+    wait_for_signal(future);
+}
+
 void tst_MediaPlaylist::connectSignal(QMediaPlaylist *playlist, Signals signal)
 {
     switch (signal)
@@ -697,6 +874,16 @@ void tst_MediaPlaylist::connectSignal(QMediaPlaylist *playlist, Signals signal)
                 (void) start;
                 (void) end;
                 qDebug() << "Pushing MediaInserted onto m_signalsDeque";
+                m_signalsDeque.push_back(signal);
+            });
+            break;
+        }
+        case Signals::MediaRemoved:
+        {
+            connect(playlist, &QMediaPlaylist::mediaRemoved, [&](int index)
+            {
+                (void) index;
+                qDebug() << "Pushing MediaRemoved onto m_signalsDeque";
                 m_signalsDeque.push_back(signal);
             });
             break;

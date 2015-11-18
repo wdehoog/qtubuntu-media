@@ -61,6 +61,7 @@ QMediaPlaylistProvider* AalMediaPlaylistControl::playlistProvider() const
 bool AalMediaPlaylistControl::setPlaylistProvider(QMediaPlaylistProvider *playlist)
 {
     m_playlistProvider = playlist;
+    connect(playlist, SIGNAL(currentIndexChanged()), this, SLOT(onCurrentIndexChanged()));
     Q_EMIT playlistProviderChanged();
     return true;
 }
@@ -120,8 +121,8 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
     //const int reducedSteps = steps - ((steps / tracklistSize) * tracklistSize);
     // Calculate how many of x are in tracklistSize to reduce the calculation
     // to only wrap around the list one time
-    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
 #ifdef VERBOSE_DEBUG
+    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
@@ -237,6 +238,8 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
             qWarning() << "Unknown playback mode: " << mode;
             m_hubPlayerSession->shuffle() = false;
     }
+
+    Q_EMIT playbackModeChanged(mode);
 }
 
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
@@ -259,6 +262,7 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     if (!id.empty())
     {
         m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
+        m_currentId = id;
         qDebug() << "m_currentIndex updated to: " << m_currentIndex;
         const QMediaContent content = playlistProvider()->media(m_currentIndex);
         Q_EMIT currentMediaChanged(content);
@@ -266,8 +270,22 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     }
 }
 
+void AalMediaPlaylistControl::onCurrentIndexChanged()
+{
+    int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
+
+    if (index != m_currentIndex) {
+        qDebug() << "Index changed to " << index;
+        m_currentIndex = index;
+        Q_EMIT currentIndexChanged(m_currentIndex);
+    }
+}
+
 void AalMediaPlaylistControl::connect_signals()
 {
+    // Avoid duplicated subscriptions
+    disconnect_signals();
+
     if (!m_hubTrackList) {
         qWarning() << "Can't connect to track list signals as it doesn't exist";
         return;

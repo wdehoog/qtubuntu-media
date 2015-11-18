@@ -25,6 +25,7 @@
 
 #include <core/connection.h>
 
+#include <atomic>
 #include <memory>
 #include <vector>
 
@@ -54,6 +55,9 @@ public:
     bool removeMedia(int start, int end);
     bool clear();
 
+Q_SIGNALS:
+    void currentIndexChanged();
+
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
     void connect_signals();
@@ -69,11 +73,16 @@ private:
     core::Connection m_trackAddedConnection;
     core::Connection m_tracksAddedConnection;
     core::Connection m_trackRemovedConnection;
+    core::Connection m_trackListResetConnection;
 
     // Simple table that holds a list (order is significant and explicit) of
     // Track::Id's for a lookup. track_index_lut.at[x] gives the corresponding
     // Track::Id for index x, and vice-versa.
     std::vector<core::ubuntu::media::Track::Id> track_index_lut;
+
+    // Did the client perform an insertTrack() (as opposed to an addTrack()) operation?
+    // If yes, the index will be zero or greater, if not index will be -1;
+    std::atomic<int> m_insertTrackIndex;
 };
 
 QT_END_NAMESPACE

@@ -1,3 +1,27 @@
+qtubuntu-media (0.8.0+15.04.20151118-0ubuntu1) vivid; urgency=medium
+
+  [ phablet ]
+  * Bump version for new TrackList related API changes.
+
+  [ Alfonso Sanchez-Beato ]
+  * Emit onPlaybackModeChanged (LP: #1510219). Implements insertTrack()
+    so that a client can move a track into a new position by first
+    calling removeTrack(). Do proper clean-up when switching between
+    playlist and playing a single URI (LP: #1511029). (LP: #1511073,
+    #1511034, #1510219, #1511029)
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Emit onPlaybackModeChanged (LP: #1510219). Implements insertTrack()
+    so that a client can move a track into a new position by first
+    calling removeTrack(). Do proper clean-up when switching between
+    playlist and playing a single URI (LP: #1511029). (LP: #1511073,
+    #1511034, #1510219, #1511029)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Wed, 18 Nov 2015 16:32:22 +0000
+
 qtubuntu-media (0.7.1+16.04.20151104.1-0ubuntu1) xenial; urgency=medium
 
   [ Timo Jyrinki ]
@@ -135,6 +159,17 @@ qtubuntu-media (0.7.1+15.10.20150522-0ubuntu1) wily; urgency=medium
     reported to the client app. (LP: #1435088)
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 22 May 2015 17:36:57 +0000
+
+qtubuntu-media (0.7.1+15.04.20151023.3-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Added addTracks support for batch track adding. Improved the
+    robustness of the QMediaPlaylist integration tests.
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Fri, 23 Oct 2015 16:43:38 +0000
 
 qtubuntu-media (0.7.1+15.04.20150513.1-0ubuntu1) vivid; urgency=medium
 

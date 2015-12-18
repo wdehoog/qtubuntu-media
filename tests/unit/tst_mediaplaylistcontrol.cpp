@@ -28,13 +28,11 @@ using namespace core::ubuntu::media;
 
 void tst_MediaPlaylistControl::initTestCase()
 {
-#if 1
     m_hubService.reset(new TestService());
     m_service = new AalMediaPlayerService(this);
     m_service->setService(m_hubService);
     m_player.reset(new PlayerMock());
     m_service->setPlayer(m_player);
-#endif
 }
 
 void tst_MediaPlaylistControl::cleanupTestCase()

@@ -206,20 +206,27 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
     qDebug() << __PRETTY_FUNCTION__ << endl;
 
     qDebug() << "setMedia() media: " << AalUtility::unescape(media);
+
+    if (m_mediaContent == media) {
+        qDebug() << "Same media as current";
+        return;
+    }
+
     m_mediaContent = media;
 
-    // Make sure we can actually load something valid
+    QMediaPlayer::MediaStatus priorStatus = mediaStatus();
+
     if (!media.isNull())
-    {
-        QMediaPlayer::MediaStatus priorStatus = mediaStatus();
         setMediaStatus(QMediaPlayer::LoadingMedia);
-        m_service->setMedia(AalUtility::unescape(media));
-        // This is important to do for QMediaPlaylist instances that
-        // are set to loop. Without this, such a playlist will only
-        // play once
-        if (priorStatus == QMediaPlayer::EndOfMedia)
-            stop();
-    }
+
+    // If there is no media this cleans up the play list
+    m_service->setMedia(AalUtility::unescape(media));
+
+    // This is important to do for QMediaPlaylist instances that
+    // are set to loop. Without this, such a playlist will only
+    // play once
+    if (priorStatus == QMediaPlayer::EndOfMedia)
+        stop();
 
     Q_EMIT mediaChanged(m_mediaContent);
 }
@@ -227,9 +234,11 @@ void AalMediaPlayerControl::setMedia(const QMediaContent& media, QIODevice* stre
 void AalMediaPlayerControl::play()
 {
     qDebug() << __PRETTY_FUNCTION__ << endl;
-
-    setState(QMediaPlayer::PlayingState);
     m_service->play();
+
+    // FIXME: Why are these setState needed? State is changed also when signals
+    // from media-hub are received, which seems the right way to track it.
+    setState(QMediaPlayer::PlayingState);
 }
 
 void AalMediaPlayerControl::pause()

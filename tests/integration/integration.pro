@@ -20,4 +20,4 @@ SOURCES += \
     ../../src/aal/aalutility.cpp
 
 # media-hub is required to be running for these tests
-system(/sbin/stop media-hub; /sbin/start media-hub)
+#system(/sbin/stop media-hub; /sbin/start media-hub)

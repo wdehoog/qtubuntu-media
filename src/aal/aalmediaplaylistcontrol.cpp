@@ -41,7 +41,8 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
     : QMediaPlaylistControl(parent),
       m_playlistProvider(nullptr),
       m_currentIndex(0),
-      m_trackChangedConnection(the_void.connect([](){}))
+      m_trackChangedConnection(the_void.connect([](){})),
+      m_trackMovedConnection(the_void.connect([](){}))
 {
     qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
@@ -61,6 +62,7 @@ QMediaPlaylistProvider* AalMediaPlaylistControl::playlistProvider() const
 bool AalMediaPlaylistControl::setPlaylistProvider(QMediaPlaylistProvider *playlist)
 {
     m_playlistProvider = playlist;
+    connect(playlist, SIGNAL(currentIndexChanged()), this, SLOT(onCurrentIndexChanged()));
     Q_EMIT playlistProviderChanged();
     return true;
 }
@@ -88,8 +90,7 @@ void AalMediaPlaylistControl::setCurrentIndex(int position)
 
     try {
         const std::string id = aalMediaPlaylistProvider()->trackOfIndex(position);
-        static const bool togglePlayerState = false;
-        m_hubTrackList->go_to(id, togglePlayerState);
+        m_hubTrackList->go_to(id);
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to go to specified tracklist position: " << e.what();
@@ -120,8 +121,8 @@ int AalMediaPlaylistControl::previousIndex(int steps) const
     //const int reducedSteps = steps - ((steps / tracklistSize) * tracklistSize);
     // Calculate how many of x are in tracklistSize to reduce the calculation
     // to only wrap around the list one time
-    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
 #ifdef VERBOSE_DEBUG
+    const uint16_t m = (uint16_t)std::abs(x) / (uint16_t)tracklistSize; // 3
     qDebug() << "m_currentIndex: " << m_currentIndex;
     qDebug() << "steps: " << steps;
     qDebug() << "tracklistSize: " << tracklistSize;
@@ -237,6 +238,8 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
             qWarning() << "Unknown playback mode: " << mode;
             m_hubPlayerSession->shuffle() = false;
     }
+
+    Q_EMIT playbackModeChanged(mode);
 }
 
 void AalMediaPlaylistControl::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
@@ -259,6 +262,7 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     if (!id.empty())
     {
         m_currentIndex = aalMediaPlaylistProvider()->indexOfTrack(id);
+        m_currentId = id;
         qDebug() << "m_currentIndex updated to: " << m_currentIndex;
         const QMediaContent content = playlistProvider()->media(m_currentIndex);
         Q_EMIT currentMediaChanged(content);
@@ -266,8 +270,29 @@ void AalMediaPlaylistControl::onTrackChanged(const core::ubuntu::media::Track::I
     }
 }
 
+void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
+{
+    Q_UNUSED(from);
+    Q_UNUSED(to);
+    m_currentId = aalMediaPlaylistProvider()->trackOfIndex(m_currentIndex);
+}
+
+void AalMediaPlaylistControl::onCurrentIndexChanged()
+{
+    int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
+
+    if (index != m_currentIndex) {
+        qDebug() << "Index changed to " << index;
+        m_currentIndex = index;
+        Q_EMIT currentIndexChanged(m_currentIndex);
+    }
+}
+
 void AalMediaPlaylistControl::connect_signals()
 {
+    // Avoid duplicated subscriptions
+    disconnect_signals();
+
     if (!m_hubTrackList) {
         qWarning() << "Can't connect to track list signals as it doesn't exist";
         return;
@@ -277,10 +302,54 @@ void AalMediaPlaylistControl::connect_signals()
     {
         QMetaObject::invokeMethod(this, "onTrackChanged", Qt::QueuedConnection, Q_ARG(core::ubuntu::media::Track::Id, id));
     });
+
+    m_trackMovedConnection = m_hubTrackList->on_track_moved().connect([this]
+            (const media::TrackList::TrackIdTuple& ids)
+    {
+        qDebug() << "-------------------------------------------------";
+        qDebug() << "source id:" << std::get<0>(ids).c_str();
+        qDebug() << "dest id:" << std::get<1>(ids).c_str();
+
+        if (!m_currentId.empty())
+        {
+            const auto new_current_track_it = aalMediaPlaylistProvider()->getTrackPosition(m_currentId);
+            if (!aalMediaPlaylistProvider()->isTrackEnd(new_current_track_it))
+            {
+                const int newCurrentIndex = aalMediaPlaylistProvider()->indexOfTrack(*new_current_track_it);
+                if (newCurrentIndex == -1)
+                    qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+
+                if (m_currentIndex != newCurrentIndex)
+                {
+                    m_currentIndex = newCurrentIndex;
+                    Q_EMIT currentIndexChanged(m_currentIndex);
+                    qDebug() << "*** Updated m_currentIndex: " << m_currentIndex;
+                }
+            }
+            else
+            {
+                qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+            }
+        }
+        else
+        {
+            qWarning() << "Can't update m_currentIndex - failed to find track in track_index_lut after move";
+        }
+
+        m_currentId.clear();
+
+        qDebug() << "-------------------------------------------------";
+    });
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::startMoveTrack,
+            this, &AalMediaPlaylistControl::onStartMoveTrack);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()
 {
+    if (m_trackMovedConnection.is_connected())
+        m_trackMovedConnection.disconnect();
+
     if (m_trackChangedConnection.is_connected())
         m_trackChangedConnection.disconnect();
 }

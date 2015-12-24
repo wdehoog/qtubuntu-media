@@ -278,12 +278,16 @@ void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
 
 void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
 {
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+
     // If the entire playlist is cleared, we need to reset the currentIndex
     // to just before the beginning of the list, otherwise if the user selects
     // a random track in the tracklist for a second time, track 0 is always
     // selected instead of the desired track index
-    if ((end+1 - start) == aalMediaPlaylistProvider()->mediaCount())
+    if (aalMediaPlaylistProvider()->mediaCount() == 0)
     {
+        qDebug() << "Tracklist was cleared, resetting m_currentIndex to -1";
         m_currentIndex = -1;
         m_currentId.clear();
     }

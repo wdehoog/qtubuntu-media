@@ -276,6 +276,19 @@ void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
     m_currentId = aalMediaPlaylistProvider()->trackOfIndex(m_currentIndex);
 }
 
+void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
+{
+    // If the entire playlist is cleared, we need to reset the currentIndex
+    // to just before the beginning of the list, otherwise if the user selects
+    // a random track in the tracklist for a second time, track 0 is always
+    // selected instead of the desired track index
+    if ((end+1 - start) == aalMediaPlaylistProvider()->mediaCount())
+    {
+        m_currentIndex = -1;
+        m_currentId.clear();
+    }
+}
+
 void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
     int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
@@ -342,6 +355,9 @@ void AalMediaPlaylistControl::connect_signals()
 
     connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::startMoveTrack,
             this, &AalMediaPlaylistControl::onStartMoveTrack);
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::mediaRemoved,
+            this, &AalMediaPlaylistControl::onMediaRemoved);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()

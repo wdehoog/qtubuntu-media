@@ -287,8 +287,8 @@ void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
     // selected instead of the desired track index
     if (aalMediaPlaylistProvider()->mediaCount() == 0)
     {
-        qDebug() << "Tracklist was cleared, resetting m_currentIndex to -1";
-        m_currentIndex = -1;
+        qDebug() << "Tracklist was cleared, resetting m_currentIndex to 0";
+        m_currentIndex = 0;
         m_currentId.clear();
     }
 }

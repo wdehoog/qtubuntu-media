@@ -295,10 +295,16 @@ void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
 
 void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
-    int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
+    const int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
+    if (index == -1)
+    {
+        qDebug() << "Current playing track was removed, updating current track to index 0";
+        setCurrentIndex(0);
+        return;
+    }
 
     if (index != m_currentIndex) {
-        qDebug() << "Index changed to " << index;
+        qDebug() << "Index changed to" << index;
         m_currentIndex = index;
         Q_EMIT currentIndexChanged(m_currentIndex);
     }

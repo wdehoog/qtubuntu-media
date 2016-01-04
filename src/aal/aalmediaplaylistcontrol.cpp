@@ -44,7 +44,6 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
       m_trackChangedConnection(the_void.connect([](){})),
       m_trackMovedConnection(the_void.connect([](){}))
 {
-    qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
@@ -277,6 +276,23 @@ void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
     m_currentId = aalMediaPlaylistProvider()->trackOfIndex(m_currentIndex);
 }
 
+void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
+{
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+
+    // If the entire playlist is cleared, we need to reset the currentIndex
+    // to just before the beginning of the list, otherwise if the user selects
+    // a random track in the tracklist for a second time, track 0 is always
+    // selected instead of the desired track index
+    if (aalMediaPlaylistProvider()->mediaCount() == 0)
+    {
+        qDebug() << "Tracklist was cleared, resetting m_currentIndex to 0";
+        m_currentIndex = 0;
+        m_currentId.clear();
+    }
+}
+
 void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
     int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
@@ -343,6 +359,9 @@ void AalMediaPlaylistControl::connect_signals()
 
     connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::startMoveTrack,
             this, &AalMediaPlaylistControl::onStartMoveTrack);
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::mediaRemoved,
+            this, &AalMediaPlaylistControl::onMediaRemoved);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()

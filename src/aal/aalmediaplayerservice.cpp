@@ -298,11 +298,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         qWarning() << "Cannot open uri without a valid media-hub player session";
         return;
     }
-    if (url.isEmpty())
-    {
-        qWarning() << "Failed to set media source, url must be set." << endl;
-        return;
-    }
 
     // This is critical to allowing a different video source to be able to play correctly
     // if another video is already playing in the same AalMediaPlayerService instance
@@ -313,8 +308,12 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     }
 
     qDebug() << "Setting media to: " << url;
+
+    if (m_mediaPlaylistProvider && url.isEmpty())
+        m_mediaPlaylistProvider->clear();
+
     const media::Track::UriType uri(url.url().toStdString());
-    if (m_mediaPlaylistProvider == nullptr)
+    if (m_mediaPlaylistProvider == nullptr || m_mediaPlaylistProvider->mediaCount() == 0)
     {
         try {
             m_hubPlayerSession->open_uri(uri);
@@ -323,42 +322,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
             qWarning() << "Failed to set media " << url << ": " << e.what();
             return;
         }
-    }
-
-    // Make sure this player can be controlled by MPRIS if appropriate
-    updateCurrentPlayer();
-
-    if (isVideoSource())
-        m_videoOutput->setupSurface();
-}
-
-void AalMediaPlayerService::setMedia(const QMediaContent &media)
-{
-    if (m_hubPlayerSession == NULL)
-    {
-        qWarning() << "Cannot open media without a valid media-hub player session";
-        return;
-    }
-    if (m_mediaPlaylistProvider == NULL)
-    {
-        qWarning() << "Cannot open media without a valid QMediaPlaylistProvider instance";
-        return;
-    }
-    if (media.isNull())
-    {
-        qWarning() << "Failed to set media source, media must be set." << endl;
-        return;
-    }
-
-    qDebug() << "Setting media to: " << AalUtility::unescape(media);
-    try {
-        // TODO: Change this to use the QUrl from QMediaContent and then call
-        // open_uri(uri) like the other version of setMedia does above
-        m_mediaPlaylistProvider->addMedia(media);
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to set media " << AalUtility::unescape(media) << ": " << e.what();
-        return;
     }
 
     // Make sure this player can be controlled by MPRIS if appropriate
@@ -717,7 +680,7 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
             qWarning() << "Unknown PlaybackStatus: " << m_newStatus;
     }
 
-    qDebug() << "PlaybackStatus changed to: " << m_newStatus;
+    qDebug() << "PlaybackStatus changed to: " << playbackStatusStr(m_newStatus);
 }
 
 void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state)
@@ -830,13 +793,31 @@ void AalMediaPlayerService::updateCurrentPlayer()
     }
 }
 
-void AalMediaPlayerService::onError(const core::ubuntu::media::Player::Error &error)
+void AalMediaPlayerService::onError(const media::Player::Error &error)
 {
     qWarning() << "** Media playback error: " << error;
     signalQMediaPlayerError(error);
 }
 
-void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media::Player> &player)
+QString AalMediaPlayerService::playbackStatusStr(const media::Player::PlaybackStatus &status)
+{
+    switch (status)
+    {
+        case media::Player::PlaybackStatus::ready:
+            return "ready";
+        case media::Player::PlaybackStatus::stopped:
+            return "stopped";
+        case media::Player::PlaybackStatus::paused:
+            return "paused";
+        case media::Player::PlaybackStatus::playing:
+            return "playing";
+        default:
+            qWarning() << "Unknown PlaybackStatus: " << status;
+            return QString();
+    }
+}
+
+void AalMediaPlayerService::setPlayer(const std::shared_ptr<media::Player> &player)
 {
     m_hubPlayerSession = player;
 
@@ -853,7 +834,7 @@ void AalMediaPlayerService::setPlayer(const std::shared_ptr<core::ubuntu::media:
     }
 }
 
-void AalMediaPlayerService::setService(const std::shared_ptr<core::ubuntu::media::Service> &service)
+void AalMediaPlayerService::setService(const std::shared_ptr<media::Service> &service)
 {
     m_hubService = service;
 }

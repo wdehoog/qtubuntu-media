@@ -64,6 +64,7 @@ private Q_SLOTS:
     void onTrackChanged(const core::ubuntu::media::Track::Id& id);
     void onStartMoveTrack(int from, int to);
     void onMediaRemoved(int start, int end);
+    void onRemoveTracks(int start, int end);
     void onCurrentIndexChanged();
 
 private:

@@ -385,7 +385,7 @@ void AalMediaPlaylistControl::connect_signals()
             this, &AalMediaPlaylistControl::onMediaRemoved);
 
     connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::removeTracks,
-+            this, &AalMediaPlaylistControl::onRemoveTracks);
+            this, &AalMediaPlaylistControl::onRemoveTracks);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()

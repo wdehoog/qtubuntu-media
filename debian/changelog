@@ -5,6 +5,13 @@ qtubuntu-media (0.8.0+16.04.20160105-0ubuntu1) xenial; urgency=medium
 
  -- Thomas Voß <ci-train-bot@canonical.com>  Tue, 05 Jan 2016 13:07:12 +0000
 
+qtubuntu-media (0.8.0+15.04.20160104-0ubuntu1) vivid; urgency=medium
+
+  * Fix removeMedia(start, end) so that it always removes the correct
+    track(s) and reflects the proper current track
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Mon, 04 Jan 2016 14:09:33 +0000
+
 qtubuntu-media (0.8.0+15.04.20151118-0ubuntu1) vivid; urgency=medium
 
   [ phablet ]

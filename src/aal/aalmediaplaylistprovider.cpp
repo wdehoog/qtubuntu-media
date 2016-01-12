@@ -22,6 +22,9 @@
 
 #include <QDebug>
 
+// Uncomment for more verbose debugging to stdout/err
+//#define VERBOSE_DEBUG
+
 namespace media = core::ubuntu::media;
 
 Q_DECLARE_METATYPE(core::ubuntu::media::Track::Id)
@@ -40,7 +43,6 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackListResetConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1)
 {
-    qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
@@ -56,8 +58,6 @@ int AalMediaPlaylistProvider::mediaCount() const
         qWarning() << "Tracklist doesn't exist";
         return 0;
     }
-
-    //qDebug() << "track_index_lut.size(): " << track_index_lut.size();
 
     return track_index_lut.size();
 }
@@ -148,7 +148,9 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
 
     media::TrackList::ContainerURI uris;
     for (const auto mediaContent : contentList) {
+#ifdef VERBOSE_DEBUG
         qDebug() << "Adding track " << AalUtility::unescape(mediaContent).toString();
+#endif
         uris.push_back(AalUtility::unescape_str(mediaContent));
     }
 
@@ -325,12 +327,25 @@ bool AalMediaPlaylistProvider::removeMedia(int pos)
 
 bool AalMediaPlaylistProvider::removeMedia(int start, int end)
 {
-    for (int i=start; i<=end; i++)
+    // If we are removing everything then just use clear()
+    if (start == 0 and (end + 1) == mediaCount())
     {
-        if (!removeMedia(i))
+        return clear();
+    }
+    else
+    {
+        // Signal AalMediaPlaylistControl
+        Q_EMIT removeTracks(start, end);
+
+        // It's important that we remove tracks from end to start as removing tracks can
+        // change the relative index value in track_index_lut relative to the Track::Id
+        for (int i=end; i>=start; i--)
         {
-            qWarning() << "Failed to remove the full range of tracks requested";
-            return false;
+            if (!removeMedia(i))
+            {
+                qWarning() << "Failed to remove the full range of tracks requested";
+                return false;
+            }
         }
     }
 
@@ -462,6 +477,7 @@ void AalMediaPlaylistProvider::connect_signals()
     m_trackRemovedConnection = m_hubTrackList->on_track_removed().connect([this](const media::Track::Id& id)
     {
         const int index = indexOfTrack(id);
+        qDebug() << "*** Removing track Id: " << id.c_str() << "with index " << index;
         Q_EMIT mediaAboutToBeRemoved(index, index);
         // Remove the track from the local look-up-table
         const bool ret = removeTrack(id);

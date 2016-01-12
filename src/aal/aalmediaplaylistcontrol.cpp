@@ -44,7 +44,6 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
       m_trackChangedConnection(the_void.connect([](){})),
       m_trackMovedConnection(the_void.connect([](){}))
 {
-    qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
@@ -277,12 +276,50 @@ void AalMediaPlaylistControl::onStartMoveTrack(int from, int to)
     m_currentId = aalMediaPlaylistProvider()->trackOfIndex(m_currentIndex);
 }
 
+void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
+{
+    Q_UNUSED(start);
+    Q_UNUSED(end);
+
+    // If the entire playlist is cleared, we need to reset the currentIndex
+    // to just before the beginning of the list, otherwise if the user selects
+    // a random track in the tracklist for a second time, track 0 is always
+    // selected instead of the desired track index
+    if (aalMediaPlaylistProvider()->mediaCount() == 0)
+    {
+        qDebug() << "Tracklist was cleared, resetting m_currentIndex to 0";
+        m_currentIndex = 0;
+        m_currentId.clear();
+    }
+}
+
+void AalMediaPlaylistControl::onRemoveTracks(int start, int end)
+{
+    // If the current track and everything after has been removed
+    // then we need to set the currentIndex to 0 otherwise it is
+    // left at the position it was before removing
+    if (start <= m_currentIndex
+            and m_currentIndex <= end
+            and (end + 1) == m_playlistProvider->mediaCount()
+            and start != 0)
+    {
+        m_currentIndex = 0;
+        setCurrentIndex(0);
+
+        // When repeat is off we have reached the end of playback so stop
+        if (playbackMode() == QMediaPlaylist::Sequential)
+        {
+            qDebug() << "Repeat is off, so stopping playback";
+            m_hubPlayerSession->stop();
+        }
+    }
+}
+
 void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
-    int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
-
+    const int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
     if (index != m_currentIndex) {
-        qDebug() << "Index changed to " << index;
+        qDebug() << "Index changed to" << index;
         m_currentIndex = index;
         Q_EMIT currentIndexChanged(m_currentIndex);
     }
@@ -343,6 +380,12 @@ void AalMediaPlaylistControl::connect_signals()
 
     connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::startMoveTrack,
             this, &AalMediaPlaylistControl::onStartMoveTrack);
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::mediaRemoved,
+            this, &AalMediaPlaylistControl::onMediaRemoved);
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::removeTracks,
+            this, &AalMediaPlaylistControl::onRemoveTracks);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()

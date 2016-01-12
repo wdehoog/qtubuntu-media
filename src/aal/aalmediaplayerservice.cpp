@@ -228,21 +228,41 @@ void AalMediaPlayerService::resetVideoSink()
         m_videoOutput->playbackComplete();
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
 QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
+#else
+QAudio::Role AalMediaPlayerService::audioRole() const
+#endif
 {
     if (m_hubPlayerSession == NULL)
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
         return QMediaPlayer::MultimediaRole;
+#else
+        return QAudio::VideoRole;
+#endif
 
     try {
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
         return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
+#else
+        return static_cast<QAudio::Role>(m_hubPlayerSession->audio_stream_role().get());
+#endif
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to get audio stream role: " << e.what();
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
         return QMediaPlayer::MultimediaRole;
+#else
+        return QAudio::VideoRole;
+#endif
     }
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
 void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
+#else
+void AalMediaPlayerService::setAudioRole(QAudio::Role audioRole)
+#endif
 {
     if (m_hubPlayerSession == NULL)
         return;
@@ -756,7 +776,11 @@ void AalMediaPlayerService::updateCurrentPlayer()
 {
         // If this player is a multimedia audioRole, then it should possible to
         // use it for MPRIS control
+#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
     if (audioRole() == QMediaPlayer::MultimediaRole)
+#else
+    if (audioRole() == QAudio::VideoRole || audioRole() == QAudio::MusicRole)
+#endif
     {
         qDebug() << "Setting player as current player";
         try {

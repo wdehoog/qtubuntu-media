@@ -50,7 +50,7 @@ class TestService : public Service
     virtual void destroy_session(const std::string& uuid, const Player::Configuration&);
     virtual std::shared_ptr<Player> create_fixed_session(const std::string& name, const Player::Configuration&);
     virtual std::shared_ptr<Player> resume_session(Player::PlayerKey);
-    virtual void set_current_player(Player::PlayerKey key);
+    virtual void set_current_player(Player::PlayerKey);
     virtual void pause_other_sessions(Player::PlayerKey);
 };
 }

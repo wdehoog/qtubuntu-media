@@ -1,3 +1,10 @@
+qtubuntu-media (0.8.0+16.04.20160105-0ubuntu1) xenial; urgency=medium
+
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Thomas Voß <ci-train-bot@canonical.com>  Tue, 05 Jan 2016 13:07:12 +0000
+
 qtubuntu-media (0.8.0+15.04.20160104-0ubuntu1) vivid; urgency=medium
 
   * Fix removeMedia(start, end) so that it always removes the correct
@@ -29,18 +36,14 @@ qtubuntu-media (0.8.0+15.04.20151118-0ubuntu1) vivid; urgency=medium
 
  -- Jim Hodapp <ci-train-bot@canonical.com>  Wed, 18 Nov 2015 16:32:22 +0000
 
-qtubuntu-media (0.7.1+15.04.20151023.3-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+16.04.20151104.1-0ubuntu1) xenial; urgency=medium
 
-  [ CI Train Bot ]
-  * New rebuild forced.
+  [ Timo Jyrinki ]
+  * Port to the new Audio Role API (LP: #1493851) (LP: #1493851)
 
-  [ Jim Hodapp ]
-  * Added addTracks support for batch track adding. Improved the
-    robustness of the QMediaPlaylist integration tests.
+ -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 04 Nov 2015 08:31:35 +0000
 
- -- Jim Hodapp <ci-train-bot@canonical.com>  Fri, 23 Oct 2015 16:43:38 +0000
-
-qtubuntu-media (0.7.1+15.04.20151014-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+15.10.20151020.1-0ubuntu1) wily; urgency=medium
 
   [ Alfonso Sanchez-Beato ]
   * Make sure the that the current player instance is controlable by
@@ -54,19 +57,72 @@ qtubuntu-media (0.7.1+15.04.20151014-0ubuntu1) vivid; urgency=medium
     control. Also, don't add a track to the tracklist when
     AalMediaPlayerService::setMedia() is called. (LP: #1500859)
 
- -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 14 Oct 2015 20:58:46 +0000
+  [ CI Train Bot ]
+  * No-change rebuild.
 
-qtubuntu-media (0.7.1+15.04.20150828-0ubuntu1) vivid; urgency=medium
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Tue, 20 Oct 2015 13:10:40 +0000
 
-  [ Jim Hodapp ]
-  * Bump version for vivid sync
+qtubuntu-media (0.7.1+15.10.20151019.1-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
 
- -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 28 Aug 2015 13:52:24 +0000
+  [ Jim Hodapp ]
+  * Get rid of the unnecessary dependency on libmediascanner. Update
+    mock service interface with changes from media-hub. (LP: #1500859)
 
-qtubuntu-media (0.7.1+15.04.20150710-0ubuntu1) vivid; urgency=medium
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Mon, 19 Oct 2015 16:21:01 +0000
+
+qtubuntu-media (0.7.1+15.10.20150903.1-0ubuntu1) wily; urgency=medium
+
+  [ Alfonso Sanchez-Beato ]
+  * [ Jim Hodapp ] Added background playlist support connecting
+    qtmultimedia with media-hub. added:
+    src/aal/aalmediaplaylistcontrol.cpp
+    src/aal/aalmediaplaylistcontrol.h
+    src/aal/aalmediaplaylistprovider.cpp
+    src/aal/aalmediaplaylistprovider.h src/aal/aalutility.cpp
+    src/aal/aalutility.h src/aal/private/
+    src/aal/private/qmediaplaylistnavigator_p.h
+    src/aal/private/qmediaplaylistprovider_p.h
+    src/aal/qmediaplaylistcontrol_p.h tests/integration/
+    tests/integration/integration.pro tests/integration/testdata/
+    tests/integration/testdata/testfile.mp4
+    tests/integration/testdata/testfile.ogg
+    tests/integration/tst_mediaplaylist.cpp
+    tests/integration/tst_mediaplaylist.h tests/tests.pro tests/unit/
+    tests/unit/player_mock.cpp tests/unit/player_mock.h
+    tests/unit/tst_mediaplaylistcontrol.cpp
+    tests/unit/tst_mediaplaylistcontrol.h renamed: unittests/ => tests/
+    unittests/player.cpp => tests/unit/player.cpp unittests/player.h =>
+    tests/unit/player.h unittests/service.cpp => tests/unit/service.cpp
+    unittests/service.h => tests/unit/service.h
+    unittests/setup_mediascanner.sh => tests/unit/setup_mediascanner.sh
+    unittests/tst_mediaplayerplugin.cpp =>
+    tests/unit/tst_mediaplayerplugin.cpp
+    unittests/tst_mediaplayerplugin.h =>
+    tests/unit/tst_mediaplayerplugin.h
+    unittests/tst_metadatareadercontrol.cpp =>
+    tests/unit/tst_metadatareadercontrol.cpp
+    unittests/tst_metadatareadercontrol.h =>
+    tests/unit/tst_metadatareadercontrol.h unittests/unittests.pro =>
+    tests/unit/unit.pro
+
+ -- CI Train Bot <ci-train-bot@canonical.com>  Thu, 03 Sep 2015 08:25:29 +0000
+
+qtubuntu-media (0.7.1+15.10.20150710-0ubuntu2~gcc5.2) wily; urgency=medium
+
+  * No-change test rebuild for g++5 ABI transition
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 30 Jul 2015 12:09:11 +0200
+
+qtubuntu-media (0.7.1+15.10.20150710-0ubuntu2~gcc5.1) wily; urgency=medium
+
+  * No-change test rebuild for g++5 ABI transition
+
+ -- Steve Langasek <steve.langasek@ubuntu.com>  Wed, 22 Jul 2015 23:30:42 +0000
+
+qtubuntu-media (0.7.1+15.10.20150710-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -77,7 +133,7 @@ qtubuntu-media (0.7.1+15.04.20150710-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 10 Jul 2015 18:12:45 +0000
 
-qtubuntu-media (0.7.1+15.04.20150602.3-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+15.10.20150602.3-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -88,7 +144,7 @@ qtubuntu-media (0.7.1+15.04.20150602.3-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 19:37:22 +0000
 
-qtubuntu-media (0.7.1+15.04.20150602.1-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+15.10.20150602.1-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -98,7 +154,7 @@ qtubuntu-media (0.7.1+15.04.20150602.1-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Tue, 02 Jun 2015 16:55:53 +0000
 
-qtubuntu-media (0.7.1+15.04.20150527.2-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+15.10.20150527.2-0ubuntu1) wily; urgency=medium
 
   [ CI Train Bot ]
   * New rebuild forced.
@@ -110,13 +166,24 @@ qtubuntu-media (0.7.1+15.04.20150527.2-0ubuntu1) vivid; urgency=medium
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 27 May 2015 18:38:32 +0000
 
-qtubuntu-media (0.7.1+15.04.20150522-0ubuntu1) vivid; urgency=medium
+qtubuntu-media (0.7.1+15.10.20150522-0ubuntu1) wily; urgency=medium
 
   [ Jim Hodapp ]
   * Make sure that stopped and ready (same state for QMediaPlayer) are
     reported to the client app. (LP: #1435088)
 
  -- CI Train Bot <ci-train-bot@canonical.com>  Fri, 22 May 2015 17:36:57 +0000
+
+qtubuntu-media (0.7.1+15.04.20151023.3-0ubuntu1) vivid; urgency=medium
+
+  [ CI Train Bot ]
+  * New rebuild forced.
+
+  [ Jim Hodapp ]
+  * Added addTracks support for batch track adding. Improved the
+    robustness of the QMediaPlaylist integration tests.
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Fri, 23 Oct 2015 16:43:38 +0000
 
 qtubuntu-media (0.7.1+15.04.20150513.1-0ubuntu1) vivid; urgency=medium
 

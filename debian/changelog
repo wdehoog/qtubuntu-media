@@ -1,3 +1,11 @@
+qtubuntu-media (0.8.0+16.04.20160113-0ubuntu1) xenial; urgency=medium
+
+  [ Andrew Hayzen ]
+  * Until bug 1518157 (RandomAndLoop playbackMode) is fixed set Random
+    to be always looping due to bug 1531296 (LP: #1531296, #1518157)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Wed, 13 Jan 2016 17:51:38 +0000
+
 qtubuntu-media (0.8.0+16.04.20160112.1-0ubuntu1) xenial; urgency=medium
 
   [ CI Train Bot ]

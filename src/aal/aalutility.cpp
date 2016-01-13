@@ -18,17 +18,24 @@
 
 #include <QDebug>
 
+// Uncomment for more verbose debugging to stdout/err
+//#define VERBOSE_DEBUG
+
 QUrl AalUtility::unescape(const QMediaContent &media)
 {
     if (media.isNull())
         return QUrl();
 
     if (media.canonicalUrl().isLocalFile()) {
+#ifdef VERBOSE_DEBUG
         qDebug() << "Local file URI: " << QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
+#endif
         return QUrl::fromPercentEncoding(media.canonicalUrl().toString().toUtf8());
     }
     else {
+#ifdef VERBOSE_DEBUG
         qDebug() << "Remote stream URI: " << QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
+#endif
         return QUrl::fromEncoded(media.canonicalUrl().toString().toUtf8());
     }
 }

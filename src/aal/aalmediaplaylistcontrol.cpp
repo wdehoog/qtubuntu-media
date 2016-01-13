@@ -296,12 +296,33 @@ void AalMediaPlaylistControl::onMediaRemoved(int start, int end)
     }
 }
 
+void AalMediaPlaylistControl::onRemoveTracks(int start, int end)
+{
+    // If the current track and everything after has been removed
+    // then we need to set the currentIndex to 0 otherwise it is
+    // left at the position it was before removing
+    if (start <= m_currentIndex
+            and m_currentIndex <= end
+            and (end + 1) == m_playlistProvider->mediaCount()
+            and start != 0)
+    {
+        m_currentIndex = 0;
+        setCurrentIndex(0);
+
+        // When repeat is off we have reached the end of playback so stop
+        if (playbackMode() == QMediaPlaylist::Sequential)
+        {
+            qDebug() << "Repeat is off, so stopping playback";
+            m_hubPlayerSession->stop();
+        }
+    }
+}
+
 void AalMediaPlaylistControl::onCurrentIndexChanged()
 {
-    int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
-
+    const int index = aalMediaPlaylistProvider()->indexOfTrack(m_currentId);
     if (index != m_currentIndex) {
-        qDebug() << "Index changed to " << index;
+        qDebug() << "Index changed to" << index;
         m_currentIndex = index;
         Q_EMIT currentIndexChanged(m_currentIndex);
     }
@@ -365,6 +386,9 @@ void AalMediaPlaylistControl::connect_signals()
 
     connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::mediaRemoved,
             this, &AalMediaPlaylistControl::onMediaRemoved);
+
+    connect(aalMediaPlaylistProvider(), &AalMediaPlaylistProvider::removeTracks,
+            this, &AalMediaPlaylistControl::onRemoveTracks);
 }
 
 void AalMediaPlaylistControl::disconnect_signals()

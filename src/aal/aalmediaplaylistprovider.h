@@ -64,6 +64,9 @@ public:
 Q_SIGNALS:
     void startMoveTrack(int from, int to);
     void currentIndexChanged();
+    // Emitted when removing a range of tracks less than mediaCount()
+    // so that AalMediaPlaylistControl can take appropriate action
+    void removeTracks(int start, int end);
 
 private:
     void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);

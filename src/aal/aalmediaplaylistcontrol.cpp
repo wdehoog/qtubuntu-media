@@ -232,6 +232,9 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
         case QMediaPlaylist::Random:
             qDebug() << "PlaybackMode: Random";
             m_hubPlayerSession->shuffle() = true;
+            // FIXME: Until pad.lv/1518157 (RandomAndLoop playbackMode) is
+            // fixed set Random to be always looping due to pad.lv/1531296
+            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
             break;
         default:
             qWarning() << "Unknown playback mode: " << mode;

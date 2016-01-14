@@ -1,3 +1,10 @@
+qtubuntu-media (0.8.0+16.04.20160114.1-0ubuntu1) xenial; urgency=medium
+
+  * Make sure to catch and report the exception
+    InsufficientPermissionsToAddTrack (LP: #1533779)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Thu, 14 Jan 2016 21:12:51 +0000
+
 qtubuntu-media (0.8.0+16.04.20160113-0ubuntu1) xenial; urgency=medium
 
   [ Andrew Hayzen ]

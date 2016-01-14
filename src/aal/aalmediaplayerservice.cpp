@@ -318,6 +318,10 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         try {
             m_hubPlayerSession->open_uri(uri);
         }
+        catch (const media::Player::Errors::InsufficientAppArmorPermissions &e) {
+            qWarning() << e.what();
+            return;
+        }
         catch (const std::runtime_error &e) {
             qWarning() << "Failed to set media " << url << ": " << e.what();
             return;

@@ -44,3 +44,9 @@ std::string AalUtility::unescape_str(const QMediaContent &media)
 {
     return unescape(media).toString().toStdString();
 }
+
+std::string AalUtility::encode_uri(const QUrl &uri)
+{
+    return std::string(
+            uri.toString().toLocal8Bit().toPercentEncoding("!$&'()*+,;=:/?[]@").constData());
+}

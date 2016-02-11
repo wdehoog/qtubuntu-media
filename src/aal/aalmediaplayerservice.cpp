@@ -312,7 +312,9 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     if (m_mediaPlaylistProvider && url.isEmpty())
         m_mediaPlaylistProvider->clear();
 
-    const media::Track::UriType uri(url.url().toStdString());
+    // Make sure to pass a valid URI to media-hub as it will not play a file path
+    // (i.e. without file://) and it won't play a non-encoded URI (e.g. "file://path/name#1.ogg")
+    const media::Track::UriType uri = AalUtility::encode_uri(url);
     if (m_mediaPlaylistProvider == nullptr || m_mediaPlaylistProvider->mediaCount() == 0)
     {
         try {

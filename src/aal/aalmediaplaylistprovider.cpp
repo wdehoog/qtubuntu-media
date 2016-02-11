@@ -108,7 +108,7 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
     }
 
     const QUrl url = content.canonicalUrl();
-    std::string urlStr = AalUtility::unescape_str(content);
+    std::string urlStr = AalUtility::encode_uri(url);
     if (url.scheme().isEmpty() and url.scheme() != "file")
         urlStr = "file://" + urlStr;
 

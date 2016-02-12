@@ -47,6 +47,13 @@ std::string AalUtility::unescape_str(const QMediaContent &media)
 
 std::string AalUtility::encode_uri(const QUrl &uri)
 {
-    return std::string(
-            uri.toString().toLocal8Bit().toPercentEncoding("!$&'()*+,;=:/?[]@").constData());
+    std::string tmp {uri.toString().toLocal8Bit().toPercentEncoding("!$&'()*+,;=:/?[]@").constData()};
+    // We want to remove the encoding for the '%' character otherwise it will cause media-hub
+    // to not be able to find the filename. toPercentEncoding() will always encode the '%' character,
+    // thus we can't simply add it to the exclude list.
+    const std::string::size_type i = tmp.find("%25");
+    if (i != std::string::npos)
+        tmp.erase(i+1, 2);
+
+    return tmp;
 }

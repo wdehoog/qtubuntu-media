@@ -633,10 +633,12 @@ void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &
         case media::Player::Error::resource_error:
             outError = QMediaPlayer::ResourceError;
             outErrorStr = "A media resource couldn't be resolved.";
+            m_mediaPlayerControl->setMediaStatus(QMediaPlayer::InvalidMedia);
             break;
         case media::Player::Error::format_error:
             outError = QMediaPlayer::FormatError;
             outErrorStr = "The media format type is not playable due to a missing codec.";
+            m_mediaPlayerControl->setMediaStatus(QMediaPlayer::InvalidMedia);
             break;
         case media::Player::Error::network_error:
             outError = QMediaPlayer::NetworkError;
@@ -645,6 +647,7 @@ void AalMediaPlayerService::signalQMediaPlayerError(const media::Player::Error &
         case media::Player::Error::access_denied_error:
             outError = QMediaPlayer::AccessDeniedError;
             outErrorStr = "Insufficient privileges to play that media.";
+            m_mediaPlayerControl->setMediaStatus(QMediaPlayer::InvalidMedia);
             break;
         case media::Player::Error::service_missing_error:
             outError = QMediaPlayer::ServiceMissingError;

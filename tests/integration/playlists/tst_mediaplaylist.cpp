@@ -15,7 +15,7 @@
  */
 
 #include "tst_mediaplaylist.h"
-#include "aalutility.h"
+#include "../../../src/aal/aalutility.h"
 
 #include <thread>
 #include <unistd.h>

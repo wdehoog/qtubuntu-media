@@ -109,7 +109,7 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
 
     const QUrl url = content.canonicalUrl();
     std::string urlStr = AalUtility::encode_uri(url);
-    if (url.scheme().isEmpty() and url.scheme() != "file")
+    if (url.scheme().isEmpty())
         urlStr = "file://" + urlStr;
 
     static const bool make_current = false;
@@ -149,9 +149,9 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
     media::TrackList::ContainerURI uris;
     for (const auto mediaContent : contentList) {
 #ifdef VERBOSE_DEBUG
-        qDebug() << "Adding track " << AalUtility::unescape(mediaContent).toString();
+        qDebug() << "Adding track " << AalUtility::encode_uri(mediaContent).toString();
 #endif
-        uris.push_back(AalUtility::unescape_str(mediaContent));
+        uris.push_back(AalUtility::encode_uri(mediaContent.canonicalUrl()));
     }
 
     const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
@@ -186,7 +186,7 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &conte
     }
 
     const QUrl url = content.canonicalUrl();
-    std::string urlStr = AalUtility::unescape_str(content);
+    std::string urlStr = AalUtility::encode_uri(content.canonicalUrl());
     if (url.scheme().isEmpty() and url.scheme() != "file")
         urlStr = "file://" + urlStr;
 

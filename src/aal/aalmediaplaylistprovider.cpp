@@ -108,7 +108,7 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
     }
 
     const QUrl url = content.canonicalUrl();
-    std::string urlStr = AalUtility::encode_uri(url);
+    std::string urlStr = url.toString().toStdString();
     if (url.scheme().isEmpty())
         urlStr = "file://" + urlStr;
 
@@ -123,11 +123,19 @@ bool AalMediaPlaylistProvider::addMedia(const QMediaContent &content)
     }
     catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
     {
-        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString()
+                   << "' to playlist:" << e.what();
+        return false;
+    }
+    catch (const media::Player::Errors::UriNotFound &e)
+    {
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString()
+                   << "' to playlist:" << e.what();
         return false;
     }
     catch (const std::runtime_error &e) {
-        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString()
+                   << "' to playlist: " << e.what();
         return false;
     }
 
@@ -149,9 +157,9 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
     media::TrackList::ContainerURI uris;
     for (const auto mediaContent : contentList) {
 #ifdef VERBOSE_DEBUG
-        qDebug() << "Adding track " << AalUtility::encode_uri(mediaContent).toString();
+        qDebug() << "Adding track " << mediaContent.canonicalUrl().toString().toStdString();
 #endif
-        uris.push_back(AalUtility::encode_uri(mediaContent.canonicalUrl()));
+        uris.push_back(mediaContent.canonicalUrl().toString().toStdString());
     }
 
     const media::Track::Id after_empty_track = media::TrackList::after_empty_track();
@@ -161,6 +169,11 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
         m_hubTrackList->add_tracks_with_uri_at(uris, after_empty_track);
     }
     catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
+    {
+        qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
+        return false;
+    }
+    catch (const media::Player::Errors::UriNotFound &e)
     {
         qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
         return false;
@@ -186,7 +199,7 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &conte
     }
 
     const QUrl url = content.canonicalUrl();
-    std::string urlStr = AalUtility::encode_uri(content.canonicalUrl());
+    std::string urlStr = url.toString().toStdString();
     if (url.scheme().isEmpty() and url.scheme() != "file")
         urlStr = "file://" + urlStr;
 
@@ -212,11 +225,13 @@ bool AalMediaPlaylistProvider::insertMedia(int index, const QMediaContent &conte
     }
     catch (const media::TrackList::Errors::InsufficientPermissionsToAddTrack &e)
     {
-        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString()
+                   << "' to playlist: " << e.what();
         return false;
     }
     catch (const std::runtime_error &e) {
-        qWarning() << "Failed to add track '" << content.canonicalUrl().toString() << "' to playlist: " << e.what();
+        qWarning() << "Failed to add track '" << content.canonicalUrl().toString()
+                   << "' to playlist: " << e.what();
         return false;
     }
 

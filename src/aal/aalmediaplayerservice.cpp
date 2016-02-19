@@ -312,16 +312,19 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
     if (m_mediaPlaylistProvider && url.isEmpty())
         m_mediaPlaylistProvider->clear();
 
-    // Make sure to pass a valid URI to media-hub as it will not play a file path
-    // (i.e. without file://) and it won't play a non-encoded URI (e.g. "file://path/name#1.ogg")
-    const media::Track::UriType uri = AalUtility::encode_uri(url);
     if (m_mediaPlaylistProvider == nullptr || m_mediaPlaylistProvider->mediaCount() == 0)
     {
         try {
-            m_hubPlayerSession->open_uri(uri);
+            m_hubPlayerSession->open_uri(url.toString().toStdString());
         }
         catch (const media::Player::Errors::InsufficientAppArmorPermissions &e) {
             qWarning() << e.what();
+            signalQMediaPlayerError(media::Player::Error::resource_error);
+            return;
+        }
+        catch (const media::Player::Errors::UriNotFound &e) {
+            qWarning() << e.what();
+            signalQMediaPlayerError(media::Player::Error::resource_error);
             return;
         }
         catch (const std::runtime_error &e) {

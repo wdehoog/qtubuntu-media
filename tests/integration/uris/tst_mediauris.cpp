@@ -52,7 +52,36 @@ void tst_MediaUris::init()
     sleep(1);
 }
 
-void tst_MediaUris::verifySpecialAsciiCharsCanPlay()
+void tst_MediaUris::verifySpecialAsciiCharsCanPlaySetMedia()
+{
+    QDir generatedFilesDir("/tmp/qtubuntu-media");
+    QStringList mediaFiles = generatedFilesDir.entryList(QDir::NoDotAndDotDot | QDir::System
+           | QDir::Hidden | QDir::AllDirs | QDir::Files, QDir::DirsFirst);
+
+    qDebug() << "mediaFiles.size():" << mediaFiles.size();
+
+    QMediaPlayer *player = new QMediaPlayer;
+
+    for (const QString &file : mediaFiles)
+    {
+        const QString fullFileUri {"file://" + generatedFilesDir.absolutePath() + "/" + file};
+        const QMediaContent content {QUrl{fullFileUri}};
+        qDebug() << "Trying to play file:" << fullFileUri;
+        player->setMedia(content);
+
+        player->play();
+        sleep(1);
+        qDebug() << "player->error():" << player->error();
+        qDebug() << "player->mediaStatus():" << player->mediaStatus();
+        QVERIFY(player->mediaStatus() != QMediaPlayer::InvalidMedia);
+        QCOMPARE(player->state(), QMediaPlayer::State::PlayingState);
+        player->stop();
+    }
+
+    delete player;
+}
+
+void tst_MediaUris::verifySpecialAsciiCharsCanPlayPlaylist()
 {
     QDir generatedFilesDir("/tmp/qtubuntu-media");
     QStringList mediaFiles = generatedFilesDir.entryList(QDir::NoDotAndDotDot | QDir::System
@@ -66,9 +95,9 @@ void tst_MediaUris::verifySpecialAsciiCharsCanPlay()
 
     for (const QString &file : mediaFiles)
     {
-        QString fullFilePath {"file://" + generatedFilesDir.absolutePath() + "/" + file};
-        qDebug() << "Trying to play file:" << fullFilePath;
-        playlist->addMedia(QUrl(fullFilePath));
+        QString fullFileUri {"file://" + generatedFilesDir.absolutePath() + "/" + file};
+        qDebug() << "Trying to play file:" << fullFileUri;
+        playlist->addMedia(QUrl(fullFileUri));
 
         player->play();
         sleep(1);

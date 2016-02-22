@@ -26,10 +26,6 @@ struct AalUtility
 {
     static QUrl unescape(const QMediaContent &media);
     static std::string unescape_str(const QMediaContent &media);
-    // URI encodes special characters by first converting the uri
-    // string to 8 bit locale encoding, then returns a URI-style percent
-    // encoded string
-    static std::string encode_uri(const QUrl &uri);
 
     AalUtility() = delete;
     AalUtility(const AalUtility&) = delete;

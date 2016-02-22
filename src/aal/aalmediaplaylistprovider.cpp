@@ -175,7 +175,7 @@ bool AalMediaPlaylistProvider::addMedia(const QList<QMediaContent> &contentList)
     }
     catch (const media::Player::Errors::UriNotFound &e)
     {
-        qWarning() << "Failed to add" << contentList.size() << "tracks to playlist: " << e.what();
+        qWarning() << "Failed to add certain tracks to playlist: " << e.what();
         return false;
     }
     catch (const std::runtime_error &e) {

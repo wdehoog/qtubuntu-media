@@ -42,7 +42,8 @@ private Q_SLOTS:
 
     void init();
 
-    void verifySpecialAsciiCharsCanPlay();
+    void verifySpecialAsciiCharsCanPlaySetMedia();
+    void verifySpecialAsciiCharsCanPlayPlaylist();
 
 private:
 };

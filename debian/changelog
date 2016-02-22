@@ -1,3 +1,10 @@
+qtubuntu-media (0.8.0+16.04.20160222.1-0ubuntu1) xenial; urgency=medium
+
+  * URI encode the URI that we call setMedia() on or add to the playlist
+    (LP: #1449790)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Mon, 22 Feb 2016 19:00:10 +0000
+
 qtubuntu-media (0.8.0+16.04.20160114.1-0ubuntu1) xenial; urgency=medium
 
   * Make sure to catch and report the exception

@@ -1,3 +1,10 @@
+Integrations Tests:
+-------------------
+* Currently, the integration tests are disabled by default. To utilize them, you first need to
+  uncomment the last line in tests/tests.pro (starts with "system"). Then from the build/ dir,
+  run qmake -r .. followed by make. After it's done building, cd to each integration test's dir
+  within build/ and manually run each test's binary.
+
 Coding Convention:
 ------------------
 

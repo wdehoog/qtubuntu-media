@@ -4,3 +4,4 @@ TEMPLATE = subdirs
 
 SUBDIRS += uris
 SUBDIRS += playlists
+SUBDIRS += audiorole

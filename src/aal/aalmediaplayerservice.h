@@ -34,6 +34,7 @@ class AalMediaPlaylistControl;
 class AalMediaPlaylistProvider;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
+class AalAudioRoleControl;
 class tst_MediaPlayerPlugin;
 class QTimerEvent;
 
@@ -124,11 +125,13 @@ private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
     void createPlaylistControl();
+    void createAudioRoleControl();
 
     void deleteMediaPlayerControl();
     void destroyPlayerSession();
     void deleteVideoRendererControl();
     void deletePlaylistControl();
+    void deleteAudioRoleControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -147,6 +150,7 @@ private:
     AalVideoRendererControl *m_videoOutput;
     AalMediaPlaylistControl *m_mediaPlaylistControl;
     AalMediaPlaylistProvider *m_mediaPlaylistProvider;
+    AalAudioRoleControl *m_audioRoleControl;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 

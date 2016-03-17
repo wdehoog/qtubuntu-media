@@ -59,7 +59,7 @@ public:
 
     AalMediaPlayerService(QObject *parent = 0);
     AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
-            const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent = 0);
+            QObject *parent = 0);
     ~AalMediaPlayerService();
 
     QMediaControl* requestControl(const char *name);
@@ -113,6 +113,7 @@ public Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
 
 protected:
+    void constructNewPlayerService();
     void updateClientSignals();
     void connectSignals();
     void disconnectSignals();

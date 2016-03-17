@@ -77,6 +77,12 @@ Player::PlayerKey TestPlayer::key() const
     return 0;
 }
 
+media::video::Sink::Ptr TestPlayer::create_gl_texture_video_sink(uint32_t texture_id)
+{
+    Q_UNUSED(texture_id);
+    throw std::runtime_error{"Not implemented"};
+}
+
 bool TestPlayer::open_uri(const Track::UriType& uri)
 {
     Q_UNUSED(uri);
@@ -87,11 +93,6 @@ bool TestPlayer::open_uri(const Track::UriType& uri, const HeadersType&)
 {
     Q_UNUSED(uri);
     return true;
-}
-
-std::shared_ptr<core::ubuntu::media::video::Sink> TestPlayer::create_gl_texture_video_sink(uint32_t texture_id)
-{
-    Q_UNUSED(texture_id); throw std::runtime_error{"Not implemented"};
 }
 
 void TestPlayer::next()
@@ -167,12 +168,6 @@ const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() 
     return ret;
 }
 
-const core::Property<TestPlayer::Orientation>& TestPlayer::orientation() const
-{
-    static core::Property<Player::Orientation> ret(Player::Orientation::rotate0);
-    return ret;
-}
-
 const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
@@ -230,6 +225,12 @@ const core::Property<Player::AudioStreamRole>& TestPlayer::audio_stream_role() c
 {
     static const core::Property<Player::AudioStreamRole> role(Player::AudioStreamRole::multimedia);
     return role;
+}
+
+const core::Property<Player::Orientation>& TestPlayer::orientation() const
+{
+    static const core::Property<Player::Orientation> orientation(Player::Orientation::rotate0);
+    return orientation;
 }
 
 const core::Property<Player::Lifetime>& TestPlayer::lifetime() const
@@ -292,12 +293,6 @@ const core::Signal<void>& TestPlayer::end_of_stream() const
     return ret;
 }
 
-const core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed() const
-{
-    static core::Signal<Player::PlaybackStatus> ret;
-    return ret;
-}
-
 core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
 {
     static core::Signal<Player::PlaybackStatus> ret;
@@ -307,12 +302,6 @@ core::Signal<Player::PlaybackStatus>& TestPlayer::playback_status_changed()
 const core::Signal<core::ubuntu::media::video::Dimensions>& TestPlayer::video_dimension_changed() const
 {
     static core::Signal<core::ubuntu::media::video::Dimensions> ret;
-    return ret;
-}
-
-const core::Signal<uint64_t>& TestPlayer::duration_changed() const
-{
-    static core::Signal<uint64_t> ret;
     return ret;
 }
 

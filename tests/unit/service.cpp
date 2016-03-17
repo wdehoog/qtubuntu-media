@@ -15,6 +15,11 @@
  */
 
 #include "service.h"
+#include "player.h"
+
+#include <core/media/player.h>
+
+#include <memory>
 
 namespace core {
 namespace ubuntu {
@@ -22,12 +27,12 @@ namespace media {
 
 const std::shared_ptr<media::Service> TestService::Client::instance()
 {
-    return NULL;
+    return std::make_shared<TestService>();
 }
 
 std::shared_ptr<Player> TestService::create_session(const Player::Configuration&)
 {
-    return NULL;
+    return std::make_shared<TestPlayer>();
 }
 
 void TestService::detach_session(const std::string&, const Player::Configuration&)

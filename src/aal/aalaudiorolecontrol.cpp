@@ -57,6 +57,7 @@ QList<QAudio::Role> AalAudioRoleControl::supportedAudioRoles() const
                                  << QAudio::VideoRole
                                  << QAudio::AlarmRole
                                  << QAudio::NotificationRole
+                                 << QAudio::RingtoneRole
                                  << QAudio::VoiceCommunicationRole;
 }
 
@@ -98,6 +99,8 @@ media::Player::AudioStreamRole AalAudioRoleControl::fromQAudioRole(const QAudio:
         case QAudio::AlarmRole:
             return media::Player::AudioStreamRole::alarm;
         case QAudio::NotificationRole:
+            return media::Player::AudioStreamRole::alert;
+        case QAudio::RingtoneRole:
             return media::Player::AudioStreamRole::alert;
         case QAudio::VoiceCommunicationRole:
             return media::Player::AudioStreamRole::phone;

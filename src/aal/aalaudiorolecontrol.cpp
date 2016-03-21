@@ -99,7 +99,6 @@ media::Player::AudioStreamRole AalAudioRoleControl::fromQAudioRole(const QAudio:
         case QAudio::AlarmRole:
             return media::Player::AudioStreamRole::alarm;
         case QAudio::NotificationRole:
-            return media::Player::AudioStreamRole::alert;
         case QAudio::RingtoneRole:
             return media::Player::AudioStreamRole::alert;
         case QAudio::VoiceCommunicationRole:

@@ -88,6 +88,9 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
 #endif
 {
     constructNewPlayerService();
+    // Note: this must be in the constructor and not part of constructNewPlayerService()
+    // or it won't successfully connect to the signal
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
 }
 
 AalMediaPlayerService::AalMediaPlayerService
@@ -117,6 +120,9 @@ AalMediaPlayerService::AalMediaPlayerService
   #endif
 {
     constructNewPlayerService();
+    // Note: this must be in the constructor and not part of constructNewPlayerService()
+    // or it won't successfully connect to the signal
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
 }
 
 AalMediaPlayerService::~AalMediaPlayerService()
@@ -172,8 +178,6 @@ void AalMediaPlayerService::constructNewPlayerService()
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
-
-    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)

@@ -1,8 +1,12 @@
-qtubuntu-media (0.8.1+16.04.20160226.1-0ubuntu1) UNRELEASED; urgency=medium
+qtubuntu-media (0.8.1+16.04.20160322.2-0ubuntu1) xenial; urgency=medium
 
+  [ Jim Hodapp ]
   * Unify the audio role implementation between vivid and xenial.
 
- -- Jim Hodapp <jim.hodapp@canonical.com>  Fri, 26 Feb 2016 21:36:37 +0000
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 22 Mar 2016 19:25:55 +0000
 
 qtubuntu-media (0.8.0+16.04.20160222.1-0ubuntu1) xenial; urgency=medium
 

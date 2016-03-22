@@ -18,6 +18,7 @@
 #define AALMEDIAPLAYER_H
 
 #include <QMediaPlayerControl>
+#include <QtMultimedia/qaudio.h>
 
 class AalMediaPlayerService;
 

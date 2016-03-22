@@ -23,6 +23,7 @@ HEADERS += \
     aalvideorenderercontrol.h \
     aalmediaplaylistprovider.h \
     aalmediaplaylistcontrol.h \
+    aalaudiorolecontrol.h \
     aalutility.h
 
 SOURCES += \
@@ -32,4 +33,5 @@ SOURCES += \
     aalvideorenderercontrol.cpp \
     aalmediaplaylistprovider.cpp \
     aalmediaplaylistcontrol.cpp \
+    aalaudiorolecontrol.cpp \
     aalutility.cpp

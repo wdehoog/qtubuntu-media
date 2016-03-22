@@ -20,9 +20,11 @@
 
 namespace media = core::ubuntu::media;
 
-AalAudioRoleControl::AalAudioRoleControl()
+AalAudioRoleControl::AalAudioRoleControl
+    (const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
     : QAudioRoleControl()
-    , m_audioRole(QAudio::UnknownRole)
+    , m_audioRole(QAudio::MusicRole)
+    , m_hubPlayerSession(playerSession)
 {
 }
 
@@ -59,12 +61,6 @@ QList<QAudio::Role> AalAudioRoleControl::supportedAudioRoles() const
                                  << QAudio::NotificationRole
                                  << QAudio::RingtoneRole
                                  << QAudio::VoiceCommunicationRole;
-}
-
-void AalAudioRoleControl::setPlayerSession
-        (const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
-{
-    m_hubPlayerSession = playerSession;
 }
 
 QAudio::Role AalAudioRoleControl::toQAudioRole(const media::Player::AudioStreamRole &role)

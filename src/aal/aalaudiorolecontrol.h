@@ -24,7 +24,12 @@
 class AalAudioRoleControl : public QAudioRoleControl
 {
 public:
-    AalAudioRoleControl();
+    explicit AalAudioRoleControl
+        (const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
+    AalAudioRoleControl(const AalAudioRoleControl&) = delete;
+
+    AalAudioRoleControl& operator=(const AalAudioRoleControl&) = delete;
+    bool operator==(const AalAudioRoleControl&) const = delete;
 
     QAudio::Role audioRole() const;
     void setAudioRole(QAudio::Role role);
@@ -34,8 +39,6 @@ public:
         (const core::ubuntu::media::Player::AudioStreamRole &role);
     static core::ubuntu::media::Player::AudioStreamRole fromQAudioRole
         (const QAudio::Role &role);
-
-    void setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession);
 
 private:
     QAudio::Role m_audioRole;

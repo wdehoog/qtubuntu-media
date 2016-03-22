@@ -33,10 +33,6 @@ void tst_AudioRole::cleanupTestCase()
 
 void tst_AudioRole::init()
 {
-    // NOTE: This sleep is currently needed in order to give media-hub a bit of time
-    // between our different tests to cleanup and come back in a state where it can
-    // respond to our requests.
-    sleep(1);
 }
 
 void tst_AudioRole::verifyAudioRolePlays()

@@ -18,6 +18,7 @@
 #include "aalmediaplayerservice.h"
 #include "aalmediaplaylistcontrol.h"
 #include "aalmediaplaylistprovider.h"
+#include "aalaudiorolecontrol.h"
 #include "aalutility.h"
 
 #include <qmediaplaylistcontrol_p.h>
@@ -62,29 +63,93 @@ enum {
 core::Signal<void> the_void;
 }
 
-AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
-    QMediaService(parent),
-    m_hubPlayerSession(NULL),
-    m_playbackStatusChangedConnection(the_void.connect([](){})),
-    m_errorConnection(the_void.connect([](){})),
-    m_endOfStreamConnection(the_void.connect([](){})),
-    m_mediaPlayerControl(nullptr),
-    m_videoOutput(nullptr),
-    m_mediaPlaylistControl(nullptr),
-    m_mediaPlaylistProvider(nullptr),
-    m_videoOutputReady(false),
-    m_firstPlayback(true),
-    m_cachedDuration(0),
-    m_mediaPlaylist(NULL),
-    m_doReattachSession(false)
+AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
+    :
+     QMediaService(parent),
+     m_hubPlayerSession(NULL),
+     m_playbackStatusChangedConnection(the_void.connect([](){})),
+     m_errorConnection(the_void.connect([](){})),
+     m_endOfStreamConnection(the_void.connect([](){})),
+     m_mediaPlayerControl(nullptr),
+     m_videoOutput(nullptr),
+     m_mediaPlaylistControl(nullptr),
+     m_mediaPlaylistProvider(nullptr),
+     m_audioRoleControl(nullptr),
+     m_videoOutputReady(false),
+     m_firstPlayback(true),
+     m_cachedDuration(0),
+     m_mediaPlaylist(NULL),
+     m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
-     , m_lastFrameDecodeStart(0)
-     , m_currentFrameDecodeStart(0)
-     , m_avgCount(0)
-     , m_frameDecodeAvg(0)
+      , m_lastFrameDecodeStart(0)
+      , m_currentFrameDecodeStart(0)
+      , m_avgCount(0)
+      , m_frameDecodeAvg(0)
 #endif
 {
-    m_hubService = media::Service::Client::instance();
+    constructNewPlayerService();
+    // Note: this must be in the constructor and not part of constructNewPlayerService()
+    // or it won't successfully connect to the signal
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
+}
+
+AalMediaPlayerService::AalMediaPlayerService
+    (const std::shared_ptr<core::ubuntu::media::Service> &service, QObject *parent)
+    :
+      QMediaService(parent),
+      m_hubService(service),
+      m_hubPlayerSession(NULL),
+      m_playbackStatusChangedConnection(the_void.connect([](){})),
+      m_errorConnection(the_void.connect([](){})),
+      m_endOfStreamConnection(the_void.connect([](){})),
+      m_mediaPlayerControl(nullptr),
+      m_videoOutput(nullptr),
+      m_mediaPlaylistControl(nullptr),
+      m_mediaPlaylistProvider(nullptr),
+      m_audioRoleControl(nullptr),
+      m_videoOutputReady(false),
+      m_firstPlayback(true),
+      m_cachedDuration(0),
+      m_mediaPlaylist(NULL),
+      m_doReattachSession(false)
+  #ifdef MEASURE_PERFORMANCE
+       , m_lastFrameDecodeStart(0)
+       , m_currentFrameDecodeStart(0)
+       , m_avgCount(0)
+       , m_frameDecodeAvg(0)
+  #endif
+{
+    constructNewPlayerService();
+    // Note: this must be in the constructor and not part of constructNewPlayerService()
+    // or it won't successfully connect to the signal
+    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
+}
+
+AalMediaPlayerService::~AalMediaPlayerService()
+{
+    m_errorConnection.disconnect();
+    m_playbackStatusChangedConnection.disconnect();
+
+    if (m_audioRoleControl)
+        deleteAudioRoleControl();
+
+    if (m_videoOutput)
+        deleteVideoRendererControl();
+
+    if (m_mediaPlaylistControl)
+        deletePlaylistControl();
+
+    if (m_mediaPlayerControl)
+        deleteMediaPlayerControl();
+
+    if (m_hubPlayerSession)
+        destroyPlayerSession();
+}
+
+void AalMediaPlayerService::constructNewPlayerService()
+{
+    if (not m_hubService.get())
+        m_hubService = media::Service::Client::instance();
 
     // As core::Connection doesn't allow us to start with a disconnected connection
     // instance we have to connect it first with a dummy signal and then disconnect
@@ -103,6 +168,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     createMediaPlayerControl();
     createVideoRendererControl();
+    createAudioRoleControl();
 
     m_playbackStatusChangedConnection = m_hubPlayerSession->playback_status_changed().connect(
         [this](const media::Player::PlaybackStatus &status) {
@@ -112,26 +178,6 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent):
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
-
-    connect(qGuiApp, &QGuiApplication::applicationStateChanged, this, &AalMediaPlayerService::onApplicationStateChanged);
-}
-
-AalMediaPlayerService::~AalMediaPlayerService()
-{
-    m_errorConnection.disconnect();
-    m_playbackStatusChangedConnection.disconnect();
-
-    if (m_videoOutput)
-        deleteVideoRendererControl();
-
-    if (m_mediaPlaylistControl)
-        deletePlaylistControl();
-
-    if (m_mediaPlayerControl)
-        deleteMediaPlayerControl();
-
-    if (m_hubPlayerSession)
-        destroyPlayerSession();
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -164,7 +210,15 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
         return m_mediaPlaylistControl;
     }
 
-    return NULL;
+    if (qstrcmp(name, QAudioRoleControl_iid) == 0)
+    {
+        if (not m_audioRoleControl)
+            createAudioRoleControl();
+
+        return m_audioRoleControl;
+    }
+
+    return nullptr;
 }
 
 void AalMediaPlayerService::releaseControl(QMediaControl *control)
@@ -176,10 +230,10 @@ void AalMediaPlayerService::releaseControl(QMediaControl *control)
 bool AalMediaPlayerService::newMediaPlayer()
 {
     // Only one player session needed
-    if (m_hubPlayerSession != NULL)
+    if (m_hubPlayerSession != nullptr)
         return true;
 
-    if (m_hubService == NULL)
+    if (m_hubService == nullptr)
     {
         qWarning() << "Cannot create new media player instance without a valid media-hub service instance";
         return false;
@@ -228,51 +282,26 @@ void AalMediaPlayerService::resetVideoSink()
         m_videoOutput->playbackComplete();
 }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-QMediaPlayer::AudioRole AalMediaPlayerService::audioRole() const
-#else
 QAudio::Role AalMediaPlayerService::audioRole() const
-#endif
 {
-    if (m_hubPlayerSession == NULL)
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-        return QMediaPlayer::MultimediaRole;
-#else
-        return QAudio::VideoRole;
-#endif
+    if (m_audioRoleControl == nullptr)
+    {
+        qWarning() << "Failed to get audio role, m_audioRoleControl is NULL";
+        return QAudio::UnknownRole;
+    }
 
-    try {
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-        return static_cast<QMediaPlayer::AudioRole>(m_hubPlayerSession->audio_stream_role().get());
-#else
-        return static_cast<QAudio::Role>(m_hubPlayerSession->audio_stream_role().get());
-#endif
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to get audio stream role: " << e.what();
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-        return QMediaPlayer::MultimediaRole;
-#else
-        return QAudio::VideoRole;
-#endif
-    }
+    return m_audioRoleControl->audioRole();
 }
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-void AalMediaPlayerService::setAudioRole(QMediaPlayer::AudioRole audioRole)
-#else
 void AalMediaPlayerService::setAudioRole(QAudio::Role audioRole)
-#endif
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_audioRoleControl == nullptr)
+    {
+        qWarning() << "Failed to set audio role, m_audioRoleControl is NULL";
         return;
+    }
 
-    try {
-        m_hubPlayerSession->audio_stream_role().set(static_cast<media::Player::AudioStreamRole>(audioRole));
-    }
-    catch (const std::runtime_error &e) {
-        qWarning() << "Failed to set audio stream role: " << e.what();
-    }
+    m_audioRoleControl->setAudioRole(audioRole);
 }
 
 void AalMediaPlayerService::setMediaPlaylist(const QMediaPlaylist &playlist)
@@ -362,6 +391,9 @@ void AalMediaPlayerService::play()
         createVideoSink(m_videoOutput->textureId());
     }
 
+    qDebug() << "m_videoOutputReady:" << m_videoOutputReady
+             << ", isVideoSource():" << isVideoSource()
+             << ", isAudioSource():" << isAudioSource();
     if ((m_videoOutputReady && isVideoSource())
             || isAudioSource())
     {
@@ -541,7 +573,7 @@ void AalMediaPlayerService::setVolume(int volume)
 
 void AalMediaPlayerService::createMediaPlayerControl()
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
         return;
 
     m_mediaPlayerControl = new AalMediaPlayerControl(this);
@@ -550,7 +582,7 @@ void AalMediaPlayerService::createMediaPlayerControl()
 
 void AalMediaPlayerService::createVideoRendererControl()
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
         return;
 
     m_videoOutput = new AalVideoRendererControl(this);
@@ -558,16 +590,21 @@ void AalMediaPlayerService::createVideoRendererControl()
 
 void AalMediaPlayerService::createPlaylistControl()
 {
-    qDebug() << Q_FUNC_INFO;
     m_mediaPlaylistControl = new AalMediaPlaylistControl(this);
     m_mediaPlaylistProvider = new AalMediaPlaylistProvider(this);
     m_mediaPlaylistControl->setPlaylistProvider(m_mediaPlaylistProvider);
 }
 
+void AalMediaPlayerService::createAudioRoleControl()
+{
+    if (m_hubPlayerSession == nullptr)
+        return;
+
+    m_audioRoleControl = new AalAudioRoleControl(m_hubPlayerSession);
+}
+
 void AalMediaPlayerService::deleteMediaPlayerControl()
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (not m_hubPlayerSession)
         return;
 
@@ -580,8 +617,6 @@ void AalMediaPlayerService::deleteMediaPlayerControl()
 
 void AalMediaPlayerService::destroyPlayerSession()
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (not m_hubPlayerSession)
         return;
 
@@ -610,8 +645,6 @@ void AalMediaPlayerService::deleteVideoRendererControl()
 
 void AalMediaPlayerService::deletePlaylistControl()
 {
-    qDebug() << Q_FUNC_INFO;
-
     if (m_mediaPlaylistProvider)
     {
         delete m_mediaPlaylistProvider;
@@ -621,6 +654,15 @@ void AalMediaPlayerService::deletePlaylistControl()
     {
         delete m_mediaPlaylistControl;
         m_mediaPlaylistControl = nullptr;
+    }
+}
+
+void AalMediaPlayerService::deleteAudioRoleControl()
+{
+    if (m_audioRoleControl)
+    {
+        delete m_audioRoleControl;
+        m_audioRoleControl = nullptr;
     }
 }
 

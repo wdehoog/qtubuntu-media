@@ -34,10 +34,10 @@ using namespace core::ubuntu::media;
 
 void tst_MediaPlayerPlugin::init()
 {
-    m_hubService.reset(new TestService());
-    m_service = new AalMediaPlayerService(this);
+    m_hubService = TestService::Client::instance();
+    m_service = new AalMediaPlayerService(m_hubService, this);
     m_service->setService(m_hubService);
-    m_player.reset(new TestPlayer());
+    m_player = m_hubService->create_session(TestPlayer::Client::default_configuration());
     m_service->setPlayer(m_player);
     m_playerControl = m_service->requestControl(QMediaPlayerControl_iid);
     m_mediaPlayerControl = m_service->mediaPlayerControl();

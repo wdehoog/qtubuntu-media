@@ -34,6 +34,7 @@ class AalMediaPlaylistControl;
 class AalMediaPlaylistProvider;
 class QMediaPlayerControl;
 class AalVideoRendererControl;
+class AalAudioRoleControl;
 class tst_MediaPlayerPlugin;
 class QTimerEvent;
 
@@ -58,7 +59,7 @@ public:
 
     AalMediaPlayerService(QObject *parent = 0);
     AalMediaPlayerService(const std::shared_ptr<core::ubuntu::media::Service> &service,
-            const std::shared_ptr<core::ubuntu::media::Player> &player, QObject *parent = 0);
+            QObject *parent = 0);
     ~AalMediaPlayerService();
 
     QMediaControl* requestControl(const char *name);
@@ -74,13 +75,8 @@ public:
     // Call this before attempting to play the same video a second time (after EOS)
     void resetVideoSink();
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-    QMediaPlayer::AudioRole audioRole() const;
-    void setAudioRole(QMediaPlayer::AudioRole audioRole);
-#else
     QAudio::Role audioRole() const;
     void setAudioRole(QAudio::Role audioRole);
-#endif
 
     void setMedia(const QUrl &url);
     void setMediaPlaylist(const QMediaPlaylist& playlist);
@@ -117,6 +113,7 @@ public Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
 
 protected:
+    void constructNewPlayerService();
     void updateClientSignals();
     void connectSignals();
     void disconnectSignals();
@@ -128,11 +125,13 @@ private:
     void createMediaPlayerControl();
     void createVideoRendererControl();
     void createPlaylistControl();
+    void createAudioRoleControl();
 
     void deleteMediaPlayerControl();
     void destroyPlayerSession();
     void deleteVideoRendererControl();
     void deletePlaylistControl();
+    void deleteAudioRoleControl();
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
@@ -151,6 +150,7 @@ private:
     AalVideoRendererControl *m_videoOutput;
     AalMediaPlaylistControl *m_mediaPlaylistControl;
     AalMediaPlaylistProvider *m_mediaPlaylistProvider;
+    AalAudioRoleControl *m_audioRoleControl;
     bool m_videoOutputReady;
     bool m_firstPlayback;
 

@@ -21,6 +21,7 @@ HEADERS += \
     ../../src/aal/aalvideorenderercontrol.h \
     ../../src/aal/aalmediaplaylistprovider.h \
     ../../src/aal/aalmediaplaylistcontrol.h \
+    ../../src/aal/aalaudiorolecontrol.h \
     ../../src/aal/aalutility.h \
     tst_mediaplayerplugin.h \
     tst_mediaplaylistcontrol.h \
@@ -40,4 +41,5 @@ SOURCES += \
     ../../src/aal/aalmediaplayerservice.cpp \
     ../../src/aal/aalmediaplayerserviceplugin.cpp \
     ../../src/aal/aalvideorenderercontrol.cpp \
+    ../../src/aal/aalaudiorolecontrol.cpp \
     ../../src/aal/aalutility.cpp

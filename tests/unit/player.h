@@ -37,7 +37,11 @@ class TestPlayer : public Player
 {
 public:
     TestPlayer();
+    TestPlayer(const TestPlayer&) = delete;
     virtual ~TestPlayer();
+
+    Player& operator=(const Player&) = delete;
+    bool operator==(const Player&) const = delete;
 
     virtual std::string uuid() const;
     virtual void reconnect();
@@ -46,15 +50,16 @@ public:
     virtual std::shared_ptr<TrackList> track_list();
     virtual PlayerKey key() const;
 
+    virtual video::Sink::Ptr create_gl_texture_video_sink(std::uint32_t texture_id);
+
     virtual bool open_uri(const Track::UriType& uri);
-    virtual bool open_uri(const Track::UriType&, const HeadersType&);
-    virtual std::shared_ptr<core::ubuntu::media::video::Sink> create_gl_texture_video_sink(uint32_t texture_id);
+    virtual bool open_uri(const Track::UriType& uri, const HeadersType&);
     virtual void next();
     virtual void previous();
     virtual void play();
     virtual void pause();
-    virtual void seek_to(const std::chrono::microseconds& offset);
     virtual void stop();
+    virtual void seek_to(const std::chrono::microseconds& offset);
 
     virtual const core::Property<bool>& can_play() const;
     virtual const core::Property<bool>& can_pause() const;
@@ -64,7 +69,6 @@ public:
     virtual const core::Property<bool>& is_video_source() const;
     virtual const core::Property<bool>& is_audio_source() const;
     virtual const core::Property<PlaybackStatus>& playback_status() const;
-    virtual const core::Property<Orientation>& orientation() const;
     virtual const core::Property<LoopStatus>& loop_status() const;
     virtual const core::Property<PlaybackRate>& playback_rate() const;
     virtual const core::Property<bool>& shuffle() const;
@@ -75,6 +79,7 @@ public:
     virtual const core::Property<int64_t>& position() const;
     virtual const core::Property<int64_t>& duration() const;
     virtual const core::Property<AudioStreamRole>& audio_stream_role() const;
+    virtual const core::Property<Orientation>& orientation() const;
     virtual const core::Property<Lifetime>& lifetime() const;
 
     virtual core::Property<LoopStatus>& loop_status();
@@ -87,10 +92,9 @@ public:
     virtual const core::Signal<int64_t>& seeked_to() const;
     virtual const core::Signal<void>& about_to_finish() const;
     virtual const core::Signal<void>& end_of_stream() const;
-    virtual const core::Signal<PlaybackStatus>& playback_status_changed() const;
     virtual core::Signal<PlaybackStatus>& playback_status_changed();
-    virtual const core::Signal<core::ubuntu::media::video::Dimensions>& video_dimension_changed() const;
-    virtual const core::Signal<uint64_t>& duration_changed() const;
+    virtual const core::Signal<video::Dimensions>& video_dimension_changed() const;
+    /** Signals all errors and warnings (typically from GStreamer and below) */
     virtual const core::Signal<Error>& error() const;
 
 private:

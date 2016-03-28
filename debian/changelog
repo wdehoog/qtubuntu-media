@@ -1,3 +1,13 @@
+qtubuntu-media (0.8.1+16.04.20160322.2-0ubuntu1) xenial; urgency=medium
+
+  [ Jim Hodapp ]
+  * Unify the audio role implementation between vivid and xenial.
+
+  [ CI Train Bot ]
+  * No-change rebuild.
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 22 Mar 2016 19:25:55 +0000
+
 qtubuntu-media (0.8.0+16.04.20160222.1-0ubuntu1) xenial; urgency=medium
 
   * URI encode the URI that we call setMedia() on or add to the playlist

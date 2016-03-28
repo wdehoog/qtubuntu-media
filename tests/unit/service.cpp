@@ -15,11 +15,6 @@
  */
 
 #include "service.h"
-#include "player.h"
-
-#include <core/media/player.h>
-
-#include <memory>
 
 namespace core {
 namespace ubuntu {
@@ -48,9 +43,8 @@ void TestService::destroy_session(const std::string&, const Player::Configuratio
 {
 }
 
-std::shared_ptr<Player> TestService::create_fixed_session(const std::string& name, const Player::Configuration&)
+std::shared_ptr<Player> TestService::create_fixed_session(const std::string&, const Player::Configuration&)
 {
-    (void) name;
     return 0;
 }
 
@@ -60,6 +54,10 @@ std::shared_ptr<Player> TestService::resume_session(Player::PlayerKey)
 }
 
 void TestService::set_current_player(Player::PlayerKey)
+{
+}
+
+void TestService::reset_current_player()
 {
 }
 

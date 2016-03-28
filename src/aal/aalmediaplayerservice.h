@@ -120,7 +120,6 @@ protected:
     void updateClientSignals();
     void connectSignals();
     void disconnectSignals();
-    void updateCurrentPlayer();
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif

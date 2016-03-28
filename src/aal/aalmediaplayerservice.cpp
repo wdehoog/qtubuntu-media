@@ -333,9 +333,6 @@ void AalMediaPlayerService::setMedia(const QUrl &url)
         }
     }
 
-    // Make sure this player can be controlled by MPRIS if appropriate
-    updateCurrentPlayer();
-
     if (isVideoSource())
         m_videoOutput->setupSurface();
 }
@@ -730,7 +727,6 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
                     connectSignals();
                 }
 #endif
-                updateCurrentPlayer();
                 break;
             default:
                 qDebug() << "Unknown ApplicationState";
@@ -782,27 +778,6 @@ void AalMediaPlayerService::disconnectSignals()
 {
     if (m_endOfStreamConnection.is_connected())
         m_endOfStreamConnection.disconnect();
-}
-
-void AalMediaPlayerService::updateCurrentPlayer()
-{
-        // If this player is a multimedia audioRole, then it should possible to
-        // use it for MPRIS control
-#if QT_VERSION < QT_VERSION_CHECK(5, 5, 0)
-    if (audioRole() == QMediaPlayer::MultimediaRole)
-#else
-    if (audioRole() == QAudio::VideoRole || audioRole() == QAudio::MusicRole)
-#endif
-    {
-        qDebug() << "Setting player as current player";
-        try {
-            const media::Player::PlayerKey key = m_hubPlayerSession->key();
-            m_hubService->set_current_player(key);
-        } catch (const std::runtime_error &e) {
-            qWarning() << "Failed to set player as current player: " << e.what();
-            return;
-        }
-    }
 }
 
 void AalMediaPlayerService::onError(const media::Player::Error &error)

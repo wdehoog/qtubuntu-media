@@ -391,9 +391,6 @@ void AalMediaPlayerService::play()
         createVideoSink(m_videoOutput->textureId());
     }
 
-    qDebug() << "m_videoOutputReady:" << m_videoOutputReady
-             << ", isVideoSource():" << isVideoSource()
-             << ", isAudioSource():" << isAudioSource();
     if ((m_videoOutputReady && isVideoSource())
             || isAudioSource())
     {

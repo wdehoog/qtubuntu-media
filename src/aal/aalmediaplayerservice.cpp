@@ -395,10 +395,6 @@ void AalMediaPlayerService::play()
             || isAudioSource())
     {
         try {
-            media::Player::PlayerKey key = m_hubPlayerSession->key();
-            // Pause all other music and video sessions
-            m_hubService->pause_other_sessions(key);
-
             m_mediaPlayerControl->setMediaStatus(QMediaPlayer::LoadedMedia);
 
             qDebug() << "Actually calling m_hubPlayerSession->play()";

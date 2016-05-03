@@ -14,12 +14,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "service.h"
 #include "player.h"
-
-#include <core/media/player.h>
-
-#include <memory>
+#include "service.h"
 
 namespace core {
 namespace ubuntu {
@@ -48,19 +44,14 @@ void TestService::destroy_session(const std::string&, const Player::Configuratio
 {
 }
 
-std::shared_ptr<Player> TestService::create_fixed_session(const std::string& name, const Player::Configuration&)
+std::shared_ptr<Player> TestService::create_fixed_session(const std::string&, const Player::Configuration&)
 {
-    (void) name;
     return 0;
 }
 
 std::shared_ptr<Player> TestService::resume_session(Player::PlayerKey)
 {
     return 0;
-}
-
-void TestService::set_current_player(Player::PlayerKey)
-{
 }
 
 void TestService::pause_other_sessions(Player::PlayerKey)

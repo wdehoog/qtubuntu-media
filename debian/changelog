@@ -1,3 +1,12 @@
+qtubuntu-media (0.8.1+16.04.20160503.4-0ubuntu1) xenial; urgency=medium
+
+  * A rewrite of how the current player is set which is what the MPRIS
+    control interface actively uses. media-hub is now responsible for
+    managing this and qtubuntu-media is no longer involved at all. (LP:
+    #1564813, #1538703)
+
+ -- Jim Hodapp <ci-train-bot@canonical.com>  Tue, 03 May 2016 18:55:07 +0000
+
 qtubuntu-media (0.8.1+16.04.20160322.2-0ubuntu1) xenial; urgency=medium
 
   [ Jim Hodapp ]

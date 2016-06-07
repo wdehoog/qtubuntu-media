@@ -176,6 +176,13 @@ void AalMediaPlayerService::constructNewPlayerService()
             QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
         });
 
+    m_bufferingStatusChangedConnection = m_hubPlayerSession->buffering_changed().connect(
+                [this](int bufferingPercent) {
+                    m_bufferPercent = bufferingPercent;
+                    QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::QueuedConnection);
+                });
+
+
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
 }
@@ -770,6 +777,12 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
     } catch (const std::runtime_error &e) {
         qWarning() << "Failed to respond to ApplicationState change: " << e.what();
     }
+}
+
+void AalMediaPlayerService::onBufferingChanged()
+{
+    qDebug() << Q_FUNC_INFO << m_bufferPercent;
+    Q_EMIT m_mediaPlayerControl->bufferStatusChanged(m_bufferPercent);
 }
 
 void AalMediaPlayerService::updateClientSignals()

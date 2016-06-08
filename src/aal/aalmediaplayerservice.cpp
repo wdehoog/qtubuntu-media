@@ -111,6 +111,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_firstPlayback(true),
       m_cachedDuration(0),
       m_mediaPlaylist(NULL),
+      m_bufferPercent(0),
       m_doReattachSession(false)
   #ifdef MEASURE_PERFORMANCE
        , m_lastFrameDecodeStart(0)
@@ -181,7 +182,6 @@ void AalMediaPlayerService::constructNewPlayerService()
                     m_bufferPercent = bufferingPercent;
                     QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::QueuedConnection);
                 });
-
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
@@ -781,7 +781,6 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
 
 void AalMediaPlayerService::onBufferingChanged()
 {
-    qDebug() << Q_FUNC_INFO << m_bufferPercent;
     Q_EMIT m_mediaPlayerControl->bufferStatusChanged(m_bufferPercent);
 }
 

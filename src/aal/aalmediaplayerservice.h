@@ -113,7 +113,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void onPlaybackStatusChanged();
     void onApplicationStateChanged(Qt::ApplicationState state);
-    void onBufferingChanged(int percent);
+    void onBufferingChanged();
 
 protected:
     void constructNewPlayerService();

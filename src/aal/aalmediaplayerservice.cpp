@@ -70,6 +70,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_playbackStatusChangedConnection(the_void.connect([](){})),
      m_errorConnection(the_void.connect([](){})),
      m_endOfStreamConnection(the_void.connect([](){})),
+     m_bufferingStatusChangedConnection(the_void.connect([](){})),
      m_mediaPlayerControl(nullptr),
      m_videoOutput(nullptr),
      m_mediaPlaylistControl(nullptr),
@@ -79,6 +80,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_firstPlayback(true),
      m_cachedDuration(0),
      m_mediaPlaylist(NULL),
+     m_bufferPercent(0),
      m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
       , m_lastFrameDecodeStart(0)
@@ -102,6 +104,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_playbackStatusChangedConnection(the_void.connect([](){})),
       m_errorConnection(the_void.connect([](){})),
       m_endOfStreamConnection(the_void.connect([](){})),
+      m_bufferingStatusChangedConnection(the_void.connect([](){})),
       m_mediaPlayerControl(nullptr),
       m_videoOutput(nullptr),
       m_mediaPlaylistControl(nullptr),

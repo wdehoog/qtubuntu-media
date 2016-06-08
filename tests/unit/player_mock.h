@@ -92,6 +92,7 @@ public:
     virtual const core::Signal<core::ubuntu::media::video::Dimensions>& video_dimension_changed() const;
     virtual const core::Signal<uint64_t>& duration_changed() const;
     virtual const core::Signal<Error>& error() const;
+    virtual const core::Signal<int>& buffering_changed() const;
 
 private:
     core::Property<int64_t> m_position;

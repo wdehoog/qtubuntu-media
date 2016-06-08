@@ -311,6 +311,12 @@ const core::Signal<Player::Error>& TestPlayer::error() const
     return ret;
 }
 
+const core::Signal<int>& TestPlayer::buffering_changed() const
+{
+    static core::Signal<int> dur;
+    return dur;
+}
+
 const std::shared_ptr<Service> Service::Client::instance()
 {
     return NULL;

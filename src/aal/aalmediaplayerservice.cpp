@@ -183,7 +183,7 @@ void AalMediaPlayerService::constructNewPlayerService()
     m_bufferingStatusChangedConnection = m_hubPlayerSession->buffering_changed().connect(
                 [this](int bufferingPercent) {
                     m_bufferPercent = bufferingPercent;
-                    QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::QueuedConnection);
+                    QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::DirectConnection);
                 });
 
     m_errorConnection = m_hubPlayerSession->error().connect(

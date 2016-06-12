@@ -313,7 +313,7 @@ const core::Signal<Player::Error>& TestPlayer::error() const
 
 const core::Signal<int>& TestPlayer::buffering_changed() const
 {
-    static core::Signal<int> dur;
+    static const core::Signal<int> dur;
     return dur;
 }
 

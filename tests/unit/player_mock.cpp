@@ -310,7 +310,7 @@ const core::Signal<Player::Error>& PlayerMock::error() const
 
 const core::Signal<int>& PlayerMock::buffering_changed() const
 {
-    static core::Signal<int> dur;
+    static const core::Signal<int> dur;
     return dur;
 }
 

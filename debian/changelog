@@ -1,3 +1,9 @@
+qtubuntu-media (0.8.1+16.10.20160711-0ubuntu1) yakkety; urgency=medium
+
+  * Add media buffering signal handling
+
+ -- Lorn Potter <lorn.potter@canonical.com>  Mon, 11 Jul 2016 01:22:22 +0000
+
 qtubuntu-media (0.8.1+16.10.20160523.1-0ubuntu1) yakkety; urgency=medium
 
   * Get arm64 building successfully.

@@ -70,6 +70,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_playbackStatusChangedConnection(the_void.connect([](){})),
      m_errorConnection(the_void.connect([](){})),
      m_endOfStreamConnection(the_void.connect([](){})),
+     m_bufferingStatusChangedConnection(the_void.connect([](){})),
      m_mediaPlayerControl(nullptr),
      m_videoOutput(nullptr),
      m_mediaPlaylistControl(nullptr),
@@ -79,6 +80,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_firstPlayback(true),
      m_cachedDuration(0),
      m_mediaPlaylist(NULL),
+     m_bufferPercent(0),
      m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
       , m_lastFrameDecodeStart(0)
@@ -102,6 +104,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_playbackStatusChangedConnection(the_void.connect([](){})),
       m_errorConnection(the_void.connect([](){})),
       m_endOfStreamConnection(the_void.connect([](){})),
+      m_bufferingStatusChangedConnection(the_void.connect([](){})),
       m_mediaPlayerControl(nullptr),
       m_videoOutput(nullptr),
       m_mediaPlaylistControl(nullptr),
@@ -111,6 +114,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_firstPlayback(true),
       m_cachedDuration(0),
       m_mediaPlaylist(NULL),
+      m_bufferPercent(0),
       m_doReattachSession(false)
   #ifdef MEASURE_PERFORMANCE
        , m_lastFrameDecodeStart(0)
@@ -175,6 +179,12 @@ void AalMediaPlayerService::constructNewPlayerService()
             m_newStatus = status;
             QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
         });
+
+    m_bufferingStatusChangedConnection = m_hubPlayerSession->buffering_changed().connect(
+                [this](int bufferingPercent) {
+                    m_bufferPercent = bufferingPercent;
+                    QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::DirectConnection);
+                });
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
@@ -770,6 +780,11 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
     } catch (const std::runtime_error &e) {
         qWarning() << "Failed to respond to ApplicationState change: " << e.what();
     }
+}
+
+void AalMediaPlayerService::onBufferingChanged()
+{
+    Q_EMIT m_mediaPlayerControl->bufferStatusChanged(m_bufferPercent);
 }
 
 void AalMediaPlayerService::updateClientSignals()

@@ -111,6 +111,8 @@ Q_SIGNALS:
 public Q_SLOTS:
     void onPlaybackStatusChanged();
     void onApplicationStateChanged(Qt::ApplicationState state);
+    void onServiceDisconnected();
+    void onServiceReconnected();
 
 protected:
     void constructNewPlayerService();
@@ -145,6 +147,8 @@ private:
     core::Connection m_playbackStatusChangedConnection;
     core::Connection m_errorConnection;
     core::Connection m_endOfStreamConnection;
+    core::Connection m_serviceDisconnectedConnection;
+    core::Connection m_serviceReconnectedConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;

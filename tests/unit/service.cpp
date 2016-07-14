@@ -58,6 +58,18 @@ void TestService::pause_other_sessions(Player::PlayerKey)
 {
 }
 
+const core::Signal<void>& TestService::service_disconnected() const
+{
+    static const core::Signal<void> s;
+    return s;
+}
+
+const core::Signal<void>& TestService::service_reconnected() const
+{
+    static const core::Signal<void> s;
+    return s;
+}
+
 }
 }
 }

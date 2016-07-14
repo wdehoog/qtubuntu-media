@@ -43,6 +43,7 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackListResetConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1)
 {
+    qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
@@ -410,6 +411,7 @@ bool AalMediaPlaylistProvider::isTrackEnd(const AalMediaPlaylistProvider::Contai
 
 void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubuntu::media::Player>& playerSession)
 {
+    qDebug() << Q_FUNC_INFO;
     m_hubPlayerSession = playerSession;
 
     try {

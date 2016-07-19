@@ -308,6 +308,12 @@ const core::Signal<Player::Error>& PlayerMock::error() const
     return ret;
 }
 
+const core::Signal<int>& PlayerMock::buffering_changed() const
+{
+    static const core::Signal<int> dur;
+    return dur;
+}
+
 }
 }
 }

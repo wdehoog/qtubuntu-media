@@ -96,6 +96,7 @@ public:
     virtual const core::Signal<video::Dimensions>& video_dimension_changed() const;
     /** Signals all errors and warnings (typically from GStreamer and below) */
     virtual const core::Signal<Error>& error() const;
+    virtual const core::Signal<int>& buffering_changed() const;
 
 private:
     core::Property<int64_t> m_position;

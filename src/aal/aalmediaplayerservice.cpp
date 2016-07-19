@@ -72,6 +72,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_endOfStreamConnection(the_void.connect([](){})),
      m_serviceDisconnectedConnection(the_void.connect([](){})),
      m_serviceReconnectedConnection(the_void.connect([](){})),
+     m_bufferingStatusChangedConnection(the_void.connect([](){})),
      m_mediaPlayerControl(nullptr),
      m_videoOutput(nullptr),
      m_mediaPlaylistControl(nullptr),
@@ -81,6 +82,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_firstPlayback(true),
      m_cachedDuration(0),
      m_mediaPlaylist(nullptr),
+     m_bufferPercent(0),
      m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
       , m_lastFrameDecodeStart(0)
@@ -106,6 +108,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_endOfStreamConnection(the_void.connect([](){})),
       m_serviceDisconnectedConnection(the_void.connect([](){})),
       m_serviceReconnectedConnection(the_void.connect([](){})),
+      m_bufferingStatusChangedConnection(the_void.connect([](){})),
       m_mediaPlayerControl(nullptr),
       m_videoOutput(nullptr),
       m_mediaPlaylistControl(nullptr),
@@ -115,6 +118,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_firstPlayback(true),
       m_cachedDuration(0),
       m_mediaPlaylist(nullptr),
+      m_bufferPercent(0),
       m_doReattachSession(false)
   #ifdef MEASURE_PERFORMANCE
        , m_lastFrameDecodeStart(0)
@@ -186,6 +190,12 @@ void AalMediaPlayerService::constructNewPlayerService()
             m_newStatus = status;
             QMetaObject::invokeMethod(this, "onPlaybackStatusChanged", Qt::QueuedConnection);
         });
+
+    m_bufferingStatusChangedConnection = m_hubPlayerSession->buffering_changed().connect(
+                [this](int bufferingPercent) {
+                    m_bufferPercent = bufferingPercent;
+                    QMetaObject::invokeMethod(this, "onBufferingChanged", Qt::DirectConnection);
+                });
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
@@ -800,6 +810,11 @@ void AalMediaPlayerService::onServiceReconnected()
     qDebug() << Q_FUNC_INFO;
     const QString errStr = "Player session is no longer valid since the service restarted.";
     m_mediaPlayerControl->error(QMediaPlayer::ServiceMissingError, errStr);
+}
+
+void AalMediaPlayerService::onBufferingChanged()
+{
+    Q_EMIT m_mediaPlayerControl->bufferStatusChanged(m_bufferPercent);
 }
 
 void AalMediaPlayerService::updateClientSignals()

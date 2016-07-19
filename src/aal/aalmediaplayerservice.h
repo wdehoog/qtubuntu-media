@@ -103,6 +103,8 @@ public:
      * service object */
     void setService(const std::shared_ptr<core::ubuntu::media::Service> &service);
 
+    int bufferStatus() { return m_bufferPercent; }
+
 Q_SIGNALS:
     void serviceReady();
     void playbackComplete();
@@ -113,6 +115,7 @@ public Q_SLOTS:
     void onApplicationStateChanged(Qt::ApplicationState state);
     void onServiceDisconnected();
     void onServiceReconnected();
+    void onBufferingChanged();
 
 protected:
     void constructNewPlayerService();
@@ -148,6 +151,7 @@ private:
     core::Connection m_endOfStreamConnection;
     core::Connection m_serviceDisconnectedConnection;
     core::Connection m_serviceReconnectedConnection;
+    core::Connection m_bufferingStatusChangedConnection;
 
     AalMediaPlayerControl *m_mediaPlayerControl;
     AalVideoRendererControl *m_videoOutput;
@@ -162,6 +166,7 @@ private:
     const QMediaPlaylist* m_mediaPlaylist;
 
     core::ubuntu::media::Player::PlaybackStatus m_newStatus;
+    int m_bufferPercent;
 
     std::string m_sessionUuid;
     bool m_doReattachSession;

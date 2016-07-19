@@ -43,13 +43,11 @@ AalMediaPlaylistProvider::AalMediaPlaylistProvider(QObject *parent)
       m_trackListResetConnection(the_void.connect([](){})),
       m_insertTrackIndex(-1)
 {
-    qDebug() << Q_FUNC_INFO;
     qRegisterMetaType<core::ubuntu::media::Track::Id>();
 }
 
 AalMediaPlaylistProvider::~AalMediaPlaylistProvider()
 {
-    qDebug() << Q_FUNC_INFO;
     disconnect_signals();
 }
 

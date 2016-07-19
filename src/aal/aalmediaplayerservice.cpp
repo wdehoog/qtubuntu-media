@@ -159,10 +159,7 @@ AalMediaPlayerService::~AalMediaPlayerService()
 void AalMediaPlayerService::constructNewPlayerService()
 {
     if (not m_hubService.get())
-    {
-        qDebug() << "Getting a new m_hubService client instance";
         m_hubService = media::Service::Client::instance();
-    }
 
     // As core::Connection doesn't allow us to start with a disconnected connection
     // instance we have to connect it first with a dummy signal and then disconnect
@@ -199,8 +196,6 @@ void AalMediaPlayerService::constructNewPlayerService()
 
     m_errorConnection = m_hubPlayerSession->error().connect(
             std::bind(&AalMediaPlayerService::onError, this, _1));
-
-    qDebug() << "Returning from" << Q_FUNC_INFO;
 }
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
@@ -264,7 +259,6 @@ bool AalMediaPlayerService::newMediaPlayer()
 
     try {
         m_hubPlayerSession = m_hubService->create_session(media::Player::Client::default_configuration());
-        qDebug() << "m_hubPlayerSession:" << m_hubPlayerSession.get();
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to start a new media-hub player session: " << e.what();
@@ -275,7 +269,6 @@ bool AalMediaPlayerService::newMediaPlayer()
         // Get the player session UUID so we can suspend/restore our session when the ApplicationState
         // changes
         m_sessionUuid = m_hubPlayerSession->uuid();
-        qDebug() << "m_sessionUuid:" << m_sessionUuid.c_str();
     } catch (const std::runtime_error &e) {
         qWarning() << "Failed to retrieve the current player's uuid: " << e.what() << endl;
         return false;
@@ -608,7 +601,6 @@ void AalMediaPlayerService::createVideoRendererControl()
 
 void AalMediaPlayerService::createPlaylistControl()
 {
-    qDebug() << Q_FUNC_INFO;
     m_mediaPlaylistControl = new AalMediaPlaylistControl(this);
     m_mediaPlaylistProvider = new AalMediaPlaylistProvider(this);
     m_mediaPlaylistControl->setPlaylistProvider(m_mediaPlaylistProvider);

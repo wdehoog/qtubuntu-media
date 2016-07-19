@@ -137,7 +137,6 @@ private:
 
     // Signals the proper QMediaPlayer::Error from a core::ubuntu::media::Error
     void signalQMediaPlayerError(const core::ubuntu::media::Player::Error &error);
-
     void onError(const core::ubuntu::media::Player::Error &error);
 
     inline QString playbackStatusStr(const core::ubuntu::media::Player::PlaybackStatus &status);

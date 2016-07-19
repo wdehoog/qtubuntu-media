@@ -80,7 +80,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_videoOutputReady(false),
      m_firstPlayback(true),
      m_cachedDuration(0),
-     m_mediaPlaylist(NULL),
+     m_mediaPlaylist(nullptr),
      m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
       , m_lastFrameDecodeStart(0)
@@ -114,7 +114,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_videoOutputReady(false),
       m_firstPlayback(true),
       m_cachedDuration(0),
-      m_mediaPlaylist(NULL),
+      m_mediaPlaylist(nullptr),
       m_doReattachSession(false)
   #ifdef MEASURE_PERFORMANCE
        , m_lastFrameDecodeStart(0)
@@ -790,48 +790,16 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
 
 void AalMediaPlayerService::onServiceDisconnected()
 {
-    qDebug() << "WE REACHED onServiceDisconnected";
+    qDebug() << Q_FUNC_INFO;
     m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
-
-    disconnectSignals();
-    m_mediaPlayerControl = nullptr;
-    m_videoOutput = nullptr;
-    m_mediaPlaylistControl = nullptr;
-    m_mediaPlaylistProvider = nullptr;
-    m_audioRoleControl = nullptr;
-    m_hubPlayerSession.reset();
-    m_hubPlayerSession = nullptr;
-    m_hubService.reset();
-    m_hubService = nullptr;
-    m_videoOutputReady = false;
-    m_firstPlayback = true;
-    m_cachedDuration = 0;
-    m_mediaPlaylist = NULL;
-    m_doReattachSession = false;
-#ifdef MEASURE_PERFORMANCE
-    m_lastFrameDecodeStart = 0;
-    m_currentFrameDecodeStart = 0;
-    m_avgCount = 0;
-    m_frameDecodeAvg = 0;
-#endif
+    m_mediaPlayerControl->setMediaStatus(QMediaPlayer::NoMedia);
 }
 
 void AalMediaPlayerService::onServiceReconnected()
 {
-    qDebug() << "WE REACHED onServiceReconnected";
-    constructNewPlayerService();
-
-#if 1
-    if (not m_mediaPlaylistControl)
-    {
-        qDebug() << "Recreating new playlist controls";
-        createPlaylistControl();
-    }
-
-    // Pass on the media-hub Player object to the playlist control
-    if (m_hubPlayerSession)
-        m_mediaPlaylistControl->setPlayerSession(m_hubPlayerSession);
-#endif
+    qDebug() << Q_FUNC_INFO;
+    const QString errStr = "Player session is no longer valid since the service restarted.";
+    m_mediaPlayerControl->error(QMediaPlayer::ServiceMissingError, errStr);
 }
 
 void AalMediaPlayerService::updateClientSignals()

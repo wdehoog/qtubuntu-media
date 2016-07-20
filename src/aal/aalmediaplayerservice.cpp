@@ -63,13 +63,42 @@ enum {
 core::Signal<void> the_void;
 }
 
+class EmptySink : public core::ubuntu::media::video::Sink
+{
+public:
+    EmptySink(std::uint32_t gl_texture)
+    {
+        Q_UNUSED(gl_texture);
+    }
+
+    const core::Signal<void>& frame_available() const override
+    {
+        static const core::Signal<void> frame_available;
+        return frame_available;
+    }
+
+    bool transformation_matrix(float* matrix) const override
+    {
+        Q_UNUSED(matrix);
+        return false;
+    }
+
+    bool swap_buffers() const override
+    {
+        return false;
+    }
+};
+
+
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
     :
      QMediaService(parent),
-     m_hubPlayerSession(NULL),
+     m_hubPlayerSession(nullptr),
      m_playbackStatusChangedConnection(the_void.connect([](){})),
      m_errorConnection(the_void.connect([](){})),
      m_endOfStreamConnection(the_void.connect([](){})),
+     m_serviceDisconnectedConnection(the_void.connect([](){})),
+     m_serviceReconnectedConnection(the_void.connect([](){})),
      m_bufferingStatusChangedConnection(the_void.connect([](){})),
      m_mediaPlayerControl(nullptr),
      m_videoOutput(nullptr),
@@ -79,7 +108,7 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_videoOutputReady(false),
      m_firstPlayback(true),
      m_cachedDuration(0),
-     m_mediaPlaylist(NULL),
+     m_mediaPlaylist(nullptr),
      m_bufferPercent(0),
      m_doReattachSession(false)
 #ifdef MEASURE_PERFORMANCE
@@ -100,10 +129,12 @@ AalMediaPlayerService::AalMediaPlayerService
     :
       QMediaService(parent),
       m_hubService(service),
-      m_hubPlayerSession(NULL),
+      m_hubPlayerSession(nullptr),
       m_playbackStatusChangedConnection(the_void.connect([](){})),
       m_errorConnection(the_void.connect([](){})),
       m_endOfStreamConnection(the_void.connect([](){})),
+      m_serviceDisconnectedConnection(the_void.connect([](){})),
+      m_serviceReconnectedConnection(the_void.connect([](){})),
       m_bufferingStatusChangedConnection(the_void.connect([](){})),
       m_mediaPlayerControl(nullptr),
       m_videoOutput(nullptr),
@@ -113,7 +144,7 @@ AalMediaPlayerService::AalMediaPlayerService
       m_videoOutputReady(false),
       m_firstPlayback(true),
       m_cachedDuration(0),
-      m_mediaPlaylist(NULL),
+      m_mediaPlaylist(nullptr),
       m_bufferPercent(0),
       m_doReattachSession(false)
   #ifdef MEASURE_PERFORMANCE
@@ -133,6 +164,8 @@ AalMediaPlayerService::~AalMediaPlayerService()
 {
     m_errorConnection.disconnect();
     m_playbackStatusChangedConnection.disconnect();
+    m_serviceDisconnectedConnection.disconnect();
+    m_serviceReconnectedConnection.disconnect();
 
     if (m_audioRoleControl)
         deleteAudioRoleControl();
@@ -160,11 +193,13 @@ void AalMediaPlayerService::constructNewPlayerService()
     // it again. If we don't do this connectSignals() will never be able to attach
     // to the relevant signals.
     m_endOfStreamConnection.disconnect();
+    m_serviceDisconnectedConnection.disconnect();
+    m_serviceReconnectedConnection.disconnect();
 
     if (!newMediaPlayer())
         qWarning() << "Failed to create a new media player backend. Video playback will not function." << endl;
 
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
     {
         qWarning() << "Could not finish contructing new AalMediaPlayerService instance since m_hubPlayerSession is NULL";
         return;
@@ -262,7 +297,7 @@ bool AalMediaPlayerService::newMediaPlayer()
         // changes
         m_sessionUuid = m_hubPlayerSession->uuid();
     } catch (const std::runtime_error &e) {
-        qWarning() << "Failed to retrieve the current player's uuid: " << e.what() << endl;
+        qWarning() << "Failed to retrieve the current player's uuid: " << e.what();
         return false;
     }
 
@@ -271,13 +306,19 @@ bool AalMediaPlayerService::newMediaPlayer()
 
 std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
         throw std::runtime_error
         {
             "Cannot create a video sink without a valid media-hub player session"
         };
 
-    auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
+    std::shared_ptr<core::ubuntu::media::video::Sink> sink;
+    try {
+        sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to create a new video sink:" << e.what();
+        return core::ubuntu::media::video::Sink::Ptr{new EmptySink(0)};
+    }
     m_videoOutputReady = true;
 
     return sink;
@@ -782,6 +823,20 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
     }
 }
 
+void AalMediaPlayerService::onServiceDisconnected()
+{
+    qDebug() << Q_FUNC_INFO;
+    m_mediaPlayerControl->setState(QMediaPlayer::StoppedState);
+    m_mediaPlayerControl->setMediaStatus(QMediaPlayer::NoMedia);
+}
+
+void AalMediaPlayerService::onServiceReconnected()
+{
+    qDebug() << Q_FUNC_INFO;
+    const QString errStr = "Player session is no longer valid since the service restarted.";
+    m_mediaPlayerControl->error(QMediaPlayer::ServiceMissingError, errStr);
+}
+
 void AalMediaPlayerService::onBufferingChanged()
 {
     Q_EMIT m_mediaPlayerControl->bufferStatusChanged(m_bufferPercent);
@@ -820,6 +875,22 @@ void AalMediaPlayerService::connectSignals()
         {
             m_firstPlayback = false;
             Q_EMIT playbackComplete();
+        });
+    }
+
+    if (!m_serviceDisconnectedConnection.is_connected())
+    {
+        m_serviceDisconnectedConnection = m_hubService->service_disconnected().connect([this]()
+        {
+            QMetaObject::invokeMethod(this, "onServiceDisconnected", Qt::QueuedConnection);
+        });
+    }
+
+    if (!m_serviceReconnectedConnection.is_connected())
+    {
+        m_serviceReconnectedConnection = m_hubService->service_reconnected().connect([this]()
+        {
+            QMetaObject::invokeMethod(this, "onServiceReconnected", Qt::QueuedConnection);
         });
     }
 }

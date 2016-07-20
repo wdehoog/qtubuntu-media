@@ -49,7 +49,6 @@ AalMediaPlaylistControl::AalMediaPlaylistControl(QObject *parent)
 
 AalMediaPlaylistControl::~AalMediaPlaylistControl()
 {
-    qDebug() << Q_FUNC_INFO;
     disconnect_signals();
 }
 
@@ -180,7 +179,12 @@ void AalMediaPlaylistControl::previous()
 QMediaPlaylist::PlaybackMode AalMediaPlaylistControl::playbackMode() const
 {
     QMediaPlaylist::PlaybackMode currentMode = QMediaPlaylist::Sequential;
-    const auto loopStatus = m_hubPlayerSession->loop_status();
+    media::Player::LoopStatus loopStatus = media::Player::LoopStatus::none;
+    try {
+        loopStatus = m_hubPlayerSession->loop_status();
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to go to get loop_status: " << e.what();
+    }
     switch (loopStatus)
     {
         case media::Player::LoopStatus::none:
@@ -196,10 +200,14 @@ QMediaPlaylist::PlaybackMode AalMediaPlaylistControl::playbackMode() const
             qWarning() << "Unknown loop status: " << loopStatus;
     }
 
-    // Shuffle overrides loopStatus since in the media-hub API random is not part of loop_status
-    // like it's all one for QMediaPlaylist::PlaybackMode
-    if (m_hubPlayerSession->shuffle())
-        currentMode = QMediaPlaylist::Random;
+    try {
+        // Shuffle overrides loopStatus since in the media-hub API random is not part of loop_status
+        // like it's all one for QMediaPlaylist::PlaybackMode
+        if (m_hubPlayerSession->shuffle())
+            currentMode = QMediaPlaylist::Random;
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to get current shuffle mode: " << e.what();
+    }
 
     return currentMode;
 }
@@ -211,34 +219,58 @@ void AalMediaPlaylistControl::setPlaybackMode(QMediaPlaylist::PlaybackMode mode)
     {
         case QMediaPlaylist::CurrentItemOnce:
             qDebug() << "PlaybackMode: CurrentItemOnce";
-            m_hubPlayerSession->shuffle() = false;
+            try {
+                m_hubPlayerSession->shuffle() = false;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to set shuffle mode: " << e.what();
+            }
             qWarning() << "No media-hub equivalent for QMediaPlaylist::CurrentItemOnce";
             break;
         case QMediaPlaylist::CurrentItemInLoop:
             qDebug() << "PlaybackMode: CurrentItemInLoop";
-            m_hubPlayerSession->shuffle() = false;
-            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::track;
+            try {
+                m_hubPlayerSession->shuffle() = false;
+                m_hubPlayerSession->loop_status() = media::Player::LoopStatus::track;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to set shuffle mode/loop_status: " << e.what();
+            }
             break;
         case QMediaPlaylist::Sequential:
             qDebug() << "PlaybackMode: Sequential";
-            m_hubPlayerSession->shuffle() = false;
-            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::none;
+            try {
+                m_hubPlayerSession->shuffle() = false;
+                m_hubPlayerSession->loop_status() = media::Player::LoopStatus::none;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to set shuffle mode/loop_status: " << e.what();
+            }
             break;
         case QMediaPlaylist::Loop:
             qDebug() << "PlaybackMode: Loop";
-            m_hubPlayerSession->shuffle() = false;
-            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
+            try {
+                m_hubPlayerSession->shuffle() = false;
+                m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to set shuffle mode/loop_status: " << e.what();
+            }
             break;
         case QMediaPlaylist::Random:
             qDebug() << "PlaybackMode: Random";
-            m_hubPlayerSession->shuffle() = true;
-            // FIXME: Until pad.lv/1518157 (RandomAndLoop playbackMode) is
-            // fixed set Random to be always looping due to pad.lv/1531296
-            m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
+            try {
+                m_hubPlayerSession->shuffle() = true;
+                // FIXME: Until pad.lv/1518157 (RandomAndLoop playbackMode) is
+                // fixed set Random to be always looping due to pad.lv/1531296
+                m_hubPlayerSession->loop_status() = media::Player::LoopStatus::playlist;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to set shuffle mode/loop_status: " << e.what();
+            }
             break;
         default:
             qWarning() << "Unknown playback mode: " << mode;
-            m_hubPlayerSession->shuffle() = false;
+            try {
+                m_hubPlayerSession->shuffle() = false;
+            } catch (const std::runtime_error &e) {
+                qWarning() << "Failed to get current shuffle mode: " << e.what();
+            }
     }
 
     Q_EMIT playbackModeChanged(mode);
@@ -313,7 +345,11 @@ void AalMediaPlaylistControl::onRemoveTracks(int start, int end)
         if (playbackMode() == QMediaPlaylist::Sequential)
         {
             qDebug() << "Repeat is off, so stopping playback";
-            m_hubPlayerSession->stop();
+            try {
+                m_hubPlayerSession->stop();
+            } catch (std::runtime_error &e) {
+                qWarning() << "FATAL: Failed to stop playback:" << e.what();
+            }
         }
     }
 }

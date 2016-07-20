@@ -345,7 +345,11 @@ void AalMediaPlaylistControl::onRemoveTracks(int start, int end)
         if (playbackMode() == QMediaPlaylist::Sequential)
         {
             qDebug() << "Repeat is off, so stopping playback";
-            m_hubPlayerSession->stop();
+            try {
+                m_hubPlayerSession->stop();
+            } catch (std::runtime_error &e) {
+                qWarning() << "FATAL: Failed to stop playback:" << e.what();
+            }
         }
     }
 }

@@ -63,6 +63,33 @@ enum {
 core::Signal<void> the_void;
 }
 
+class EmptySink : public core::ubuntu::media::video::Sink
+{
+public:
+    EmptySink(std::uint32_t gl_texture)
+    {
+        Q_UNUSED(gl_texture);
+    }
+
+    const core::Signal<void>& frame_available() const override
+    {
+        static const core::Signal<void> frame_available;
+        return frame_available;
+    }
+
+    bool transformation_matrix(float* matrix) const override
+    {
+        Q_UNUSED(matrix);
+        return false;
+    }
+
+    bool swap_buffers() const override
+    {
+        return false;
+    }
+};
+
+
 AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
     :
      QMediaService(parent),
@@ -270,7 +297,7 @@ bool AalMediaPlayerService::newMediaPlayer()
         // changes
         m_sessionUuid = m_hubPlayerSession->uuid();
     } catch (const std::runtime_error &e) {
-        qWarning() << "Failed to retrieve the current player's uuid: " << e.what() << endl;
+        qWarning() << "Failed to retrieve the current player's uuid: " << e.what();
         return false;
     }
 
@@ -279,13 +306,19 @@ bool AalMediaPlayerService::newMediaPlayer()
 
 std::shared_ptr<core::ubuntu::media::video::Sink> AalMediaPlayerService::createVideoSink(uint32_t texture_id)
 {
-    if (m_hubPlayerSession == NULL)
+    if (m_hubPlayerSession == nullptr)
         throw std::runtime_error
         {
             "Cannot create a video sink without a valid media-hub player session"
         };
 
-    auto sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
+    std::shared_ptr<core::ubuntu::media::video::Sink> sink;
+    try {
+        sink = m_hubPlayerSession->create_gl_texture_video_sink(texture_id);
+    } catch (const std::runtime_error &e) {
+        qWarning() << "Failed to create a new video sink:" << e.what();
+        return core::ubuntu::media::video::Sink::Ptr{new EmptySink(0)};
+    }
     m_videoOutputReady = true;
 
     return sink;

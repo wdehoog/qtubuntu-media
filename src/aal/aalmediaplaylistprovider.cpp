@@ -413,9 +413,8 @@ void AalMediaPlaylistProvider::setPlayerSession(const std::shared_ptr<core::ubun
 
     try {
         m_hubTrackList = m_hubPlayerSession->track_list();
-    }
-    catch (std::runtime_error &e) {
-        qWarning() << "FATAL: Failed to retrieve the current player session TrackList: " << e.what();
+    } catch (std::runtime_error &e) {
+        qWarning() << "FATAL: Failed to retrieve the current player session TrackList:" << e.what();
     }
 
     /* Disconnect first to avoid duplicated calls */

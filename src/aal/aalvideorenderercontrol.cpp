@@ -103,7 +103,8 @@ AalVideoRendererControl::AalVideoRendererControl(AalMediaPlayerService *service,
 #endif
 {
     // Get notified when qtvideo-node creates a GL texture
-    connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)), this, SLOT(onTextureCreated(unsigned int)));
+    connect(SharedSignal::instance(), SIGNAL(textureCreated(unsigned int)),
+            this, SLOT(onTextureCreated(unsigned int)));
     connect(SharedSignal::instance(), SIGNAL(glConsumerSet()), this, SLOT(onGLConsumerSet()));
     connect(m_service, SIGNAL(playbackComplete()), this, SLOT(playbackComplete()));
 }
@@ -274,6 +275,12 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
         m_videoSink = m_service->createVideoSink(textureID);
+        if (not m_videoSink)
+        {
+            qWarning() << "Failed to create a new video sink with texture ID ("
+                << textureID << "), m_videoSink is a nullptr";
+            return;
+        }
 
         // Connect callback so that frames are rendered after decoding
         m_frameAvailableConnection.reset(new core::Connection(m_videoSink->frame_available().connect(

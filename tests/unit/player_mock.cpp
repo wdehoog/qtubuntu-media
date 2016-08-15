@@ -153,6 +153,12 @@ const core::Property<PlayerMock::PlaybackStatus>& PlayerMock::playback_status() 
     return ret;
 }
 
+const core::Property<AVBackend::Backend>& PlayerMock::backend() const
+{
+    static core::Property<AVBackend::Backend> ret(AVBackend::Backend::none);
+    return ret;
+}
+
 const core::Property<PlayerMock::Orientation>& PlayerMock::orientation() const
 {
     static core::Property<Player::Orientation> ret(Player::Orientation::rotate0);

@@ -168,6 +168,12 @@ const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() 
     return ret;
 }
 
+const core::Property<AVBackend::Backend>& TestPlayer::backend() const
+{
+    static core::Property<AVBackend::Backend> ret(AVBackend::Backend::none);
+    return ret;
+}
+
 const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);

@@ -89,7 +89,7 @@ bool AalMediaPlaylistProvider::isReadOnly() const
     }
 
     try {
-        return m_hubTrackList->can_edit_tracks();
+        return !m_hubTrackList->can_edit_tracks();
     }
     catch (const std::runtime_error &e) {
         qWarning() << "Failed to see if tracklist is editable: " << e.what();

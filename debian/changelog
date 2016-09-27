@@ -1,3 +1,11 @@
+qtubuntu-media (0.8.1+16.10.20160927-0ubuntu1) yakkety; urgency=medium
+
+  [ Andrew Hayzen ]
+  * Fix isReadOnly to respect can_edit_tracks correct, so when
+    can_edit_tracks is True isReadOnly is False (LP: #1510225)
+
+ -- Timo Jyrinki <timo.jyrinki@canonical.com>  Tue, 27 Sep 2016 10:01:26 +0000
+
 qtubuntu-media (0.8.1+16.10.20160815.1-0ubuntu1) yakkety; urgency=medium
 
   * Make media-hub work on the desktop. Everything except for video

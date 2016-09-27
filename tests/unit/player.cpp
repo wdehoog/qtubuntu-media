@@ -168,6 +168,12 @@ const core::Property<TestPlayer::PlaybackStatus>& TestPlayer::playback_status() 
     return ret;
 }
 
+const core::Property<AVBackend::Backend>& TestPlayer::backend() const
+{
+    static core::Property<AVBackend::Backend> ret(AVBackend::Backend::none);
+    return ret;
+}
+
 const core::Property<Player::LoopStatus>& TestPlayer::loop_status() const
 {
     static core::Property<Player::LoopStatus> ret(Player::LoopStatus::none);
@@ -309,6 +315,12 @@ const core::Signal<Player::Error>& TestPlayer::error() const
 {
     static core::Signal<Player::Error> ret;
     return ret;
+}
+
+const core::Signal<int>& TestPlayer::buffering_changed() const
+{
+    static const core::Signal<int> dur;
+    return dur;
 }
 
 const std::shared_ptr<Service> Service::Client::instance()

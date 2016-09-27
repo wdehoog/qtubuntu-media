@@ -69,6 +69,7 @@ public:
     virtual const core::Property<bool>& is_video_source() const;
     virtual const core::Property<bool>& is_audio_source() const;
     virtual const core::Property<PlaybackStatus>& playback_status() const;
+    virtual const core::Property<AVBackend::Backend>& backend() const;
     virtual const core::Property<LoopStatus>& loop_status() const;
     virtual const core::Property<PlaybackRate>& playback_rate() const;
     virtual const core::Property<bool>& shuffle() const;
@@ -96,6 +97,7 @@ public:
     virtual const core::Signal<video::Dimensions>& video_dimension_changed() const;
     /** Signals all errors and warnings (typically from GStreamer and below) */
     virtual const core::Signal<Error>& error() const;
+    virtual const core::Signal<int>& buffering_changed() const;
 
 private:
     core::Property<int64_t> m_position;

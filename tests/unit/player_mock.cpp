@@ -153,6 +153,12 @@ const core::Property<PlayerMock::PlaybackStatus>& PlayerMock::playback_status() 
     return ret;
 }
 
+const core::Property<AVBackend::Backend>& PlayerMock::backend() const
+{
+    static core::Property<AVBackend::Backend> ret(AVBackend::Backend::none);
+    return ret;
+}
+
 const core::Property<PlayerMock::Orientation>& PlayerMock::orientation() const
 {
     static core::Property<Player::Orientation> ret(Player::Orientation::rotate0);
@@ -306,6 +312,12 @@ const core::Signal<Player::Error>& PlayerMock::error() const
 {
     static core::Signal<Player::Error> ret;
     return ret;
+}
+
+const core::Signal<int>& PlayerMock::buffering_changed() const
+{
+    static const core::Signal<int> dur;
+    return dur;
 }
 
 }

@@ -146,8 +146,7 @@ void AalMediaPlayerControl::setMuted(bool muted)
 
 int AalMediaPlayerControl::bufferStatus() const
 {
-    // Until we are playing network streams, there is no buffering necessary
-    return 100;
+    return m_service->bufferStatus();
 }
 
 bool AalMediaPlayerControl::isAudioAvailable() const

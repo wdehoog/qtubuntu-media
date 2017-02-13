@@ -274,6 +274,8 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
+        // Remove old instances
+        m_videoSink = nullptr;
         m_videoSink = m_service->createVideoSink(textureID);
         if (not m_videoSink)
         {

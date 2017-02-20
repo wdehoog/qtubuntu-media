@@ -1,3 +1,10 @@
+qtubuntu-media (0.8.1+17.04.20170220-0ubuntu1) zesty; urgency=medium
+
+  * Release sink before creating a new one so resources are properly
+    freed.
+
+ -- Alfonso Sanchez-Beato <alfonso.sanchez-beato@canonical.com>  Mon, 20 Feb 2017 08:42:32 +0000
+
 qtubuntu-media (0.8.1+16.10.20160927-0ubuntu1) yakkety; urgency=medium
 
   [ Andrew Hayzen ]

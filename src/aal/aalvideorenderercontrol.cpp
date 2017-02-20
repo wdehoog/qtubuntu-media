@@ -274,6 +274,11 @@ void AalVideoRendererControl::onTextureCreated(unsigned int textureID)
 {
     if (m_textureId == 0) {
         m_textureId = static_cast<GLuint>(textureID);
+        // Remove old instance first (assignment first creates the new object,
+        // then removes the old one, but we need the resources from the old
+        // object to create the new one, so we force the right order with an
+        // initial pointer reset).
+        m_videoSink.reset();
         m_videoSink = m_service->createVideoSink(textureID);
         if (not m_videoSink)
         {

@@ -1,3 +1,9 @@
+qtubuntu-media (0.8.2+ubports) xenial; urgency=medium
+
+  * Imported to UBports
+
+ -- UBports auto importer <infra@ubports.com>  Mon, 15 Jan 2018 14:38:46 +0100
+
 qtubuntu-media (0.8.1+17.04.20170220-0ubuntu1) zesty; urgency=medium
 
   * Release sink before creating a new one so resources are properly

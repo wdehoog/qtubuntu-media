@@ -125,6 +125,7 @@ protected:
 #ifdef MEASURE_PERFORMANCE
     void measurePerformance();
 #endif
+    void checkForSessionDetach();
 
 private:
     void createMediaPlayerControl();

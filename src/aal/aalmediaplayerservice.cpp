@@ -39,7 +39,9 @@
 // It is not clear at all whether we should do this or not, as detaching
 // is probably something that should be done when the app finishes, not when it
 // simply moves to the background.
-//#define DO_PLAYER_ATTACH_DETACH
+//
+// 2020/05/03 enabled to have the app detach on suspend en re-attach on activate
+#define DO_PLAYER_ATTACH_DETACH
 
 // Defined in aalvideorenderercontrol.h
 #ifdef MEASURE_PERFORMANCE
@@ -778,6 +780,42 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
     qDebug() << "PlaybackStatus changed to: " << playbackStatusStr(m_newStatus);
 }
 
+#ifdef DO_PLAYER_ATTACH_DETACH
+
+void AalMediaPlayerService::checkForSessionDetach() {
+    if (m_doReattachSession) {
+        qDebug() << "  session already detached";
+        return;
+    }
+
+    // if the app is suspended the app will not respond anyway so we disconnect
+    // in order to prevent it responding on old events when it wakes up
+    qDebug() << "  going to detach session";
+    disconnectSignals();
+    m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
+    m_doReattachSession = true;
+}
+
+void AalMediaPlayerService::checkForSessionReattach() {
+    // 20200503: this is 'old' comment. left it here since it might still be valid
+    // Avoid doing this for when the client application first loads as this
+    // will break video playback
+    if (m_doReattachSession)
+    {
+        qDebug() << "  going to reatach session";
+        m_hubPlayerSession = m_hubService->
+            reattach_session(m_sessionUuid,
+                             media::Player::Client::default_configuration());
+        // Make sure the client's status (position, duraiton, state, etc) are all
+        // correct when reattaching to the media-hub Player session
+        updateClientSignals();
+        connectSignals();
+        m_doReattachSession = false;
+    }
+}
+
+#endif
+
 void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state)
 {
     try {
@@ -785,6 +823,9 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
         {
             case Qt::ApplicationSuspended:
                 qDebug() << "** Application has been suspended";
+#ifdef DO_PLAYER_ATTACH_DETACH
+                checkForSessionDetach();
+#endif
                 break;
             case Qt::ApplicationHidden:
                 qDebug() << "** Application is now hidden";
@@ -792,26 +833,13 @@ void AalMediaPlayerService::onApplicationStateChanged(Qt::ApplicationState state
             case Qt::ApplicationInactive:
                 qDebug() << "** Application is now inactive";
 #ifdef DO_PLAYER_ATTACH_DETACH
-                disconnectSignals();
-                m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
-                m_doReattachSession = true;
+                checkForSessionDetach();
 #endif
                 break;
             case Qt::ApplicationActive:
                 qDebug() << "** Application is now active";
 #ifdef DO_PLAYER_ATTACH_DETACH
-                // Avoid doing this for when the client application first loads as this
-                // will break video playback
-                if (m_doReattachSession)
-                {
-                    m_hubPlayerSession = m_hubService->
-                        reattach_session(m_sessionUuid,
-                                         media::Player::Client::default_configuration());
-                    // Make sure the client's status (position, duraiton, state, etc) are all
-                    // correct when reattaching to the media-hub Player session
-                    updateClientSignals();
-                    connectSignals();
-                }
+                checkForSessionReattach();
 #endif
                 break;
             default:

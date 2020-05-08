@@ -112,7 +112,8 @@ AalMediaPlayerService::AalMediaPlayerService(QObject *parent)
      m_cachedDuration(0),
      m_mediaPlaylist(nullptr),
      m_bufferPercent(0),
-     m_doReattachSession(false)
+     m_doReattachSession(false),
+     m_sessionAttached(false)
 #ifdef MEASURE_PERFORMANCE
       , m_lastFrameDecodeStart(0)
       , m_currentFrameDecodeStart(0)
@@ -229,6 +230,7 @@ void AalMediaPlayerService::constructNewPlayerService()
 
 QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 {
+    qDebug() << "requestControl: " << name;
     if (qstrcmp(name, QMediaPlayerControl_iid) == 0)
     {
         if (not m_mediaPlayerControl)
@@ -239,7 +241,8 @@ QMediaControl *AalMediaPlayerService::requestControl(const char *name)
 
     if (qstrcmp(name, QVideoRendererControl_iid) == 0)
     {
-        if (not m_videoOutput)
+        qDebug() << "createVideoRendererControl if needed: " << QVideoRendererControl_iid;
+        if (not m_videoOutput) 
             createVideoRendererControl();
 
         return m_videoOutput;
@@ -783,21 +786,42 @@ void AalMediaPlayerService::onPlaybackStatusChanged()
 #ifdef DO_PLAYER_ATTACH_DETACH
 
 void AalMediaPlayerService::checkForSessionDetach() {
-    if (m_doReattachSession) {
-        qDebug() << "  session already detached";
+    // Detaching is done so the media-hub can continue playing on itself. So when
+    // not playing it is not needed.
+    // 
+    if(m_newStatus != media::Player::PlaybackStatus::playing) {
+        qDebug() << Q_FUNC_INFO << "Not detaching due to m_newStatus=" << m_newStatus;
         return;
     }
 
+    // Detach/reattach totally destroys video playback since it seems to break
+    // all communication with/from media-hub after reattaching. 
+    //if(m_videoOutput != nullptr) {
+    if (isVideoSource() && m_videoOutput != NULL) {
+        qDebug() << Q_FUNC_INFO << "Not detaching due to m_videoOutput";
+        return;
+    }
+
+    if (!m_sessionAttached) {
+        qDebug() << "Session is already detached";
+        return;
+    }
+    m_sessionAttached = false;
+
     // if the app is suspended the app will not respond anyway so we disconnect
     // in order to prevent it responding on old events when it wakes up
-    qDebug() << "  going to detach session";
+    qDebug() << "Going to detach session";
     disconnectSignals();
     m_hubService->detach_session(m_sessionUuid, media::Player::Client::default_configuration());
     m_doReattachSession = true;
 }
 
 void AalMediaPlayerService::checkForSessionReattach() {
-    // 20200503: this is 'old' comment. left it here since it might still be valid
+    if(m_sessionAttached) {
+        qDebug() << Q_FUNC_INFO << "Already attached";
+        return;
+    }
+
     // Avoid doing this for when the client application first loads as this
     // will break video playback
     if (m_doReattachSession)
@@ -810,8 +834,8 @@ void AalMediaPlayerService::checkForSessionReattach() {
         // correct when reattaching to the media-hub Player session
         updateClientSignals();
         connectSignals();
-        m_doReattachSession = false;
     }
+    m_sessionAttached = true;
 }
 
 #endif

@@ -172,6 +172,7 @@ private:
 
     std::string m_sessionUuid;
     bool m_doReattachSession;
+    bool m_sessionAttached;
 
 #ifdef MEASURE_PERFORMANCE
     qint64 m_lastFrameDecodeStart;
